@@ -139,6 +139,21 @@
     overflow-y: auto;
     padding-right: 2px;
     flex: 1;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(220, 220, 87, 0.2) transparent;
+  }
+  .content-list::-webkit-scrollbar {
+    width: 4px;
+  }
+  .content-list::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .content-list::-webkit-scrollbar-thumb {
+    background: rgba(220, 220, 87, 0.2);
+    border-radius: 2px;
+  }
+  .content-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(220, 220, 87, 0.4);
   }
   .dir-item {
     display: flex;

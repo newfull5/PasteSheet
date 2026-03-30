@@ -34,3 +34,6 @@ ui/dist/
 
 # macOS
 .DS_Store
+
+CLAUDE.md
+docs/minutes/

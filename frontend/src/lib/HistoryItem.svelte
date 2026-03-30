@@ -240,14 +240,30 @@
     white-space: pre-wrap;
     overflow-y: auto;
     max-height: 350px;
-    padding-right: 6px;
+    padding-right: 4px;
     margin-top: 4px;
     margin-bottom: 16px;
     line-height: 1.6;
     flex: none;
     height: auto;
     text-overflow: clip;
-    overflow-x: visible;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(220, 220, 87, 0.2) transparent;
+    user-select: none;
+  }
+  .history-item.selected .item-content::-webkit-scrollbar {
+    width: 4px;
+  }
+  .history-item.selected .item-content::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .history-item.selected .item-content::-webkit-scrollbar-thumb {
+    background: rgba(220, 220, 87, 0.2);
+    border-radius: 2px;
+  }
+  .history-item.selected .item-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(220, 220, 87, 0.4);
   }
   .item-meta {
     display: none;
