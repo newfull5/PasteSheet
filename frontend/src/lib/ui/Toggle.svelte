@@ -1,9 +1,11 @@
 <script>
-  import { createEventDispatcher } from "svelte";
+  import { createEventDispatcher, onMount } from "svelte";
   export let checked = false;
   export let label = "";
   export let description = "";
   const dispatch = createEventDispatcher();
+  let mounted = false;
+  onMount(() => { mounted = true; });
   function toggle() {
     checked = !checked;
     dispatch("change", checked);
@@ -16,7 +18,7 @@
       <span class="toggle-description">{description}</span>
     {/if}
   </div>
-  <div class="toggle-switch {checked ? 'checked' : ''}">
+  <div class="toggle-switch {checked ? 'checked' : ''} {mounted ? 'animated' : ''}">
     <div class="toggle-handle"></div>
   </div>
 </div>
@@ -56,6 +58,8 @@
     background: rgba(255, 255, 255, 0.1);
     border-radius: 20px;
     position: relative;
+  }
+  .toggle-switch.animated {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .toggle-switch.checked {
@@ -69,8 +73,10 @@
     position: absolute;
     top: 3px;
     left: 3px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+  .toggle-switch.animated .toggle-handle {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .toggle-switch.checked .toggle-handle {
     transform: translateX(20px);
