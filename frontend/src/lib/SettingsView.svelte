@@ -4,16 +4,15 @@
   import Toggle from "./ui/Toggle.svelte";
   const dispatch = createEventDispatcher();
   let settings = {
-    mouse_edge_enabled: true,
+    mouse_edge_enabled: null,
   };
   onMount(async () => {
     try {
       const val = await invoke("get_setting", { key: "mouse_edge_enabled" });
-      if (val !== null) {
-        settings.mouse_edge_enabled = val === "true";
-      }
+      settings.mouse_edge_enabled = val === null ? false : val === "true";
     } catch (err) {
       console.error("Failed to load settings:", err);
+      settings.mouse_edge_enabled = false;
     }
   });
   async function updateSetting(key, value) {
@@ -31,12 +30,14 @@
 <div class="settings-view">
   <div class="settings-group">
     <h3 class="group-title">General</h3>
-    <Toggle
-      label="Mouse Edge Detection"
-      description="Slide into the screen when the mouse hits the right edge."
-      checked={settings.mouse_edge_enabled}
-      on:change={(e) => updateSetting("mouse_edge_enabled", e.detail)}
-    />
+    {#if settings.mouse_edge_enabled !== null}
+      <Toggle
+        label="Mouse Edge Detection"
+        description="Slide into the screen when the mouse hits the right edge."
+        checked={settings.mouse_edge_enabled}
+        on:change={(e) => updateSetting("mouse_edge_enabled", e.detail)}
+      />
+    {/if}
   </div>
   <div class="settings-group">
     <h3 class="group-title">Information</h3>
