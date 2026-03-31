@@ -2,6 +2,8 @@
   import { onMount } from "svelte";
   import { invoke } from "@tauri-apps/api/core";
   import { listen } from "@tauri-apps/api/event";
+  import { getCurrentWindow } from "@tauri-apps/api/window";
+  import { LogicalSize } from "@tauri-apps/api/dpi";
   import { fly } from "svelte/transition";
   import DirectoryView from "./lib/DirectoryView.svelte";
   import ItemView from "./lib/ItemView.svelte";
@@ -105,6 +107,14 @@
   ) {
   }
   onMount(async () => {
+    const savedHeight = localStorage.getItem("windowHeight");
+    if (savedHeight) {
+      const h = parseInt(savedHeight);
+      if (h >= MIN_HEIGHT && h <= MAX_HEIGHT) {
+        await getCurrentWindow().setSize(new LogicalSize(WINDOW_WIDTH, h));
+      }
+    }
+
     await listen("window-visible", async (event) => {
       isVisible = event.payload;
       if (isVisible) {
@@ -276,6 +286,27 @@
       },
     });
   }
+  // --- Vertical resize (Rust-side mouse polling) ---
+  const MIN_HEIGHT = 300;
+  const MAX_HEIGHT = 1400;
+  const WINDOW_WIDTH = 380;
+
+  function startResize(e) {
+    e.preventDefault();
+    document.body.style.cursor = "ns-resize";
+    invoke("start_height_resize");
+    window.addEventListener("mouseup", stopResize, { once: true });
+  }
+
+  async function stopResize() {
+    document.body.style.cursor = "";
+    const height = await invoke("stop_height_resize");
+    if (height > 0) {
+      localStorage.setItem("windowHeight", String(height));
+    }
+  }
+  // --- End vertical resize ---
+
   let directoryView;
   let itemView;
   let searchView;
@@ -466,7 +497,15 @@
     ? 'pointer-events-none'
     : 'pointer-events-auto'}"
 >
-  <div class="p-4 flex flex-col h-full">
+  <!-- svelte-ignore a11y-no-static-element-interactions -->
+  <div
+    class="absolute bottom-0 left-0 right-0 h-3 flex items-end justify-center pb-[3px] cursor-ns-resize z-50 group"
+    on:mousedown={startResize}
+  >
+    <div class="w-8 h-[3px] rounded-full bg-white/10 group-hover:bg-white/30 transition-colors duration-150"></div>
+  </div>
+
+  <div class="p-4 flex flex-col h-full pb-3">
     <Header
       bind:this={header}
       title={searchQuery
