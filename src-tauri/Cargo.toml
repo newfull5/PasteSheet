@@ -41,3 +41,10 @@ winapi = { version = "0.3", features = ["winuser"] }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 objc-foundation = "0.1"
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = "s"
+panic = "abort"
+strip = true
