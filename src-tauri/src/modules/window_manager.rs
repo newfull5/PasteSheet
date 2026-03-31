@@ -7,6 +7,9 @@ use objc::{class, msg_send, sel, sel_impl};
 static IS_WINDOW_VISIBLE: Mutex<bool> = Mutex::new(false);
 static IS_AUTO_HIDE_ENABLED: Mutex<bool> = Mutex::new(false);
 static MOUSE_EDGE_ENABLED: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(true);
+static IS_HEIGHT_RESIZING: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+static RESIZE_START_MOUSE_Y: Mutex<f64> = Mutex::new(0.0);
+static RESIZE_START_HEIGHT: Mutex<f64> = Mutex::new(0.0);
 pub fn set_window_state(is_visible: bool) {
     if let Ok(mut visible) = IS_WINDOW_VISIBLE.lock() {
         *visible = is_visible;
@@ -240,4 +243,55 @@ fn get_mouse_location() -> Option<(f64, f64)> {
 #[cfg(target_os = "windows")]
 fn get_screen_width() -> Option<f64> {
     None
+}
+
+const RESIZE_WINDOW_WIDTH: f64 = 380.0;
+const RESIZE_MIN_HEIGHT: f64 = 300.0;
+const RESIZE_MAX_HEIGHT: f64 = 1400.0;
+
+pub fn start_height_resize<R: Runtime>(window: &tauri::WebviewWindow<R>) {
+    #[cfg(target_os = "macos")]
+    {
+        let mouse_y = get_mouse_location().map(|(_, y)| y).unwrap_or(0.0);
+        let logical_height = window
+            .inner_size()
+            .ok()
+            .and_then(|s| window.scale_factor().ok().map(|sf| s.height as f64 / sf))
+            .unwrap_or(800.0);
+
+        *RESIZE_START_MOUSE_Y.lock().unwrap() = mouse_y;
+        *RESIZE_START_HEIGHT.lock().unwrap() = logical_height;
+        IS_HEIGHT_RESIZING.store(true, std::sync::atomic::Ordering::Relaxed);
+
+        let window_clone = window.clone();
+        std::thread::spawn(move || {
+            loop {
+                if !IS_HEIGHT_RESIZING.load(std::sync::atomic::Ordering::Relaxed) {
+                    break;
+                }
+                if let Some((_, current_y)) = get_mouse_location() {
+                    let start_y = *RESIZE_START_MOUSE_Y.lock().unwrap();
+                    let start_height = *RESIZE_START_HEIGHT.lock().unwrap();
+                    // macOS Y increases upward, so moving down = Y decreases = height increases
+                    let delta = start_y - current_y;
+                    let new_height = (start_height + delta)
+                        .max(RESIZE_MIN_HEIGHT)
+                        .min(RESIZE_MAX_HEIGHT);
+                    let _ = window_clone
+                        .set_size(tauri::LogicalSize::new(RESIZE_WINDOW_WIDTH, new_height));
+                }
+                std::thread::sleep(std::time::Duration::from_millis(8));
+            }
+        });
+    }
+}
+
+pub fn stop_height_resize<R: Runtime>(window: &tauri::WebviewWindow<R>) -> f64 {
+    IS_HEIGHT_RESIZING.store(false, std::sync::atomic::Ordering::Relaxed);
+    std::thread::sleep(std::time::Duration::from_millis(20));
+    window
+        .inner_size()
+        .ok()
+        .and_then(|s| window.scale_factor().ok().map(|sf| (s.height as f64 / sf).round()))
+        .unwrap_or(0.0)
 }
