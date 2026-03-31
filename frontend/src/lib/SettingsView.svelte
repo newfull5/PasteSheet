@@ -5,20 +5,28 @@
   const dispatch = createEventDispatcher();
   let settings = {
     mouse_edge_enabled: null,
+    auto_hide_enabled: null,
+    auto_hide_timeout: 5,
   };
   onMount(async () => {
     try {
-      const val = await invoke("get_setting", { key: "mouse_edge_enabled" });
-      settings.mouse_edge_enabled = val === null ? false : val === "true";
+      const mouseEdge = await invoke("get_setting", { key: "mouse_edge_enabled" });
+      settings.mouse_edge_enabled = mouseEdge === null ? false : mouseEdge === "true";
+      const autoHide = await invoke("get_setting", { key: "auto_hide_enabled" });
+      settings.auto_hide_enabled = autoHide === null ? false : autoHide === "true";
+      const autoHideTimeout = await invoke("get_setting", { key: "auto_hide_timeout" });
+      settings.auto_hide_timeout = autoHideTimeout ? parseInt(autoHideTimeout) : 5;
     } catch (err) {
       console.error("Failed to load settings:", err);
       settings.mouse_edge_enabled = false;
+      settings.auto_hide_enabled = false;
     }
   });
   async function updateSetting(key, value) {
     try {
       await invoke("update_setting", { key, value: String(value) });
       settings[key] = value;
+      dispatch("settingschange", { key, value });
     } catch (err) {
       console.error(`Failed to update setting ${key}:`, err);
     }
@@ -37,6 +45,28 @@
         checked={settings.mouse_edge_enabled}
         on:change={(e) => updateSetting("mouse_edge_enabled", e.detail)}
       />
+    {/if}
+    {#if settings.auto_hide_enabled !== null}
+      <Toggle
+        label="Auto-hide"
+        description="Automatically hide the window after a period of inactivity."
+        checked={settings.auto_hide_enabled}
+        on:change={(e) => updateSetting("auto_hide_enabled", e.detail)}
+      />
+      {#if settings.auto_hide_enabled}
+        <div class="timeout-row">
+          <span class="timeout-label">Hide after</span>
+          <div class="timeout-segments">
+            {#each [3, 5, 10, 30, 60] as sec}
+              <!-- svelte-ignore a11y-no-static-element-interactions -->
+              <div
+                class="segment {settings.auto_hide_timeout === sec ? 'active' : ''}"
+                on:click={() => updateSetting("auto_hide_timeout", sec)}
+              >{sec}s</div>
+            {/each}
+          </div>
+        </div>
+      {/if}
     {/if}
   </div>
   <div class="settings-group">
@@ -89,5 +119,41 @@
     color: var(--color-text-main);
     font-size: 14px;
     font-weight: 500;
+  }
+  .timeout-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+  }
+  .timeout-label {
+    color: var(--color-text-sub);
+    font-size: 14px;
+  }
+  .timeout-segments {
+    display: flex;
+    gap: 4px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    padding: 3px;
+  }
+  .segment {
+    padding: 4px 10px;
+    border-radius: 7px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-sub);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    user-select: none;
+  }
+  .segment:hover {
+    color: var(--color-text-main);
+  }
+  .segment.active {
+    background: rgba(255, 255, 255, 0.15);
+    color: var(--color-text-main);
   }
 </style>

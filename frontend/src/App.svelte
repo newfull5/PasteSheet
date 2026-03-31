@@ -14,6 +14,36 @@
   import SettingsView from "./lib/SettingsView.svelte";
   let isVisible = false;
   let currentView = "directories";
+  // --- Auto-hide ---
+  let autoHideEnabled = false;
+  let autoHideTimeout = 5;
+  let autoHideTimer = null;
+
+  function resetAutoHideTimer() {
+    if (!autoHideEnabled || !isVisible) return;
+    clearTimeout(autoHideTimer);
+    autoHideTimer = setTimeout(() => {
+      invoke("toggle_main_window");
+    }, autoHideTimeout * 1000);
+  }
+
+  function clearAutoHideTimer() {
+    clearTimeout(autoHideTimer);
+    autoHideTimer = null;
+  }
+
+  function handleSettingsChange(e) {
+    const { key, value } = e.detail;
+    if (key === "auto_hide_enabled") {
+      autoHideEnabled = value;
+      if (isVisible && autoHideEnabled) resetAutoHideTimer();
+      else clearAutoHideTimer();
+    } else if (key === "auto_hide_timeout") {
+      autoHideTimeout = value;
+      if (isVisible && autoHideEnabled) resetAutoHideTimer();
+    }
+  }
+  // --- End auto-hide ---
   let directories = [];
   let historyItems = [];
   let currentDirId = "";
@@ -115,11 +145,21 @@
       }
     }
 
+    try {
+      const enabled = await invoke("get_setting", { key: "auto_hide_enabled" });
+      const timeout = await invoke("get_setting", { key: "auto_hide_timeout" });
+      autoHideEnabled = enabled === "true";
+      autoHideTimeout = timeout ? parseInt(timeout) : 5;
+    } catch (_) {}
+
     await listen("window-visible", async (event) => {
       isVisible = event.payload;
       if (isVisible) {
         await loadDirectories();
-        await loadHistory(); 
+        await loadHistory();
+        resetAutoHideTimer();
+      } else {
+        clearAutoHideTimer();
       }
     });
     await listen("clipboard-updated", async () => {
@@ -312,6 +352,7 @@
   let searchView;
   let header;
   function handleKeyDown(event) {
+    resetAutoHideTimer();
     const isInput =
       event.target.tagName === "INPUT" || event.target.tagName === "TEXTAREA";
     const isSearchInput = event.target.classList.contains("header-search");
@@ -490,6 +531,7 @@
 </script>
 <svelte:window on:keydown={handleKeyDown} />
 <div
+  on:mousemove={resetAutoHideTimer}
   class="w-full h-full max-h-screen bg-bg-container rounded-l-[16px] border-l border-t border-b border-white/10 flex flex-col overflow-hidden relative shadow-[-4px_0_15px_rgba(0,0,0,0.5)] transition-[var(--transition-app-container)] {isVisible
     ? 'opacity-100 translate-x-0'
     : 'opacity-0 translate-x-[60px] pointer-events-none'} {modalConfig.show ||
@@ -577,7 +619,7 @@
         </div>
       {:else if currentView === "settings"}
         <div class="absolute inset-0" transition:fly={{ y: 10, duration: 150 }}>
-          <SettingsView on:back={showDirectoryView} />
+          <SettingsView on:back={showDirectoryView} on:settingschange={handleSettingsChange} />
         </div>
       {/if}
     </div>
