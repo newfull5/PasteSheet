@@ -70,6 +70,18 @@ fn update_setting(key: String, value: String) -> Result<(), String> {
     }
     Ok(())
 }
+#[tauri::command]
+fn update_shortcut(app: AppHandle, shortcut: String) -> Result<(), String> {
+    hotkey::update_shortcut(app, &shortcut).map_err(|e| e.to_string())
+}
+#[tauri::command]
+fn start_height_resize(window: tauri::WebviewWindow) {
+    window_manager::start_height_resize(&window);
+}
+#[tauri::command]
+fn stop_height_resize(window: tauri::WebviewWindow) -> f64 {
+    window_manager::stop_height_resize(&window)
+}
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -203,7 +215,10 @@ pub fn run() {
             delete_history_item,
             create_history_item,
             get_setting,
-            update_setting
+            update_setting,
+            start_height_resize,
+            stop_height_resize,
+            update_shortcut
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

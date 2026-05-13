@@ -2,6 +2,8 @@
   import { onMount } from "svelte";
   import { invoke } from "@tauri-apps/api/core";
   import { listen } from "@tauri-apps/api/event";
+  import { getCurrentWindow } from "@tauri-apps/api/window";
+  import { LogicalSize } from "@tauri-apps/api/dpi";
   import { fly } from "svelte/transition";
   import DirectoryView from "./lib/DirectoryView.svelte";
   import ItemView from "./lib/ItemView.svelte";
@@ -12,6 +14,36 @@
   import SettingsView from "./lib/SettingsView.svelte";
   let isVisible = false;
   let currentView = "directories";
+  // --- Auto-hide ---
+  let autoHideEnabled = false;
+  let autoHideTimeout = 5;
+  let autoHideTimer = null;
+
+  function resetAutoHideTimer() {
+    if (!autoHideEnabled || !isVisible) return;
+    clearTimeout(autoHideTimer);
+    autoHideTimer = setTimeout(() => {
+      invoke("toggle_main_window");
+    }, autoHideTimeout * 1000);
+  }
+
+  function clearAutoHideTimer() {
+    clearTimeout(autoHideTimer);
+    autoHideTimer = null;
+  }
+
+  function handleSettingsChange(e) {
+    const { key, value } = e.detail;
+    if (key === "auto_hide_enabled") {
+      autoHideEnabled = value;
+      if (isVisible && autoHideEnabled) resetAutoHideTimer();
+      else clearAutoHideTimer();
+    } else if (key === "auto_hide_timeout") {
+      autoHideTimeout = value;
+      if (isVisible && autoHideEnabled) resetAutoHideTimer();
+    }
+  }
+  // --- End auto-hide ---
   let directories = [];
   let historyItems = [];
   let currentDirId = "";
@@ -105,11 +137,29 @@
   ) {
   }
   onMount(async () => {
+    const savedHeight = localStorage.getItem("windowHeight");
+    if (savedHeight) {
+      const h = parseInt(savedHeight);
+      if (h >= MIN_HEIGHT && h <= MAX_HEIGHT) {
+        await getCurrentWindow().setSize(new LogicalSize(WINDOW_WIDTH, h));
+      }
+    }
+
+    try {
+      const enabled = await invoke("get_setting", { key: "auto_hide_enabled" });
+      const timeout = await invoke("get_setting", { key: "auto_hide_timeout" });
+      autoHideEnabled = enabled === "true";
+      autoHideTimeout = timeout ? parseInt(timeout) : 5;
+    } catch (_) {}
+
     await listen("window-visible", async (event) => {
       isVisible = event.payload;
       if (isVisible) {
         await loadDirectories();
-        await loadHistory(); 
+        await loadHistory();
+        resetAutoHideTimer();
+      } else {
+        clearAutoHideTimer();
       }
     });
     await listen("clipboard-updated", async () => {
@@ -276,11 +326,33 @@
       },
     });
   }
+  // --- Vertical resize (Rust-side mouse polling) ---
+  const MIN_HEIGHT = 300;
+  const MAX_HEIGHT = 1400;
+  const WINDOW_WIDTH = 380;
+
+  function startResize(e) {
+    e.preventDefault();
+    document.body.style.cursor = "ns-resize";
+    invoke("start_height_resize");
+    window.addEventListener("mouseup", stopResize, { once: true });
+  }
+
+  async function stopResize() {
+    document.body.style.cursor = "";
+    const height = await invoke("stop_height_resize");
+    if (height > 0) {
+      localStorage.setItem("windowHeight", String(height));
+    }
+  }
+  // --- End vertical resize ---
+
   let directoryView;
   let itemView;
   let searchView;
   let header;
   function handleKeyDown(event) {
+    resetAutoHideTimer();
     const isInput =
       event.target.tagName === "INPUT" || event.target.tagName === "TEXTAREA";
     const isSearchInput = event.target.classList.contains("header-search");
@@ -459,6 +531,7 @@
 </script>
 <svelte:window on:keydown={handleKeyDown} />
 <div
+  on:mousemove={resetAutoHideTimer}
   class="w-full h-full max-h-screen bg-bg-container rounded-l-[16px] border-l border-t border-b border-white/10 flex flex-col overflow-hidden relative shadow-[-4px_0_15px_rgba(0,0,0,0.5)] transition-[var(--transition-app-container)] {isVisible
     ? 'opacity-100 translate-x-0'
     : 'opacity-0 translate-x-[60px] pointer-events-none'} {modalConfig.show ||
@@ -466,7 +539,15 @@
     ? 'pointer-events-none'
     : 'pointer-events-auto'}"
 >
-  <div class="p-4 flex flex-col h-full">
+  <!-- svelte-ignore a11y-no-static-element-interactions -->
+  <div
+    class="absolute bottom-0 left-0 right-0 h-3 flex items-end justify-center pb-[3px] cursor-ns-resize z-50 group"
+    on:mousedown={startResize}
+  >
+    <div class="w-8 h-[3px] rounded-full bg-white/10 group-hover:bg-white/30 transition-colors duration-150"></div>
+  </div>
+
+  <div class="p-4 flex flex-col h-full pb-3">
     <Header
       bind:this={header}
       title={searchQuery
@@ -538,7 +619,7 @@
         </div>
       {:else if currentView === "settings"}
         <div class="absolute inset-0" transition:fly={{ y: 10, duration: 150 }}>
-          <SettingsView on:back={showDirectoryView} />
+          <SettingsView on:back={showDirectoryView} on:settingschange={handleSettingsChange} />
         </div>
       {/if}
     </div>

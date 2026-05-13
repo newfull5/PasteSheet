@@ -10,11 +10,26 @@ use tauri_plugin_global_shortcut::{
     Code, GlobalShortcutExt, Shortcut, ShortcutEvent, ShortcutState,
 };
 static PREV_APP_NAME: Mutex<Option<String>> = Mutex::new(None);
+const DEFAULT_SHORTCUT: &str = "CommandOrControl+Shift+V";
 pub fn setup_global_hotkey<R: Runtime>(
     app: AppHandle<R>,
 ) -> Result<(), Box<dyn std::error::Error>> {
+    let shortcut_str = crate::modules::db::get_setting("shortcut")
+        .ok()
+        .flatten()
+        .unwrap_or_else(|| DEFAULT_SHORTCUT.to_string());
     let gs = app.global_shortcut();
-    gs.register("CommandOrControl+Shift+V")?;
+    gs.register(shortcut_str.as_str())?;
+    Ok(())
+}
+pub fn update_shortcut<R: Runtime>(
+    app: AppHandle<R>,
+    new_shortcut: &str,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let gs = app.global_shortcut();
+    gs.unregister_all()?;
+    gs.register(new_shortcut)?;
+    crate::modules::db::set_setting("shortcut", new_shortcut)?;
     Ok(())
 }
 fn get_current_app_name() -> Option<String> {
@@ -68,16 +83,8 @@ pub fn handle_shortcut<R: Runtime>(app: &AppHandle<R>, shortcut: &Shortcut, even
     if event.state != ShortcutState::Pressed {
         return;
     }
-    match shortcut.key {
-        Code::KeyV => {
-            save_current_app();
-            toggle_main_window(app);
-        }
-        Code::Enter => {
-            save_current_app();
-        }
-        _ => {}
-    }
+    save_current_app();
+    toggle_main_window(app);
 }
 pub fn toggle_main_window<R: Runtime>(app: &AppHandle<R>) {
     use crate::modules::window_manager;
