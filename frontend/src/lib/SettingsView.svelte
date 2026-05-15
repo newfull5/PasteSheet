@@ -8,6 +8,7 @@
     auto_hide_enabled: null,
     auto_hide_timeout: 5,
     shortcut: "CommandOrControl+Shift+V",
+    auto_start: null,
   };
   let isRecording = false;
   let recordingDisplay = "";
@@ -71,12 +72,23 @@
       settings.auto_hide_timeout = autoHideTimeout ? parseInt(autoHideTimeout) : 5;
       const shortcut = await invoke("get_setting", { key: "shortcut" });
       settings.shortcut = shortcut || "CommandOrControl+Shift+V";
+      const autoStart = await invoke("get_autostart");
+      settings.auto_start = autoStart;
     } catch (err) {
       console.error("Failed to load settings:", err);
       settings.mouse_edge_enabled = false;
       settings.auto_hide_enabled = false;
+      settings.auto_start = true;
     }
   });
+  async function toggleAutoStart(enabled) {
+    try {
+      await invoke("set_autostart", { enabled });
+      settings.auto_start = enabled;
+    } catch (err) {
+      console.error("Failed to update auto-start:", err);
+    }
+  }
   async function updateSetting(key, value) {
     try {
       await invoke("update_setting", { key, value: String(value) });
@@ -114,6 +126,14 @@
   </div>
   <div class="settings-group">
     <h3 class="group-title">General</h3>
+    {#if settings.auto_start !== null}
+      <Toggle
+        label="Launch at Login"
+        description="Automatically start PasteSheets when you log in."
+        checked={settings.auto_start}
+        on:change={(e) => toggleAutoStart(e.detail)}
+      />
+    {/if}
     {#if settings.mouse_edge_enabled !== null}
       <Toggle
         label="Mouse Edge Detection"

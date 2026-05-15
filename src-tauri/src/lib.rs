@@ -7,6 +7,7 @@ use modules::window_manager;
 use tauri::menu::{Menu, MenuItem};
 use tauri::tray::{TrayIconBuilder, TrayIconEvent};
 use tauri::AppHandle;
+use tauri_plugin_autostart::MacosLauncher;
 #[tauri::command]
 fn get_clipboard_history() -> Result<Vec<db::PasteItem>, String> {
     db::get_all_contents().map_err(|e| e.to_string())
@@ -75,6 +76,23 @@ fn update_shortcut(app: AppHandle, shortcut: String) -> Result<(), String> {
     hotkey::update_shortcut(app, &shortcut).map_err(|e| e.to_string())
 }
 #[tauri::command]
+fn set_autostart(app: AppHandle, enabled: bool) -> Result<(), String> {
+    use tauri_plugin_autostart::ManagerExt;
+    let manager = app.autolaunch();
+    if enabled {
+        manager.enable().map_err(|e| e.to_string())?;
+    } else {
+        manager.disable().map_err(|e| e.to_string())?;
+    }
+    db::set_setting("auto_start", if enabled { "true" } else { "false" })
+        .map_err(|e| e.to_string())
+}
+#[tauri::command]
+fn get_autostart(app: AppHandle) -> Result<bool, String> {
+    use tauri_plugin_autostart::ManagerExt;
+    app.autolaunch().is_enabled().map_err(|e| e.to_string())
+}
+#[tauri::command]
 fn start_height_resize(window: tauri::WebviewWindow) {
     window_manager::start_height_resize(&window);
 }
@@ -85,6 +103,10 @@ fn stop_height_resize(window: tauri::WebviewWindow) -> f64 {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_autostart::init(
+            MacosLauncher::LaunchAgent,
+            None,
+        ))
         .plugin(
             tauri_plugin_global_shortcut::Builder::new()
                 .with_handler(hotkey::handle_shortcut)
@@ -111,6 +133,13 @@ pub fn run() {
             app.set_activation_policy(tauri::ActivationPolicy::Accessory);
             let _conn = db::init_db().expect("Failed to initialize database");
             info!("Database initialized");
+            // Enable autostart by default on first run
+            if let Ok(None) = db::get_setting("auto_start") {
+                use tauri_plugin_autostart::ManagerExt;
+                let _ = app.handle().autolaunch().enable();
+                let _ = db::set_setting("auto_start", "true");
+                info!("Auto-start enabled by default");
+            }
             if let Ok(Some(val)) = db::get_setting("mouse_edge_enabled") {
                 window_manager::update_mouse_edge_enabled(val == "true");
             }
@@ -218,7 +247,9 @@ pub fn run() {
             update_setting,
             start_height_resize,
             stop_height_resize,
-            update_shortcut
+            update_shortcut,
+            set_autostart,
+            get_autostart
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
