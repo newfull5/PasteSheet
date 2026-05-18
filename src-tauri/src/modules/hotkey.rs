@@ -1,14 +1,11 @@
 #![allow(unexpected_cfgs)]
-use active_win_pos_rs::get_active_window;
 use cocoa::base::{id, nil};
 use log::debug;
 use objc::{class, msg_send, sel, sel_impl};
 use std::ffi::CStr;
 use std::sync::Mutex;
 use tauri::{AppHandle, Runtime};
-use tauri_plugin_global_shortcut::{
-    Code, GlobalShortcutExt, Shortcut, ShortcutEvent, ShortcutState,
-};
+use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut, ShortcutEvent, ShortcutState};
 static PREV_APP_NAME: Mutex<Option<String>> = Mutex::new(None);
 const DEFAULT_SHORTCUT: &str = "CommandOrControl+Shift+V";
 pub fn setup_global_hotkey<R: Runtime>(
@@ -33,7 +30,7 @@ pub fn update_shortcut<R: Runtime>(
     Ok(())
 }
 fn get_current_app_name() -> Option<String> {
-    match get_active_window() {
+    match active_win_pos_rs::get_active_window() {
         Ok(window) => Some(window.app_name),
         Err(_) => None,
     }
@@ -79,7 +76,7 @@ pub fn restore_prev_app_native() {
         }
     }
 }
-pub fn handle_shortcut<R: Runtime>(app: &AppHandle<R>, shortcut: &Shortcut, event: ShortcutEvent) {
+pub fn handle_shortcut<R: Runtime>(app: &AppHandle<R>, _shortcut: &Shortcut, event: ShortcutEvent) {
     if event.state != ShortcutState::Pressed {
         return;
     }
