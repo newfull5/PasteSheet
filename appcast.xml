@@ -6,16 +6,16 @@
         <description>PasteSheet Updates</description>
         <language>en</language>
         <item>
-            <title>Version 0.4.0</title>
-            <sparkle:version>2</sparkle:version>
-            <sparkle:shortVersionString>0.4.0</sparkle:shortVersionString>
+            <title>Version 0.4.1</title>
+            <sparkle:version>3</sparkle:version>
+            <sparkle:shortVersionString>0.4.1</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
             <pubDate>Fri, 06 Jun 2025 00:00:00 +0000</pubDate>
             <enclosure
-                url="https://github.com/newfull5/PasteSheets/releases/download/v0.4.0/PasteSheet_0.4.0_universal.dmg"
-                length="1898947"
+                url="https://github.com/newfull5/PasteSheets/releases/download/v0.4.1/PasteSheet_0.4.1_universal.dmg"
+                length="1883785"
                 type="application/octet-stream"
-                sparkle:edSignature="l1kvIBCttnjuX1Lv/Xe+ZAuoKn0ZwJP7Uny8GvzKTMY+TNdqOUJIR54QThv+o4clc50/aYN/V8weJSz4WDN/AA=="
+                sparkle:edSignature="08EFsZq5SwSgfwF0TPFuVl8eQ1DZ5nccbPFAoKCydz7aJTcp/S3p+vcIAnECC9ISNK+wGFyOnUnAQkB9nCQ0Aw=="
             />
         </item>
     </channel>
