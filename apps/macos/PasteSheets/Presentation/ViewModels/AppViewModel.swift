@@ -146,6 +146,10 @@ final class AppViewModel: ObservableObject {
         loadHistory()
         loadAutoHideSettings()
         resetAutoHideTimer()
+        // Reset the directory list to the top so the Clipboard folder is visible on open
+        if currentView == .directories && searchQuery.isEmpty {
+            selectedIndex = 0
+        }
     }
 
     func onClipboardUpdated() {
