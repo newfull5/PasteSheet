@@ -1,0 +1,195 @@
+import SwiftUI
+
+struct HistoryItemRow: View {
+    let item: PasteItem
+    let isSelected: Bool
+    let activeButtonIndex: Int
+    let isEditing: Bool
+    let showFolderLabel: Bool
+    @Binding var editContent: String
+    @Binding var editMemo: String
+    let onPaste: () -> Void
+    let onEdit: () -> Void
+    let onDelete: () -> Void
+    let onSave: () -> Void
+    let onCancel: () -> Void
+
+    init(item: PasteItem, isSelected: Bool, activeButtonIndex: Int = -1,
+         isEditing: Bool = false, showFolderLabel: Bool = false,
+         editContent: Binding<String>, editMemo: Binding<String>,
+         onPaste: @escaping () -> Void, onEdit: @escaping () -> Void,
+         onDelete: @escaping () -> Void, onSave: @escaping () -> Void,
+         onCancel: @escaping () -> Void) {
+        self.item = item
+        self.isSelected = isSelected
+        self.activeButtonIndex = activeButtonIndex
+        self.isEditing = isEditing
+        self.showFolderLabel = showFolderLabel
+        self._editContent = editContent
+        self._editMemo = editMemo
+        self.onPaste = onPaste
+        self.onEdit = onEdit
+        self.onDelete = onDelete
+        self.onSave = onSave
+        self.onCancel = onCancel
+    }
+
+    private let accent = Color(nsColor: Constants.accentColor)
+    private let subText = Color(nsColor: Constants.subTextColor)
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 0) {
+            // Accent bar
+            RoundedRectangle(cornerRadius: 2)
+                .fill(isSelected ? accent : subText.opacity(0.4))
+                .frame(width: 4)
+                .frame(maxHeight: isSelected ? .infinity : 16)
+                .shadow(color: isSelected ? accent.opacity(0.5) : .clear, radius: 4)
+                .padding(.trailing, 12)
+
+            VStack(alignment: .leading, spacing: 4) {
+                if isEditing {
+                    editingView
+                } else {
+                    normalView
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 6)
+                .fill(isSelected ? accent.opacity(0.08) : Color.clear)
+        )
+    }
+
+    @ViewBuilder
+    private var normalView: some View {
+        // Header: memo + folder label
+        HStack {
+            if let memo = item.memo, !memo.isEmpty {
+                Text(memo)
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(accent.opacity(0.8))
+                    .lineLimit(1)
+            }
+            Spacer()
+            if showFolderLabel {
+                Text(item.directory)
+                    .font(.system(size: 10))
+                    .foregroundColor(.white.opacity(0.4))
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 1)
+                    .background(Color.white.opacity(0.08))
+                    .cornerRadius(4)
+            }
+        }
+
+        // Content
+        Text(item.content)
+            .font(.system(size: 14))
+            .foregroundColor(isSelected ? .white : .white.opacity(0.7))
+            .lineLimit(isSelected ? 15 : 1)
+            .truncationMode(.tail)
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+        // Selected: meta + actions
+        if isSelected {
+            Text(formatDate(item.createdAt))
+                .font(.system(size: 11, design: .monospaced))
+                .foregroundColor(.white.opacity(0.4))
+                .padding(.top, 8)
+
+            HStack(spacing: 8) {
+                ActionButton(label: "Paste", isActive: activeButtonIndex == 0, isDanger: false, action: onPaste)
+                ActionButton(label: "Edit", isActive: activeButtonIndex == 1, isDanger: false, action: onEdit)
+                ActionButton(label: "Delete", isActive: activeButtonIndex == 2, isDanger: true, action: onDelete)
+            }
+            .padding(.top, 8)
+        }
+    }
+
+    @ViewBuilder
+    private var editingView: some View {
+        TextField("Memo", text: $editMemo)
+            .textFieldStyle(.plain)
+            .font(.system(size: 13, weight: .semibold))
+            .foregroundColor(accent)
+            .padding(8)
+            .background(accent.opacity(0.05))
+            .cornerRadius(4)
+            .overlay(RoundedRectangle(cornerRadius: 4).stroke(accent.opacity(0.3)))
+
+        TextEditor(text: $editContent)
+            .font(.system(size: 14))
+            .foregroundColor(.white)
+            .scrollContentBackground(.hidden)
+            .frame(minHeight: 120)
+            .padding(8)
+            .background(Color.white.opacity(0.03))
+            .cornerRadius(6)
+            .overlay(RoundedRectangle(cornerRadius: 6).stroke(accent.opacity(0.2)))
+
+        HStack(spacing: 8) {
+            ActionButton(label: "Save", isActive: true, isDanger: false, action: onSave)
+            ActionButton(label: "Cancel", isActive: false, isDanger: false, action: onCancel)
+        }
+    }
+
+    private func formatDate(_ str: String) -> String {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        if let date = formatter.date(from: str) {
+            let display = DateFormatter()
+            display.dateStyle = .medium
+            display.timeStyle = .short
+            return display.string(from: date)
+        }
+        return str
+    }
+}
+
+struct ActionButton: View {
+    let label: String
+    let isActive: Bool
+    let isDanger: Bool
+    let action: () -> Void
+
+    private let accent = Color(nsColor: Constants.accentColor)
+
+    var body: some View {
+        Button(action: action) {
+            Text(label)
+                .font(.system(size: 11, weight: .medium))
+                .padding(.horizontal, 10)
+                .padding(.vertical, 4)
+        }
+        .buttonStyle(.plain)
+        .foregroundColor(foregroundColor)
+        .background(backgroundColor)
+        .cornerRadius(4)
+        .overlay(
+            RoundedRectangle(cornerRadius: 4)
+                .stroke(borderColor, lineWidth: 1)
+        )
+    }
+
+    private var foregroundColor: Color {
+        if isActive && isDanger { return .white }
+        if isActive { return .black }
+        return .white.opacity(0.6)
+    }
+
+    private var backgroundColor: Color {
+        if isActive && isDanger { return Color.red }
+        if isActive { return accent }
+        return Color.white.opacity(0.05)
+    }
+
+    private var borderColor: Color {
+        if isActive && isDanger { return .red }
+        if isActive { return .clear }
+        return Color.white.opacity(0.1)
+    }
+}
