@@ -8,7 +8,7 @@ struct DirectoryListView: View {
     var body: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                LazyVStack(spacing: 4) {
+                VStack(spacing: 4) {
                     ForEach(Array(vm.filteredDirectories.enumerated()), id: \.element.id) { index, dir in
                         DirectoryRow(
                             directory: dir,
