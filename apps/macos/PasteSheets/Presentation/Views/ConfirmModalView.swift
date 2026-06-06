@@ -4,6 +4,9 @@ struct ConfirmModalView: View {
     let config: ModalConfig
     let onDismiss: () -> Void
     @State private var inputValue: String
+    @State private var appeared = false
+
+    private let accent = Color(nsColor: Constants.accentColor)
 
     init(config: ModalConfig, onDismiss: @escaping () -> Void) {
         self.config = config
@@ -20,11 +23,12 @@ struct ConfirmModalView: View {
             VStack(alignment: .leading, spacing: 16) {
                 Text(config.title)
                     .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(.yellow)
+                    .foregroundColor(accent)
 
                 Text(config.message)
                     .font(.system(size: 14))
                     .foregroundColor(.white.opacity(0.9))
+                    .lineSpacing(4)
 
                 if config.showInput {
                     TextField("", text: $inputValue)
@@ -56,17 +60,22 @@ struct ConfirmModalView: View {
                     .fontWeight(.bold)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 8)
-                    .background(config.isDanger ? Color.red : Color.yellow)
+                    .background(config.isDanger ? Color(nsColor: Constants.modalDangerColor) : accent)
                     .cornerRadius(8)
+                    .shadow(color: (config.isDanger ? Color(nsColor: Constants.modalDangerColor) : accent).opacity(0.3),
+                            radius: 6, x: 0, y: 4) // 0 4px 12px rgba(...,0.3)
                 }
             }
             .padding(24)
             .frame(maxWidth: 340)
             .background(
                 RoundedRectangle(cornerRadius: 16)
-                    .fill(Color(nsColor: NSColor(white: 0.12, alpha: 1)))
+                    .fill(Color(nsColor: Constants.bgContainer)) // rgba(18,18,18,0.98)
                     .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.white.opacity(0.1)))
             )
+            .scaleEffect(appeared ? 1 : 0.95)
+            .opacity(appeared ? 1 : 0)
         }
+        .onAppear { withAnimation(.easeInOut(duration: 0.2)) { appeared = true } }
     }
 }
