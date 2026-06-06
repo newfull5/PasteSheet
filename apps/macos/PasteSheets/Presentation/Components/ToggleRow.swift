@@ -14,7 +14,7 @@ struct ToggleRow: View {
                 if !description.isEmpty {
                     Text(description)
                         .font(.system(size: 12))
-                        .foregroundColor(.white.opacity(0.5))
+                        .foregroundColor(Color(nsColor: Constants.subTextColor))
                 }
             }
 
@@ -22,7 +22,7 @@ struct ToggleRow: View {
 
             Toggle("", isOn: $isOn)
                 .toggleStyle(.switch)
-                .tint(.yellow)
+                .tint(Color(nsColor: Constants.accentColor))
         }
         .padding(12)
         .background(Color.white.opacity(0.03))

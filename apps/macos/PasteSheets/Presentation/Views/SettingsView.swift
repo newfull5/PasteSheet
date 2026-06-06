@@ -28,8 +28,8 @@ struct SettingsView: View {
                                 .font(.system(size: 13, weight: .semibold))
                                 .padding(.horizontal, 14)
                                 .padding(.vertical, 6)
-                                .background(isRecording ? Color.indigo.opacity(0.25) : Color.white.opacity(0.08))
-                                .foregroundColor(isRecording ? Color.indigo : .white)
+                                .background(isRecording ? Color(red: 99/255, green: 102/255, blue: 241/255).opacity(0.25) : Color.white.opacity(0.08))
+                                .foregroundColor(isRecording ? Color(red: 165/255, green: 180/255, blue: 252/255) : .white)
                                 .cornerRadius(8)
                         }
                         .buttonStyle(.plain)
@@ -67,7 +67,7 @@ struct SettingsView: View {
                             HStack {
                                 Text("Hide after")
                                     .font(.system(size: 14))
-                                    .foregroundColor(.white.opacity(0.5))
+                                    .foregroundColor(Color(nsColor: Constants.subTextColor))
                                 Spacer()
                                 HStack(spacing: 4) {
                                     ForEach(timeoutOptions, id: \.self) { sec in
@@ -77,7 +77,7 @@ struct SettingsView: View {
                                         }
                                         .buttonStyle(.plain)
                                         .font(.system(size: 13, weight: .medium))
-                                        .foregroundColor(autoHideTimeout == sec ? .white : .white.opacity(0.5))
+                                        .foregroundColor(autoHideTimeout == sec ? .white : Color(nsColor: Constants.subTextColor))
                                         .padding(.horizontal, 10)
                                         .padding(.vertical, 4)
                                         .background(autoHideTimeout == sec ? Color.white.opacity(0.15) : Color.clear)
@@ -131,7 +131,7 @@ struct SettingsView: View {
             Text(title)
                 .font(.system(size: 13, weight: .semibold))
                 .textCase(.uppercase)
-                .foregroundColor(.white.opacity(0.4))
+                .foregroundColor(Color(nsColor: Constants.subTextColor))
                 .tracking(0.5)
                 .padding(.leading, 4)
             content()
@@ -140,7 +140,7 @@ struct SettingsView: View {
 
     private func infoRow(_ label: String, _ value: String) -> some View {
         HStack {
-            Text(label).font(.system(size: 14)).foregroundColor(.white.opacity(0.5))
+            Text(label).font(.system(size: 14)).foregroundColor(Color(nsColor: Constants.subTextColor))
             Spacer()
             Text(value).font(.system(size: 14, weight: .medium)).foregroundColor(.white)
         }
