@@ -39,6 +39,7 @@ struct HeaderView: View {
                 HStack(spacing: 0) {
                     Text(title)
                         .font(.system(size: showBack ? 18 : 22, weight: .medium))
+                        .tracking(showBack ? 0.54 : 0.66) // letter-spacing 0.03em
                         .foregroundColor(accent)
                         .lineLimit(1)
                     Text("|")
@@ -93,7 +94,7 @@ struct IconButtonStyle: ButtonStyle {
             .foregroundColor(.white.opacity(0.7))
             .padding(6)
             .background(
-                RoundedRectangle(cornerRadius: 6)
+                RoundedRectangle(cornerRadius: 8)
                     .fill(configuration.isPressed ? Color.white.opacity(0.1) : Color.clear)
             )
             .contentShape(Rectangle())
