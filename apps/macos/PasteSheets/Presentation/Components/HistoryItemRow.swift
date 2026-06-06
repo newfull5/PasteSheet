@@ -44,7 +44,7 @@ struct HistoryItemRow: View {
                 .fill(isSelected ? accent : subText.opacity(0.4))
                 .frame(width: 4)
                 .frame(maxHeight: isSelected ? .infinity : 16)
-                .shadow(color: isSelected ? accent.opacity(0.5) : .clear, radius: 4)
+                .shadow(color: isSelected ? accent : .clear, radius: 4, x: 0, y: 0) // --shadow-glow: 0 0 8px accent
                 .padding(.trailing, 12)
 
             VStack(alignment: .leading, spacing: 4) {
@@ -71,7 +71,7 @@ struct HistoryItemRow: View {
             if let memo = item.memo, !memo.isEmpty {
                 Text(memo)
                     .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(accent.opacity(0.8))
+                    .foregroundColor(Color(nsColor: Constants.memoColor)) // #e2e2b6
                     .lineLimit(1)
             }
             Spacer()
@@ -98,7 +98,7 @@ struct HistoryItemRow: View {
         if isSelected {
             Text(formatDate(item.createdAt))
                 .font(.system(size: 11, design: .monospaced))
-                .foregroundColor(.white.opacity(0.4))
+                .foregroundColor(subText.opacity(0.6)) // var(--color-text-sub) opacity 0.6
                 .padding(.top, 8)
 
             HStack(spacing: 8) {
@@ -119,7 +119,7 @@ struct HistoryItemRow: View {
             .padding(8)
             .background(accent.opacity(0.05))
             .cornerRadius(4)
-            .overlay(RoundedRectangle(cornerRadius: 4).stroke(accent.opacity(0.3)))
+            .overlay(RoundedRectangle(cornerRadius: 4).stroke(accent.opacity(0.2)))
 
         TextEditor(text: $editContent)
             .font(.system(size: 14))
@@ -161,7 +161,7 @@ struct ActionButton: View {
     var body: some View {
         Button(action: action) {
             Text(label)
-                .font(.system(size: 11, weight: .medium))
+                .font(.system(size: 11, weight: .semibold))
                 .padding(.horizontal, 10)
                 .padding(.vertical, 4)
         }
@@ -178,17 +178,17 @@ struct ActionButton: View {
     private var foregroundColor: Color {
         if isActive && isDanger { return .white }
         if isActive { return .black }
-        return .white.opacity(0.6)
+        return Color(nsColor: Constants.subTextColor)
     }
 
     private var backgroundColor: Color {
-        if isActive && isDanger { return Color.red }
+        if isActive && isDanger { return Color(nsColor: Constants.dangerColor) }
         if isActive { return accent }
         return Color.white.opacity(0.05)
     }
 
     private var borderColor: Color {
-        if isActive && isDanger { return .red }
+        if isActive && isDanger { return Color(nsColor: Constants.dangerColor) }
         if isActive { return .clear }
         return Color.white.opacity(0.1)
     }
