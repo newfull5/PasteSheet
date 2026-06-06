@@ -1,126 +1,117 @@
 import Carbon
 import AppKit
 
+/// Global hotkey via Carbon `RegisterEventHotKey`.
+///
+/// This intentionally does NOT use a `CGEvent` tap: a Carbon hot key does not
+/// require Accessibility permission, so the toggle shortcut works immediately
+/// without the user granting (or re-granting) any privacy permission. This
+/// matches how the original Tauri build registered its global shortcut.
 final class HotkeyService {
-    private var eventTap: CFMachPort?
-    private var runLoopSource: CFRunLoopSource?
+    private var hotKeyRef: EventHotKeyRef?
+    private var eventHandlerRef: EventHandlerRef?
     private var handler: (() -> Void)?
-    private var registeredKeyCode: UInt16 = 0
-    private var registeredModifiers: CGEventFlags = []
+    private let hotKeyID = EventHotKeyID(signature: 0x5053_5448 /* 'PSTH' */, id: 1)
 
     func register(shortcut: String, handler: @escaping () -> Void) {
         self.handler = handler
-        parseShortcut(shortcut)
-        let msg = "[HotkeyService] Registering shortcut: \(shortcut) → keyCode=\(registeredKeyCode), mods=\(registeredModifiers.rawValue)\n"
+        let (keyCode, modifiers) = Self.parseShortcut(shortcut)
+        let msg = "[HotkeyService] Registering (Carbon): \(shortcut) → keyCode=\(keyCode), mods=\(modifiers)\n"
         FileHandle.standardError.write(Data(msg.utf8))
-        installEventTap()
+
+        installEventHandlerIfNeeded()
+
+        var ref: EventHotKeyRef?
+        let status = RegisterEventHotKey(
+            keyCode,
+            modifiers,
+            hotKeyID,
+            GetApplicationEventTarget(),
+            0,
+            &ref
+        )
+        if status == noErr {
+            hotKeyRef = ref
+            FileHandle.standardError.write(Data("[HotkeyService] Hot key registered successfully.\n".utf8))
+        } else {
+            FileHandle.standardError.write(Data("[HotkeyService] FAILED to register hot key (status=\(status)).\n".utf8))
+        }
     }
 
     func unregisterAll() {
-        if let runLoopSource {
-            CFRunLoopRemoveSource(CFRunLoopGetMain(), runLoopSource, .commonModes)
+        if let hotKeyRef {
+            UnregisterEventHotKey(hotKeyRef)
         }
-        if let eventTap {
-            CGEvent.tapEnable(tap: eventTap, enable: false)
-        }
-        eventTap = nil
-        runLoopSource = nil
+        hotKeyRef = nil
         handler = nil
     }
 
     func updateShortcut(_ newShortcut: String, handler: @escaping () -> Void) {
-        unregisterAll()
+        if let hotKeyRef {
+            UnregisterEventHotKey(hotKeyRef)
+            self.hotKeyRef = nil
+        }
         register(shortcut: newShortcut, handler: handler)
     }
 
-    private func parseShortcut(_ shortcut: String) {
-        let parts = shortcut.split(separator: "+").map { String($0) }
-        var flags: CGEventFlags = []
-        var keyCode: UInt16 = 0
+    private func installEventHandlerIfNeeded() {
+        guard eventHandlerRef == nil else { return }
 
-        for part in parts {
+        var spec = EventTypeSpec(
+            eventClass: OSType(kEventClassKeyboard),
+            eventKind: UInt32(kEventHotKeyPressed)
+        )
+
+        let callback: EventHandlerUPP = { _, event, userData in
+            guard let userData, let event else { return noErr }
+            let service = Unmanaged<HotkeyService>.fromOpaque(userData).takeUnretainedValue()
+            var hkID = EventHotKeyID()
+            GetEventParameter(
+                event,
+                EventParamName(kEventParamDirectObject),
+                EventParamType(typeEventHotKeyID),
+                nil,
+                MemoryLayout<EventHotKeyID>.size,
+                nil,
+                &hkID
+            )
+            if hkID.id == service.hotKeyID.id {
+                DispatchQueue.main.async { service.handler?() }
+            }
+            return noErr
+        }
+
+        InstallEventHandler(
+            GetApplicationEventTarget(),
+            callback,
+            1,
+            &spec,
+            Unmanaged.passUnretained(self).toOpaque(),
+            &eventHandlerRef
+        )
+    }
+
+    // MARK: - Parsing
+
+    private static func parseShortcut(_ shortcut: String) -> (keyCode: UInt32, modifiers: UInt32) {
+        var modifiers: UInt32 = 0
+        var keyCode: UInt32 = 0
+
+        for part in shortcut.split(separator: "+").map({ String($0) }) {
             switch part {
             case "CommandOrControl", "Command", "Cmd":
-                flags.insert(.maskCommand)
+                modifiers |= UInt32(cmdKey)
             case "Shift":
-                flags.insert(.maskShift)
+                modifiers |= UInt32(shiftKey)
             case "Alt", "Option":
-                flags.insert(.maskAlternate)
+                modifiers |= UInt32(optionKey)
             case "Control", "Ctrl":
-                flags.insert(.maskControl)
+                modifiers |= UInt32(controlKey)
             default:
-                keyCode = Self.keyCodeForCharacter(part.uppercased())
+                keyCode = UInt32(Self.keyCodeForCharacter(part.uppercased()))
             }
         }
-        registeredKeyCode = keyCode
-        registeredModifiers = flags
-    }
-
-    private func installEventTap() {
-        let trusted = AXIsProcessTrustedWithOptions(
-            [kAXTrustedCheckOptionPrompt.takeUnretainedValue(): true] as CFDictionary
-        )
-        do {
-            let m1 = "[HotkeyService] AXIsProcessTrusted: \(trusted)\n"
-            FileHandle.standardError.write(Data(m1.utf8))
-        }
-        if !trusted {
-            let m2 = "[HotkeyService] Accessibility NOT granted.\n"
-            FileHandle.standardError.write(Data(m2.utf8))
-        }
-
-        let mask: CGEventMask = (1 << CGEventType.keyDown.rawValue)
-        let callback: CGEventTapCallBack = { proxy, type, event, refcon in
-            let service = Unmanaged<HotkeyService>.fromOpaque(refcon!).takeUnretainedValue()
-            return service.handleEvent(proxy: proxy, type: type, event: event)
-        }
-
-        let refcon = Unmanaged.passUnretained(self).toOpaque()
-        guard let tap = CGEvent.tapCreate(
-            tap: .cgSessionEventTap,
-            place: .headInsertEventTap,
-            options: .defaultTap,
-            eventsOfInterest: mask,
-            callback: callback,
-            userInfo: refcon
-        ) else {
-            let m3 = "[HotkeyService] FAILED to create event tap.\n"
-            FileHandle.standardError.write(Data(m3.utf8))
-            return
-        }
-
-        eventTap = tap
-        let source = CFMachPortCreateRunLoopSource(nil, tap, 0)
-        runLoopSource = source
-        CFRunLoopAddSource(CFRunLoopGetMain(), source, .commonModes)
-        CGEvent.tapEnable(tap: tap, enable: true)
-        let m4 = "[HotkeyService] Event tap created and enabled successfully.\n"
-        FileHandle.standardError.write(Data(m4.utf8))
-    }
-
-    private func handleEvent(proxy: CGEventTapProxy, type: CGEventType, event: CGEvent) -> Unmanaged<CGEvent>? {
-        if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput {
-            let m = "[HotkeyService] Event tap was DISABLED, re-enabling...\n"
-            FileHandle.standardError.write(Data(m.utf8))
-            if let eventTap { CGEvent.tapEnable(tap: eventTap, enable: true) }
-            return Unmanaged.passRetained(event)
-        }
-        guard type == .keyDown else { return Unmanaged.passRetained(event) }
-
-        let keyCode = UInt16(event.getIntegerValueField(.keyboardEventKeycode))
-        let flags = event.flags
-
-        let relevantFlags: CGEventFlags = [.maskCommand, .maskShift, .maskAlternate, .maskControl]
-        let pressedMods = flags.intersection(relevantFlags)
-        let requiredMods = registeredModifiers.intersection(relevantFlags)
-
-        if keyCode == registeredKeyCode && pressedMods == requiredMods {
-            DispatchQueue.main.async { [weak self] in
-                self?.handler?()
-            }
-            return nil
-        }
-        return Unmanaged.passRetained(event)
+        return (keyCode, modifiers)
     }
 
     private static func keyCodeForCharacter(_ char: String) -> UInt16 {
