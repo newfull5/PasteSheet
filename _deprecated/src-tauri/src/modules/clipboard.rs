@@ -115,8 +115,14 @@ pub fn paste_text(text: String) -> Result<(), String> {
     clipboard
         .set_text(text)
         .map_err(|e| format!("Failed to set clipboard text: {:?}", e))?;
-    info!("Text copied to clipbaord");
+    info!("Text copied to clipboard");
     restore_prev_app_native();
+    std::thread::sleep(std::time::Duration::from_millis(80));
+    #[cfg(target_os = "macos")]
+    {
+        restore_prev_app_native();
+        std::thread::sleep(std::time::Duration::from_millis(50));
+    }
     let mut enigo = Enigo::new(&Settings::default()).map_err(|e| e.to_string())?;
     #[cfg(target_os = "macos")]
     {

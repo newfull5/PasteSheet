@@ -39,6 +39,7 @@ struct HeaderView: View {
                 HStack(spacing: 0) {
                     Text(title)
                         .font(.system(size: showBack ? 18 : 22, weight: .medium))
+                        .tracking(showBack ? 0.54 : 0.66) // letter-spacing 0.03em
                         .foregroundColor(accent)
                         .lineLimit(1)
                     Text("|")
@@ -51,14 +52,17 @@ struct HeaderView: View {
                             }
                         }
                 }
-                .opacity(vm.searchQuery.isEmpty && !isSearchFocused ? 1 : 0)
+                // Show the title (not the search placeholder) whenever the query is
+                // empty, even if the field is focused — prevents "Search Anything..."
+                // from showing on open.
+                .opacity(vm.searchQuery.isEmpty ? 1 : 0)
 
                 TextField("Search Anything...", text: $vm.searchQuery)
                     .textFieldStyle(.plain)
                     .font(.system(size: showBack ? 18 : 22, weight: .medium))
                     .foregroundColor(accent)
                     .focused($isSearchFocused)
-                    .opacity(vm.searchQuery.isEmpty && !isSearchFocused ? 0 : 1)
+                    .opacity(vm.searchQuery.isEmpty ? 0 : 1)
                     .onChange(of: vm.searchQuery) { _ in
                         vm.selectedIndex = 0
                     }
@@ -93,7 +97,7 @@ struct IconButtonStyle: ButtonStyle {
             .foregroundColor(.white.opacity(0.7))
             .padding(6)
             .background(
-                RoundedRectangle(cornerRadius: 6)
+                RoundedRectangle(cornerRadius: 8)
                     .fill(configuration.isPressed ? Color.white.opacity(0.1) : Color.clear)
             )
             .contentShape(Rectangle())

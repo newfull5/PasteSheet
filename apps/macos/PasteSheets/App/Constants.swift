@@ -7,6 +7,12 @@ enum Constants {
     static let accentColor = NSColor(red: 220/255, green: 220/255, blue: 87/255, alpha: 1.0)
     static let subTextColor = NSColor(red: 0x68/255, green: 0x74/255, blue: 0x8d/255, alpha: 1.0)
     static let bgContainer = NSColor(red: 18/255, green: 18/255, blue: 18/255, alpha: 0.98)
+    // Exact tokens from Tauri app.css / components
+    static let modalDangerColor = NSColor(red: 0xef/255, green: 0x44/255, blue: 0x44/255, alpha: 1.0) // tailwind red-500 #ef4444
+    static let detailModalBg = NSColor(red: 0x1e/255, green: 0x1e/255, blue: 0x1e/255, alpha: 1.0)    // #1e1e1e
+    static let detailContentBg = NSColor(red: 0x1a/255, green: 0x1a/255, blue: 0x1a/255, alpha: 1.0)  // #1a1a1a
+    static let dangerColor = NSColor(red: 1.0, green: 0x44/255, blue: 0x44/255, alpha: 1.0)        // #ff4444
+    static let memoColor = NSColor(red: 0xe2/255, green: 0xe2/255, blue: 0xb6/255, alpha: 1.0)     // #e2e2b6
     static let clipboardPollingInterval: TimeInterval = 0.1
     static let mouseEdgePollingInterval: TimeInterval = 0.1
     static let mouseEdgeThreshold: CGFloat = 2.0
