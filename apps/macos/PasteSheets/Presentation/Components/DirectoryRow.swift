@@ -13,7 +13,7 @@ struct DirectoryRow: View {
             RoundedRectangle(cornerRadius: 2)
                 .fill(isSelected ? accent : subText.opacity(0.4))
                 .frame(width: 4, height: 18)
-                .shadow(color: isSelected ? accent.opacity(0.5) : .clear, radius: 4)
+                .shadow(color: isSelected ? accent : .clear, radius: 4, x: 0, y: 0) // glow
                 .padding(.trailing, 12)
 
             Text(directory.name)
