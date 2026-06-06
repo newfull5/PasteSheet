@@ -8,7 +8,7 @@
     auto_hide_enabled: null,
     auto_hide_timeout: 5,
     shortcut: "CommandOrControl+Shift+V",
-    auto_start: null,
+    max_items_per_directory: 50,
   };
   let isRecording = false;
   let recordingDisplay = "";
@@ -72,23 +72,14 @@
       settings.auto_hide_timeout = autoHideTimeout ? parseInt(autoHideTimeout) : 5;
       const shortcut = await invoke("get_setting", { key: "shortcut" });
       settings.shortcut = shortcut || "CommandOrControl+Shift+V";
-      const autoStart = await invoke("get_autostart");
-      settings.auto_start = autoStart;
+      const maxItems = await invoke("get_setting", { key: "max_items_per_directory" });
+      settings.max_items_per_directory = maxItems ? parseInt(maxItems) : 50;
     } catch (err) {
       console.error("Failed to load settings:", err);
       settings.mouse_edge_enabled = false;
       settings.auto_hide_enabled = false;
-      settings.auto_start = true;
     }
   });
-  async function toggleAutoStart(enabled) {
-    try {
-      await invoke("set_autostart", { enabled });
-      settings.auto_start = enabled;
-    } catch (err) {
-      console.error("Failed to update auto-start:", err);
-    }
-  }
   async function updateSetting(key, value) {
     try {
       await invoke("update_setting", { key, value: String(value) });
@@ -126,14 +117,6 @@
   </div>
   <div class="settings-group">
     <h3 class="group-title">General</h3>
-    {#if settings.auto_start !== null}
-      <Toggle
-        label="Launch at Login"
-        description="Automatically start PasteSheets when you log in."
-        checked={settings.auto_start}
-        on:change={(e) => toggleAutoStart(e.detail)}
-      />
-    {/if}
     {#if settings.mouse_edge_enabled !== null}
       <Toggle
         label="Mouse Edge Detection"
@@ -164,6 +147,27 @@
         </div>
       {/if}
     {/if}
+  </div>
+  <div class="settings-group">
+    <h3 class="group-title">Storage</h3>
+    <div class="setting-item">
+      <div class="setting-text">
+        <span class="setting-label">Max items per folder</span>
+        <span class="setting-description">Oldest items are automatically deleted when the limit is reached.</span>
+      </div>
+    </div>
+    <div class="timeout-row">
+      <span class="timeout-label">Limit</span>
+      <div class="timeout-segments">
+        {#each [30, 50, 100, 200, -1] as val}
+          <!-- svelte-ignore a11y-no-static-element-interactions -->
+          <div
+            class="segment {settings.max_items_per_directory === val ? 'active' : ''}"
+            on:click={() => { settings.max_items_per_directory = val; updateSetting("max_items_per_directory", val); }}
+          >{val === -1 ? '∞' : val}</div>
+        {/each}
+      </div>
+    </div>
   </div>
   <div class="settings-group">
     <h3 class="group-title">Information</h3>
@@ -251,6 +255,23 @@
   .segment.active {
     background: rgba(255, 255, 255, 0.15);
     color: var(--color-text-main);
+  }
+  .setting-item {
+    padding: 0 4px;
+  }
+  .setting-label {
+    color: var(--color-text-main);
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .setting-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .setting-description {
+    color: var(--color-text-sub);
+    font-size: 12px;
   }
   .shortcut-row {
     display: flex;
