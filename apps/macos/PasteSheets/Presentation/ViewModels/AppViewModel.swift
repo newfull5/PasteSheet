@@ -146,8 +146,10 @@ final class AppViewModel: ObservableObject {
         loadHistory()
         loadAutoHideSettings()
         resetAutoHideTimer()
-        // Reset the directory list to the top so the Clipboard folder is visible on open
-        if currentView == .directories && searchQuery.isEmpty {
+        // Start fresh on open: clear any previous search so the next keystroke
+        // searches immediately, and show the directory list from the top.
+        searchQuery = ""
+        if currentView == .directories {
             selectedIndex = 0
         }
     }
@@ -449,8 +451,11 @@ final class AppViewModel: ObservableObject {
         // Auto-focus search on character input
         if !isInput && !hasCmd && !event.modifierFlags.contains(.control) && !event.modifierFlags.contains(.option) {
             if let chars = event.characters, chars.count == 1, chars.first!.isLetter || chars.first!.isNumber {
+                // Insert the first character immediately and focus the field, so the
+                // very first keystroke after (re)opening registers without being lost.
+                searchQuery += chars
                 shouldFocusSearch = true
-                return false
+                return true
             }
         }
 
