@@ -50,6 +50,7 @@ final class AppViewModel: ObservableObject {
     let settingsUseCase: SettingsUseCase
     let previousAppService: PreviousAppService
     let hotkeyService: HotkeyService
+    let updateService: UpdateService
 
     weak var panel: NSPanel?
 
@@ -60,7 +61,8 @@ final class AppViewModel: ObservableObject {
          clipboardMonitor: ClipboardMonitorUseCase,
          settingsUseCase: SettingsUseCase,
          previousAppService: PreviousAppService,
-         hotkeyService: HotkeyService) {
+         hotkeyService: HotkeyService,
+         updateService: UpdateService) {
         self.manageItems = manageItems
         self.manageDirectories = manageDirectories
         self.searchUseCase = searchUseCase
@@ -69,6 +71,7 @@ final class AppViewModel: ObservableObject {
         self.settingsUseCase = settingsUseCase
         self.previousAppService = previousAppService
         self.hotkeyService = hotkeyService
+        self.updateService = updateService
     }
 
     // MARK: - Computed

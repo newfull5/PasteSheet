@@ -9,6 +9,7 @@ struct SettingsView: View {
     @State private var shortcutDisplay = ""
     @State private var autoStartEnabled = true
     @State private var isRecording = false
+    @State private var autoUpdateEnabled = true
     @State private var loaded = false
 
     let timeoutOptions = [3, 5, 10, 30, 60]
@@ -95,9 +96,39 @@ struct SettingsView: View {
                     }
                 }
 
+                // Updates
+                settingsGroup("Updates") {
+                    ToggleRow(label: "Automatic Updates",
+                              description: "Automatically check for updates in the background.",
+                              isOn: $autoUpdateEnabled)
+                    .onChange(of: autoUpdateEnabled) { val in
+                        vm.updateService.automaticallyChecksForUpdates = val
+                    }
+
+                    HStack {
+                        Text("Check for Updates")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(.white)
+                        Spacer()
+                        Button(action: { vm.updateService.checkForUpdates() }) {
+                            Text("Check Now")
+                                .font(.system(size: 13, weight: .semibold))
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 6)
+                                .background(Color.white.opacity(0.08))
+                                .foregroundColor(.white)
+                                .cornerRadius(8)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    .padding(12)
+                    .background(Color.white.opacity(0.03))
+                    .cornerRadius(12)
+                }
+
                 // Info
                 settingsGroup("Information") {
-                    infoRow("Version", "0.1.0")
+                    infoRow("Version", Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "unknown")
                     infoRow("Developer", "newfull5")
                 }
             }
@@ -115,6 +146,7 @@ struct SettingsView: View {
         let shortcut = (try? vm.settingsUseCase.getSetting(key: "shortcut")) ?? Constants.defaultShortcut
         shortcutDisplay = formatShortcut(shortcut)
         autoStartEnabled = vm.settingsUseCase.isAutoStartEnabled()
+        autoUpdateEnabled = vm.updateService.automaticallyChecksForUpdates
         loaded = true
     }
 
