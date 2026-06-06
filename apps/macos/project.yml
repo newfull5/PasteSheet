@@ -11,6 +11,11 @@ settings:
     SWIFT_VERSION: "5.9"
     MACOSX_DEPLOYMENT_TARGET: "13.0"
 
+packages:
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    version: 2.9.2
+
 targets:
   PasteSheets:
     type: application
@@ -19,6 +24,8 @@ targets:
       - path: PasteSheets
         excludes:
           - "**/.DS_Store"
+    dependencies:
+      - package: Sparkle
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.newfull5.pastesheet

@@ -13,6 +13,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let hotkeyService = HotkeyService()
     private let mouseEdgeService = MouseEdgeService()
     private let autoStartService = AutoStartService()
+    private let updateService = UpdateService()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -54,7 +55,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             ),
             settingsUseCase: settingsUseCase,
             previousAppService: previousAppService,
-            hotkeyService: hotkeyService
+            hotkeyService: hotkeyService,
+            updateService: updateService
         )
 
         setupPanel()

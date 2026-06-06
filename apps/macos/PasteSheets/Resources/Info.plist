@@ -18,5 +18,9 @@
     <string>13.0</string>
     <key>LSUIElement</key>
     <true/>
+    <key>SUFeedURL</key>
+    <string>https://raw.githubusercontent.com/newfull5/PasteSheets/main/appcast.xml</string>
+    <key>SUPublicEDKey</key>
+    <string>MjK4WpjC+kVYQTMt5iUCkUKzLEGOWn3D1HzTEppH9S8=</string>
 </dict>
 </plist>
