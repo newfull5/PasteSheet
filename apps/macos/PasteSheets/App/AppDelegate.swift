@@ -63,6 +63,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         setupTray()
         setupHotkey(settingsUseCase: settingsUseCase)
         startBackgroundServices()
+        updateService.startUpdater()
     }
 
     // MARK: - Panel

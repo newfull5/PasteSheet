@@ -7,15 +7,15 @@
         <language>en</language>
         <item>
             <title>Version 0.4.1</title>
-            <sparkle:version>3</sparkle:version>
+            <sparkle:version>2</sparkle:version>
             <sparkle:shortVersionString>0.4.1</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
-            <pubDate>Fri, 06 Jun 2025 00:00:00 +0000</pubDate>
+            <pubDate>Fri, 06 Jun 2026 14:31:31 +0000</pubDate>
             <enclosure
                 url="https://github.com/newfull5/PasteSheets/releases/download/v0.4.1/PasteSheet_0.4.1_universal.dmg"
                 length="1895828"
                 type="application/octet-stream"
-                sparkle:edSignature="65NqYPpXa61UmIStVByiKO8TQ1fii5R+9n4MbeUVZSDwbR0g9Iew6ybIqOHtrYa3e3DChSA1zogN3nuyoq8yCA=="
+                sparkle:edSignature="DOrE8d3Mk3e5xOZ8hSfeJ9fFuAcICv0bLC535VrhDaXSiRkudfQcSAjU0oTtvNdvOoiCYjtw0Uf0in3yI8XPAA=="
             />
         </item>
     </channel>
