@@ -6,14 +6,18 @@ final class UpdateService {
 
     init() {
         updaterController = SPUStandardUpdaterController(
-            startingUpdater: true,
+            startingUpdater: false,
             updaterDelegate: nil,
             userDriverDelegate: nil
         )
     }
 
-    var updater: SPUUpdater {
-        updaterController.updater
+    func startUpdater() {
+        do {
+            try updaterController.updater.start()
+        } catch {
+            NSLog("Sparkle updater failed to start: \(error)")
+        }
     }
 
     func checkForUpdates() {
@@ -21,11 +25,11 @@ final class UpdateService {
     }
 
     var automaticallyChecksForUpdates: Bool {
-        get { updater.automaticallyChecksForUpdates }
-        set { updater.automaticallyChecksForUpdates = newValue }
+        get { updaterController.updater.automaticallyChecksForUpdates }
+        set { updaterController.updater.automaticallyChecksForUpdates = newValue }
     }
 
     var canCheckForUpdates: Bool {
-        updater.canCheckForUpdates
+        updaterController.updater.canCheckForUpdates
     }
 }
