@@ -1,6 +1,7 @@
 <script>
   import { createEventDispatcher, onMount } from "svelte";
   import { invoke } from "@tauri-apps/api/core";
+  import { getVersion } from "@tauri-apps/api/app";
   import Toggle from "./ui/Toggle.svelte";
   const dispatch = createEventDispatcher();
   let settings = {
@@ -8,8 +9,9 @@
     auto_hide_enabled: null,
     auto_hide_timeout: 5,
     shortcut: "CommandOrControl+Shift+V",
-    max_items_per_directory: 50,
   };
+  let autoStart = null;
+  let version = "";
   let isRecording = false;
   let recordingDisplay = "";
 
@@ -72,14 +74,29 @@
       settings.auto_hide_timeout = autoHideTimeout ? parseInt(autoHideTimeout) : 5;
       const shortcut = await invoke("get_setting", { key: "shortcut" });
       settings.shortcut = shortcut || "CommandOrControl+Shift+V";
-      const maxItems = await invoke("get_setting", { key: "max_items_per_directory" });
-      settings.max_items_per_directory = maxItems ? parseInt(maxItems) : 50;
     } catch (err) {
       console.error("Failed to load settings:", err);
       settings.mouse_edge_enabled = false;
       settings.auto_hide_enabled = false;
     }
+    try {
+      autoStart = await invoke("get_autostart");
+    } catch (err) {
+      console.error("Failed to load autostart state:", err);
+      autoStart = false;
+    }
+    try {
+      version = await getVersion();
+    } catch (_) {}
   });
+  async function updateAutostart(enabled) {
+    try {
+      await invoke("set_autostart", { enabled });
+      autoStart = enabled;
+    } catch (err) {
+      console.error("Failed to update autostart:", err);
+    }
+  }
   async function updateSetting(key, value) {
     try {
       await invoke("update_setting", { key, value: String(value) });
@@ -117,6 +134,14 @@
   </div>
   <div class="settings-group">
     <h3 class="group-title">General</h3>
+    {#if autoStart !== null}
+      <Toggle
+        label="Launch at Login"
+        description="Automatically start PasteSheets when you log in."
+        checked={autoStart}
+        on:change={(e) => updateAutostart(e.detail)}
+      />
+    {/if}
     {#if settings.mouse_edge_enabled !== null}
       <Toggle
         label="Mouse Edge Detection"
@@ -149,31 +174,10 @@
     {/if}
   </div>
   <div class="settings-group">
-    <h3 class="group-title">Storage</h3>
-    <div class="setting-item">
-      <div class="setting-text">
-        <span class="setting-label">Max items per folder</span>
-        <span class="setting-description">Oldest items are automatically deleted when the limit is reached.</span>
-      </div>
-    </div>
-    <div class="timeout-row">
-      <span class="timeout-label">Limit</span>
-      <div class="timeout-segments">
-        {#each [30, 50, 100, 200, -1] as val}
-          <!-- svelte-ignore a11y-no-static-element-interactions -->
-          <div
-            class="segment {settings.max_items_per_directory === val ? 'active' : ''}"
-            on:click={() => { settings.max_items_per_directory = val; updateSetting("max_items_per_directory", val); }}
-          >{val === -1 ? '∞' : val}</div>
-        {/each}
-      </div>
-    </div>
-  </div>
-  <div class="settings-group">
     <h3 class="group-title">Information</h3>
     <div class="info-item">
       <span class="info-label">Version</span>
-      <span class="info-value">0.1.0</span>
+      <span class="info-value">{version}</span>
     </div>
     <div class="info-item">
       <span class="info-label">Developer</span>
@@ -255,23 +259,6 @@
   .segment.active {
     background: rgba(255, 255, 255, 0.15);
     color: var(--color-text-main);
-  }
-  .setting-item {
-    padding: 0 4px;
-  }
-  .setting-label {
-    color: var(--color-text-main);
-    font-size: 14px;
-    font-weight: 500;
-  }
-  .setting-text {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  .setting-description {
-    color: var(--color-text-sub);
-    font-size: 12px;
   }
   .shortcut-row {
     display: flex;
