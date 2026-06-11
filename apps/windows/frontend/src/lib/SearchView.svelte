@@ -165,10 +165,6 @@
     transition: all 0.2s;
     background: transparent;
   }
-  .search-result-item:hover,
-  .search-result-item.selected {
-    background: rgba(255, 255, 255, 0.05);
-  }
   .search-result-item.selected {
     background-color: rgba(220, 220, 87, 0.1);
   }

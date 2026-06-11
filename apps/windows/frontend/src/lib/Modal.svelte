@@ -59,12 +59,12 @@
 <svelte:window on:keydown|capture={handleKeydown} />
 {#if show}
   <div
-    class="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+    class="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4"
     transition:fade={{ duration: 200 }}
     on:click|self={handleCancel}
   >
     <div
-      class="bg-bg-container border border-white/10 rounded-2xl p-6 w-full max-w-sm shadow-2xl"
+      class="bg-bg-container border border-white/10 rounded-2xl p-6 w-full max-w-[340px] shadow-2xl"
       transition:scale={{ duration: 200, start: 0.95 }}
     >
       <h3 class="text-lg font-bold text-accent mb-2">{title}</h3>

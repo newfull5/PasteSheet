@@ -39,14 +39,6 @@
   function handleCancel() {
     dispatch("cancel");
   }
-  function formatDate(dateStr) {
-    try {
-      const date = new Date(dateStr);
-      return date.toLocaleString();
-    } catch (e) {
-      return dateStr;
-    }
-  }
 </script>
 <div
   role="button"
@@ -100,7 +92,7 @@
       <div class="item-content">{item.content}</div>
       {#if isSelected}
         <div class="item-meta">
-          <span>{formatDate(item.created_at)}</span>
+          <span>{item.created_at}</span>
         </div>
         <div class="item-actions">
           <button
@@ -150,12 +142,6 @@
     position: relative;
     min-height: 44px;
     overflow: hidden;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-  }
-  .history-item:hover,
-  .history-item.selected {
-    background-color: rgba(255, 255, 255, 0.05);
-    outline: none;
   }
   .history-item.selected {
     background-color: rgba(220, 220, 87, 0.08);
@@ -163,6 +149,7 @@
     max-height: 800px;
     min-height: fit-content;
     overflow: visible;
+    outline: none;
   }
   .history-item::before {
     content: "";
@@ -179,10 +166,6 @@
   .history-item.selected::before {
     height: auto;
     align-self: stretch;
-    opacity: 1;
-    box-shadow: 0 0 8px var(--color-accent);
-  }
-  .history-item:hover::before {
     opacity: 1;
     box-shadow: 0 0 8px var(--color-accent);
   }
@@ -238,32 +221,17 @@
   .history-item.selected .item-content {
     color: var(--color-text-main);
     white-space: pre-wrap;
-    overflow-y: auto;
-    max-height: 350px;
-    padding-right: 4px;
+    display: -webkit-box;
+    -webkit-line-clamp: 15;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
     margin-top: 4px;
     margin-bottom: 16px;
     line-height: 1.6;
     flex: none;
     height: auto;
     text-overflow: clip;
-    overflow-x: hidden;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(220, 220, 87, 0.2) transparent;
     user-select: none;
-  }
-  .history-item.selected .item-content::-webkit-scrollbar {
-    width: 4px;
-  }
-  .history-item.selected .item-content::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  .history-item.selected .item-content::-webkit-scrollbar-thumb {
-    background: rgba(220, 220, 87, 0.2);
-    border-radius: 2px;
-  }
-  .history-item.selected .item-content::-webkit-scrollbar-thumb:hover {
-    background: rgba(220, 220, 87, 0.4);
   }
   .item-meta {
     display: none;
@@ -318,9 +286,9 @@
   }
   .btn-mini.danger:hover,
   .btn-mini.danger.primary {
-    background: #ff5555 !important;
+    background: var(--color-accent-danger) !important;
     color: white !important;
-    border-color: #ff5555 !important;
+    border-color: var(--color-accent-danger) !important;
   }
   .edit-mode {
     display: flex;

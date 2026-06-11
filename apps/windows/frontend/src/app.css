@@ -50,9 +50,6 @@
   --shadow-glow: 0 0 8px var(--color-accent);
   --shadow-danger-glow: 0 4px 12px rgba(255, 68, 68, 0.3);
 
-  /* [수정] 이동 거리를 줄이고 opacity를 추가하여 '빨려들어가는' 느낌 방지 */
-  --transition-app-container: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1),
-  opacity 0.3s ease-out;
 }
 
 /* 유틸리티 레이어 (필요시) */
@@ -67,10 +64,9 @@
 
   /* Shared New Item/Folder Button Styles */
   .btn-new {
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-    margin-top: 12px;
+    border: 1px dashed rgba(255, 255, 255, 0.05);
     opacity: 0.8;
-    padding: 10px 12px;
+    padding: 12px 12px;
     display: flex;
     align-items: center;
     cursor: pointer;
@@ -89,10 +85,9 @@
     opacity: 0.8;
   }
 
-  .btn-new:hover,
   .btn-new.selected {
     opacity: 1;
-    background-color: rgba(220, 220, 87, 0.05);
+    background-color: rgba(220, 220, 87, 0.08);
   }
 
   .btn-new::before {

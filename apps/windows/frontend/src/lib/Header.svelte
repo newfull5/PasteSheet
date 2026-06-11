@@ -47,7 +47,7 @@
     position: relative;
     display: flex;
     align-items: center;
-    margin-bottom: 20px;
+    padding: 16px 16px 12px;
     min-height: 40px;
     flex-shrink: 0;
   }

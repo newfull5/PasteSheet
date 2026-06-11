@@ -165,16 +165,11 @@
     transition: background 0.1s;
     position: relative;
     color: var(--color-text-main);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-    outline: none;
-  }
-  .dir-item:hover,
-  .dir-item.selected {
-    background-color: rgba(255, 255, 255, 0.05);
     outline: none;
   }
   .dir-item.selected {
     background-color: rgba(220, 220, 87, 0.1);
+    outline: none;
   }
   .dir-item::before {
     content: "";
@@ -188,7 +183,6 @@
     transition: all 0.2s;
     flex-shrink: 0;
   }
-  .dir-item:hover::before,
   .dir-item.selected::before {
     background-color: var(--color-accent);
     opacity: 1;

@@ -532,9 +532,9 @@
 <svelte:window on:keydown={handleKeyDown} />
 <div
   on:mousemove={resetAutoHideTimer}
-  class="w-full h-full max-h-screen bg-bg-container rounded-l-[16px] border-l border-t border-b border-white/10 flex flex-col overflow-hidden relative shadow-[-4px_0_15px_rgba(0,0,0,0.5)] transition-[var(--transition-app-container)] {isVisible
-    ? 'opacity-100 translate-x-0'
-    : 'opacity-0 translate-x-[60px] pointer-events-none'} {modalConfig.show ||
+  class="w-full h-full max-h-screen bg-bg-container rounded-[16px] border border-white/10 flex flex-col overflow-hidden relative shadow-[0_8px_24px_rgba(0,0,0,0.5)] {isVisible
+    ? 'opacity-100'
+    : 'opacity-0 transition-opacity duration-[350ms] ease-out pointer-events-none'} {modalConfig.show ||
   detailItem !== null
     ? 'pointer-events-none'
     : 'pointer-events-auto'}"
@@ -547,7 +547,7 @@
     <div class="w-8 h-[3px] rounded-full bg-white/10 group-hover:bg-white/30 transition-colors duration-150"></div>
   </div>
 
-  <div class="p-4 flex flex-col h-full pb-3">
+  <div class="flex flex-col h-full pb-3">
     <Header
       bind:this={header}
       title={searchQuery
@@ -563,7 +563,8 @@
       on:back={showDirectoryView}
       on:settings={showSettingsView}
     />
-    <div class="flex-1 overflow-hidden relative">
+    <div class="h-px bg-white/10 flex-shrink-0"></div>
+    <div class="flex-1 overflow-hidden relative px-4 py-1">
       {#if searchQuery}
         <div class="absolute inset-0" transition:fly={{ y: 10, duration: 150 }}>
           <SearchView
