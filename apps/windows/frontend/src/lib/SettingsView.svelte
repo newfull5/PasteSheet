@@ -2,6 +2,7 @@
   import { createEventDispatcher, onMount } from "svelte";
   import { invoke } from "@tauri-apps/api/core";
   import { getVersion } from "@tauri-apps/api/app";
+  import { check } from "@tauri-apps/plugin-updater";
   import Toggle from "./ui/Toggle.svelte";
   const dispatch = createEventDispatcher();
   let settings = {
@@ -11,7 +12,10 @@
     shortcut: "CommandOrControl+Shift+V",
   };
   let autoStart = null;
+  let autoUpdate = null;
   let version = "";
+  let isCheckingUpdate = false;
+  let checkMessage = "";
   let isRecording = false;
   let recordingDisplay = "";
 
@@ -74,6 +78,8 @@
       settings.auto_hide_timeout = autoHideTimeout ? parseInt(autoHideTimeout) : 5;
       const shortcut = await invoke("get_setting", { key: "shortcut" });
       settings.shortcut = shortcut || "CommandOrControl+Shift+V";
+      const autoUpd = await invoke("get_setting", { key: "auto_update_enabled" });
+      autoUpdate = autoUpd === null ? true : autoUpd === "true";
     } catch (err) {
       console.error("Failed to load settings:", err);
       settings.mouse_edge_enabled = false;
@@ -95,6 +101,34 @@
       autoStart = enabled;
     } catch (err) {
       console.error("Failed to update autostart:", err);
+    }
+  }
+  async function updateAutoUpdate(enabled) {
+    try {
+      await invoke("update_setting", {
+        key: "auto_update_enabled",
+        value: String(enabled),
+      });
+      autoUpdate = enabled;
+    } catch (err) {
+      console.error("Failed to update auto-update setting:", err);
+    }
+  }
+  async function checkNow() {
+    isCheckingUpdate = true;
+    checkMessage = "";
+    try {
+      const update = await check();
+      if (update) {
+        dispatch("updateavailable", update);
+      } else {
+        checkMessage = "You're up to date.";
+      }
+    } catch (err) {
+      console.error("Update check failed:", err);
+      checkMessage = "Update check failed.";
+    } finally {
+      isCheckingUpdate = false;
     }
   }
   async function updateSetting(key, value) {
@@ -172,6 +206,28 @@
         </div>
       {/if}
     {/if}
+  </div>
+  <div class="settings-group">
+    <h3 class="group-title">Updates</h3>
+    {#if autoUpdate !== null}
+      <Toggle
+        label="Automatic Updates"
+        description="Automatically check for updates in the background."
+        checked={autoUpdate}
+        on:change={(e) => updateAutoUpdate(e.detail)}
+      />
+    {/if}
+    <div class="shortcut-row">
+      <div class="shortcut-info">
+        <span class="shortcut-label">Check for Updates</span>
+        {#if checkMessage}
+          <span class="check-message">{checkMessage}</span>
+        {/if}
+      </div>
+      <button class="check-btn" on:click={checkNow} disabled={isCheckingUpdate}>
+        {isCheckingUpdate ? "Checking..." : "Check Now"}
+      </button>
+    </div>
   </div>
   <div class="settings-group">
     <h3 class="group-title">Information</h3>
@@ -292,6 +348,30 @@
     background: rgba(99, 102, 241, 0.25);
     color: rgba(165, 180, 252, 1);
     animation: pulse 1.2s ease-in-out infinite;
+  }
+  .check-btn {
+    padding: 6px 14px;
+    background: rgba(255, 255, 255, 0.08);
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-text-main);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .check-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.14);
+  }
+  .check-btn:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+  .check-message {
+    color: var(--color-text-sub);
+    font-size: 12px;
+    margin-top: 2px;
+    display: block;
   }
   @keyframes pulse {
     0%, 100% { opacity: 1; }

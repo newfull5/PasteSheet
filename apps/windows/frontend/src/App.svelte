@@ -4,6 +4,8 @@
   import { listen } from "@tauri-apps/api/event";
   import { getCurrentWindow } from "@tauri-apps/api/window";
   import { LogicalSize } from "@tauri-apps/api/dpi";
+  import { check } from "@tauri-apps/plugin-updater";
+  import { relaunch } from "@tauri-apps/plugin-process";
   import { fly } from "svelte/transition";
   import DirectoryView from "./lib/DirectoryView.svelte";
   import ItemView from "./lib/ItemView.svelte";
@@ -92,6 +94,21 @@
       detailItem = item;
     }
   }
+  function promptUpdate(update) {
+    openModal({
+      title: "Update Available",
+      message: `PasteSheet ${update.version} is available. Install and restart now?`,
+      confirmText: "Install",
+      onConfirm: async () => {
+        try {
+          await update.downloadAndInstall();
+          await relaunch();
+        } catch (err) {
+          console.error("Update install failed:", err);
+        }
+      },
+    });
+  }
   function closeDetail() {
     detailItem = null;
   }
@@ -150,6 +167,17 @@
       const timeout = await invoke("get_setting", { key: "auto_hide_timeout" });
       autoHideEnabled = enabled === "true";
       autoHideTimeout = timeout ? parseInt(timeout) : 5;
+    } catch (_) {}
+
+    try {
+      const autoUpdate = await invoke("get_setting", { key: "auto_update_enabled" });
+      if (autoUpdate !== "false") {
+        check()
+          .then((update) => {
+            if (update) promptUpdate(update);
+          })
+          .catch(() => {});
+      }
     } catch (_) {}
 
     await listen("window-visible", async (event) => {
@@ -620,7 +648,11 @@
         </div>
       {:else if currentView === "settings"}
         <div class="absolute inset-0" transition:fly={{ y: 10, duration: 150 }}>
-          <SettingsView on:back={showDirectoryView} on:settingschange={handleSettingsChange} />
+          <SettingsView
+            on:back={showDirectoryView}
+            on:settingschange={handleSettingsChange}
+            on:updateavailable={(e) => promptUpdate(e.detail)}
+          />
         </div>
       {/if}
     </div>
