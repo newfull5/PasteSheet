@@ -24,7 +24,8 @@
         "shadow": false,
         "alwaysOnTop": true,
         "visible": false,
-        "focus": false
+        "focus": false,
+        "skipTaskbar": true
       }
     ],
     "security": {

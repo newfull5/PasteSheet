@@ -1,12 +1,17 @@
 #![allow(unexpected_cfgs)]
+#[cfg(target_os = "macos")]
 use cocoa::base::{id, nil};
 use log::debug;
+#[cfg(target_os = "macos")]
 use objc::{class, msg_send, sel, sel_impl};
+#[cfg(target_os = "macos")]
 use std::ffi::CStr;
 use std::sync::Mutex;
 use tauri::{AppHandle, Runtime};
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut, ShortcutEvent, ShortcutState};
 static PREV_APP_NAME: Mutex<Option<String>> = Mutex::new(None);
+#[cfg(target_os = "windows")]
+static PREV_WINDOW_HANDLE: Mutex<Option<isize>> = Mutex::new(None);
 const DEFAULT_SHORTCUT: &str = "CommandOrControl+Shift+V";
 pub fn setup_global_hotkey<R: Runtime>(
     app: AppHandle<R>,
@@ -40,6 +45,13 @@ pub fn save_current_app() {
         if app_name != "PasteSheet" && app_name != "Electron" {
             let mut prev = PREV_APP_NAME.lock().unwrap();
             *prev = Some(app_name.clone());
+            #[cfg(target_os = "windows")]
+            unsafe {
+                let hwnd = winapi::um::winuser::GetForegroundWindow();
+                if !hwnd.is_null() {
+                    *PREV_WINDOW_HANDLE.lock().unwrap() = Some(hwnd as isize);
+                }
+            }
             debug!("✅ Previous app saved: {}", app_name);
         }
     } else {
@@ -71,6 +83,18 @@ pub fn restore_prev_app_native() {
                             return;
                         }
                     }
+                }
+            }
+        }
+    }
+    #[cfg(target_os = "windows")]
+    {
+        let handle = *PREV_WINDOW_HANDLE.lock().unwrap();
+        if let Some(handle) = handle {
+            unsafe {
+                let hwnd = handle as winapi::shared::windef::HWND;
+                if winapi::um::winuser::IsWindow(hwnd) != 0 {
+                    winapi::um::winuser::SetForegroundWindow(hwnd);
                 }
             }
         }

@@ -52,10 +52,15 @@ pub fn toggle_main_window<R: Runtime>(app: &AppHandle<R>) {
                             .unwrap_or(2.0);
                         s.width as f64 / scale
                     })
-                    .unwrap_or(410.0);
+                    .unwrap_or(RESIZE_WINDOW_WIDTH);
                 let x = screen.x + screen.width - window_width;
                 let y = screen.y;
                 let _ = window.set_position(LogicalPosition::new(x, y));
+                debug!("✅ Window repositioned to active monitor: ({}, {})", x, y);
+            }
+            #[cfg(target_os = "windows")]
+            if let Some((x, y)) = windows_top_right_position(&window) {
+                let _ = window.set_position(tauri::PhysicalPosition::new(x, y));
                 debug!("✅ Window repositioned to active monitor: ({}, {})", x, y);
             }
             let _ = window.show();
@@ -73,7 +78,7 @@ pub fn start_mouse_edge_monitor<R: Runtime>(
     app: AppHandle<R>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     set_window_position(&app);
-    #[cfg(target_os = "macos")]
+    #[cfg(any(target_os = "macos", target_os = "windows"))]
     {
         let app_clone = app.clone();
         std::thread::spawn(move || {
@@ -99,10 +104,16 @@ fn set_window_position<R: Runtime>(app: &AppHandle<R>) {
                         .unwrap_or(2.0);
                     s.width as f64 / scale
                 })
-                .unwrap_or(410.0);
+                .unwrap_or(RESIZE_WINDOW_WIDTH);
             let x = screen.x + screen.width - window_width;
             let y = screen.y;
             let _ = window.set_position(LogicalPosition::new(x, y));
+            debug!("✅ Window initially positioned: ({}, {})", x, y);
+            return;
+        }
+        #[cfg(target_os = "windows")]
+        if let Some((x, y)) = windows_top_right_position(&window) {
+            let _ = window.set_position(tauri::PhysicalPosition::new(x, y));
             debug!("✅ Window initially positioned: ({}, {})", x, y);
             return;
         }
@@ -111,7 +122,7 @@ fn set_window_position<R: Runtime>(app: &AppHandle<R>) {
                 let scale_factor = monitor.scale_factor();
                 let physical_size = monitor.size();
                 let logical_width = physical_size.width as f64 / scale_factor;
-                let window_width = 410.0;
+                let window_width = RESIZE_WINDOW_WIDTH;
                 let x = logical_width - window_width;
                 let y = 0.0;
                 let _ = window.set_position(LogicalPosition::new(x, y));
@@ -151,7 +162,7 @@ fn setup_mouse_event_monitoring<R: Runtime>(app: AppHandle<R>) {
                                 .unwrap_or(2.0);
                             s.width as f64 / scale
                         })
-                        .unwrap_or(410.0);
+                        .unwrap_or(RESIZE_WINDOW_WIDTH);
                     let right_edge = screen.x + screen.width;
                     let show_threshold = 2.0;
                     let hide_threshold = window_width;
@@ -238,11 +249,99 @@ fn get_mouse_location() -> Option<(f64, f64)> {
 }
 #[cfg(target_os = "windows")]
 fn get_mouse_location() -> Option<(f64, f64)> {
-    None
+    use winapi::shared::windef::POINT;
+    use winapi::um::winuser::GetCursorPos;
+    let mut point = POINT { x: 0, y: 0 };
+    unsafe {
+        if GetCursorPos(&mut point) != 0 {
+            Some((point.x as f64, point.y as f64))
+        } else {
+            None
+        }
+    }
 }
 #[cfg(target_os = "windows")]
-fn get_screen_width() -> Option<f64> {
-    None
+fn monitor_at_point<R: Runtime>(
+    window: &tauri::WebviewWindow<R>,
+    x: f64,
+    y: f64,
+) -> Option<tauri::Monitor> {
+    window.available_monitors().ok()?.into_iter().find(|m| {
+        let pos = m.position();
+        let size = m.size();
+        x >= pos.x as f64
+            && x < pos.x as f64 + size.width as f64
+            && y >= pos.y as f64
+            && y < pos.y as f64 + size.height as f64
+    })
+}
+#[cfg(target_os = "windows")]
+fn windows_top_right_position<R: Runtime>(window: &tauri::WebviewWindow<R>) -> Option<(i32, i32)> {
+    let (mouse_x, mouse_y) = get_mouse_location()?;
+    let monitor = monitor_at_point(window, mouse_x, mouse_y)?;
+    let window_width = window
+        .outer_size()
+        .map(|s| s.width as f64)
+        .unwrap_or(RESIZE_WINDOW_WIDTH * monitor.scale_factor());
+    let pos = monitor.position();
+    let size = monitor.size();
+    let x = (pos.x as f64 + size.width as f64 - window_width).round() as i32;
+    Some((x, pos.y))
+}
+#[cfg(target_os = "windows")]
+fn setup_mouse_event_monitoring<R: Runtime>(app: AppHandle<R>) {
+    use std::thread;
+    use std::time::Duration;
+    thread::spawn(move || loop {
+        if !MOUSE_EDGE_ENABLED.load(std::sync::atomic::Ordering::Relaxed) {
+            thread::sleep(Duration::from_millis(500));
+            continue;
+        }
+        if let Some((mouse_x, mouse_y)) = get_mouse_location() {
+            if let Some(window) = app.get_webview_window("main") {
+                if let Some(monitor) = monitor_at_point(&window, mouse_x, mouse_y) {
+                    let scale = monitor.scale_factor();
+                    let window_width = window
+                        .outer_size()
+                        .map(|s| s.width as f64)
+                        .unwrap_or(RESIZE_WINDOW_WIDTH * scale);
+                    let right_edge = monitor.position().x as f64 + monitor.size().width as f64;
+                    let show_threshold = 2.0 * scale;
+                    let hide_threshold = window_width;
+                    let at_right_edge = mouse_x >= right_edge - show_threshold;
+                    let outside_window = mouse_x < right_edge - hide_threshold;
+                    let mut visible = IS_WINDOW_VISIBLE.lock().unwrap();
+                    let mut auto_hide = IS_AUTO_HIDE_ENABLED.lock().unwrap();
+                    if at_right_edge && !*visible {
+                        if !window.is_visible().unwrap_or(false) {
+                            let x = (right_edge - window_width).round() as i32;
+                            let y = monitor.position().y;
+                            let _ = window.set_position(tauri::PhysicalPosition::new(x, y));
+                            *visible = true;
+                            *auto_hide = true;
+                            let _ = window.emit("window-visible", true);
+                            let _ = window.show();
+                            let _ = window.set_focus();
+                            debug!(
+                                "✅ Window shown from mouse edge (Auto-hide enabled) at ({}, {})",
+                                x, y
+                            );
+                        }
+                    } else if outside_window && *visible && *auto_hide {
+                        if window.is_visible().unwrap_or(false) {
+                            *visible = false;
+                            *auto_hide = false;
+                            let _ = window.emit("window-visible", false);
+                            thread::sleep(Duration::from_millis(150));
+                            let _ = window.hide();
+                            debug!("✅ Window hidden (left mouse edge)");
+                        }
+                    }
+                }
+            }
+        }
+        thread::sleep(Duration::from_millis(100));
+    });
 }
 
 const RESIZE_WINDOW_WIDTH: f64 = 380.0;
@@ -250,7 +349,7 @@ const RESIZE_MIN_HEIGHT: f64 = 300.0;
 const RESIZE_MAX_HEIGHT: f64 = 1400.0;
 
 pub fn start_height_resize<R: Runtime>(window: &tauri::WebviewWindow<R>) {
-    #[cfg(target_os = "macos")]
+    #[cfg(any(target_os = "macos", target_os = "windows"))]
     {
         let mouse_y = get_mouse_location().map(|(_, y)| y).unwrap_or(0.0);
         let logical_height = window
@@ -272,8 +371,13 @@ pub fn start_height_resize<R: Runtime>(window: &tauri::WebviewWindow<R>) {
                 if let Some((_, current_y)) = get_mouse_location() {
                     let start_y = *RESIZE_START_MOUSE_Y.lock().unwrap();
                     let start_height = *RESIZE_START_HEIGHT.lock().unwrap();
-                    // macOS Y increases upward, so moving down = Y decreases = height increases
+                    // macOS Y increases upward (logical points), so moving down = Y decreases = height increases
+                    #[cfg(target_os = "macos")]
                     let delta = start_y - current_y;
+                    // Windows Y increases downward (physical pixels), so convert to logical and keep the sign
+                    #[cfg(target_os = "windows")]
+                    let delta =
+                        (current_y - start_y) / window_clone.scale_factor().unwrap_or(1.0);
                     let new_height = (start_height + delta)
                         .max(RESIZE_MIN_HEIGHT)
                         .min(RESIZE_MAX_HEIGHT);
