@@ -194,6 +194,7 @@ pub fn run() {
                     } = event
                     {
                         let app = tray.app_handle();
+                        hotkey::save_current_app();
                         window_manager::toggle_main_window(app);
                     }
                 })
@@ -220,6 +221,7 @@ pub fn run() {
                     } = event
                     {
                         let app = tray.app_handle();
+                        hotkey::save_current_app();
                         window_manager::toggle_main_window(app);
                     }
                 })

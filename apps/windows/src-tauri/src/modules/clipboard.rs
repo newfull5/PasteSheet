@@ -12,17 +12,11 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
 const CLIPBOARD_DEFAULT_DIRECTORY: &str = "Clipboard";
-const DEFAULT_MAX_ITEMS: i64 = 50;
+// Fixed cap matching the macOS app (maxItemsPerDirectory = 30)
+const MAX_ITEMS_PER_DIRECTORY: i64 = 30;
 const POLLING_INTERVAL: u64 = 100;
 pub fn cleanup_old_items(directory: &str) -> Result<(), rusqlite::Error> {
-    let max_items = db::get_setting("max_items_per_directory")
-        .ok()
-        .flatten()
-        .and_then(|v| v.parse::<i64>().ok())
-        .unwrap_or(DEFAULT_MAX_ITEMS);
-    if max_items <= 0 {
-        return Ok(());
-    }
+    let max_items = MAX_ITEMS_PER_DIRECTORY;
     let conn = Connection::open(db::get_path())?;
     let count: i64 = conn.query_row(
         "SELECT COUNT(*) FROM paste_sheets WHERE directory = ?1",

@@ -40,26 +40,16 @@ pub fn toggle_main_window<R: Runtime>(app: &AppHandle<R>) {
             *auto_hide = false;
             #[cfg(target_os = "macos")]
             if let Some(screen) = get_active_screen_info() {
-                let window_width = window
-                    .inner_size()
-                    .ok()
-                    .map(|s| {
-                        let scale = window
-                            .current_monitor()
-                            .ok()
-                            .flatten()
-                            .map(|m| m.scale_factor())
-                            .unwrap_or(2.0);
-                        s.width as f64 / scale
-                    })
-                    .unwrap_or(RESIZE_WINDOW_WIDTH);
-                let x = screen.x + screen.width - window_width;
-                let y = screen.y;
+                let x = screen.vis_x + screen.vis_width - RESIZE_WINDOW_WIDTH;
+                let y = screen.vis_y;
+                let _ = window
+                    .set_size(tauri::LogicalSize::new(RESIZE_WINDOW_WIDTH, screen.vis_height));
                 let _ = window.set_position(LogicalPosition::new(x, y));
                 debug!("✅ Window repositioned to active monitor: ({}, {})", x, y);
             }
             #[cfg(target_os = "windows")]
-            if let Some((x, y)) = windows_top_right_position(&window) {
+            if let Some((x, y, width, height)) = windows_show_frame(&window) {
+                let _ = window.set_size(tauri::PhysicalSize::new(width, height));
                 let _ = window.set_position(tauri::PhysicalPosition::new(x, y));
                 debug!("✅ Window repositioned to active monitor: ({}, {})", x, y);
             }
@@ -92,27 +82,17 @@ fn set_window_position<R: Runtime>(app: &AppHandle<R>) {
     if let Some(window) = app.get_webview_window("main") {
         #[cfg(target_os = "macos")]
         if let Some(screen) = get_active_screen_info() {
-            let window_width = window
-                .inner_size()
-                .ok()
-                .map(|s| {
-                    let scale = window
-                        .current_monitor()
-                        .ok()
-                        .flatten()
-                        .map(|m| m.scale_factor())
-                        .unwrap_or(2.0);
-                    s.width as f64 / scale
-                })
-                .unwrap_or(RESIZE_WINDOW_WIDTH);
-            let x = screen.x + screen.width - window_width;
-            let y = screen.y;
+            let x = screen.vis_x + screen.vis_width - RESIZE_WINDOW_WIDTH;
+            let y = screen.vis_y;
+            let _ =
+                window.set_size(tauri::LogicalSize::new(RESIZE_WINDOW_WIDTH, screen.vis_height));
             let _ = window.set_position(LogicalPosition::new(x, y));
             debug!("✅ Window initially positioned: ({}, {})", x, y);
             return;
         }
         #[cfg(target_os = "windows")]
-        if let Some((x, y)) = windows_top_right_position(&window) {
+        if let Some((x, y, width, height)) = windows_show_frame(&window) {
+            let _ = window.set_size(tauri::PhysicalSize::new(width, height));
             let _ = window.set_position(tauri::PhysicalPosition::new(x, y));
             debug!("✅ Window initially positioned: ({}, {})", x, y);
             return;
@@ -172,8 +152,12 @@ fn setup_mouse_event_monitoring<R: Runtime>(app: AppHandle<R>) {
                     let mut auto_hide = IS_AUTO_HIDE_ENABLED.lock().unwrap();
                     if at_right_edge && !*visible {
                         if !window.is_visible().unwrap_or(false) {
-                            let x = right_edge - window_width;
-                            let y = screen.y;
+                            let x = screen.vis_x + screen.vis_width - RESIZE_WINDOW_WIDTH;
+                            let y = screen.vis_y;
+                            let _ = window.set_size(tauri::LogicalSize::new(
+                                RESIZE_WINDOW_WIDTH,
+                                screen.vis_height,
+                            ));
                             let _ = window.set_position(LogicalPosition::new(x, y));
                             *visible = true;
                             *auto_hide = true;
@@ -204,8 +188,12 @@ fn setup_mouse_event_monitoring<R: Runtime>(app: AppHandle<R>) {
 #[cfg(target_os = "macos")]
 struct ScreenInfo {
     x: f64,
-    y: f64,
     width: f64,
+    // visibleFrame (work area without menu bar/Dock), top-left origin
+    vis_x: f64,
+    vis_y: f64,
+    vis_width: f64,
+    vis_height: f64,
 }
 #[cfg(target_os = "macos")]
 fn get_active_screen_info() -> Option<ScreenInfo> {
@@ -229,10 +217,14 @@ fn get_active_screen_info() -> Option<ScreenInfo> {
                 && mouse_loc.y >= frame.origin.y
                 && mouse_loc.y <= (frame.origin.y + frame.size.height)
             {
+                let vis: cocoa::foundation::NSRect = msg_send![screen, visibleFrame];
                 return Some(ScreenInfo {
                     x: frame.origin.x,
-                    y: primary_height - (frame.origin.y + frame.size.height),
                     width: frame.size.width,
+                    vis_x: vis.origin.x,
+                    vis_y: primary_height - (vis.origin.y + vis.size.height),
+                    vis_width: vis.size.width,
+                    vis_height: vis.size.height,
                 });
             }
         }
@@ -276,17 +268,15 @@ fn monitor_at_point<R: Runtime>(
     })
 }
 #[cfg(target_os = "windows")]
-fn windows_top_right_position<R: Runtime>(window: &tauri::WebviewWindow<R>) -> Option<(i32, i32)> {
+fn windows_show_frame<R: Runtime>(
+    window: &tauri::WebviewWindow<R>,
+) -> Option<(i32, i32, u32, u32)> {
     let (mouse_x, mouse_y) = get_mouse_location()?;
     let monitor = monitor_at_point(window, mouse_x, mouse_y)?;
-    let window_width = window
-        .outer_size()
-        .map(|s| s.width as f64)
-        .unwrap_or(RESIZE_WINDOW_WIDTH * monitor.scale_factor());
-    let pos = monitor.position();
-    let size = monitor.size();
-    let x = (pos.x as f64 + size.width as f64 - window_width).round() as i32;
-    Some((x, pos.y))
+    let work_area = monitor.work_area();
+    let width = (RESIZE_WINDOW_WIDTH * monitor.scale_factor()).round() as u32;
+    let x = work_area.position.x + work_area.size.width as i32 - width as i32;
+    Some((x, work_area.position.y, width, work_area.size.height))
 }
 #[cfg(target_os = "windows")]
 fn setup_mouse_event_monitoring<R: Runtime>(app: AppHandle<R>) {
@@ -314,8 +304,13 @@ fn setup_mouse_event_monitoring<R: Runtime>(app: AppHandle<R>) {
                     let mut auto_hide = IS_AUTO_HIDE_ENABLED.lock().unwrap();
                     if at_right_edge && !*visible {
                         if !window.is_visible().unwrap_or(false) {
-                            let x = (right_edge - window_width).round() as i32;
-                            let y = monitor.position().y;
+                            let work_area = monitor.work_area();
+                            let width = (RESIZE_WINDOW_WIDTH * scale).round() as u32;
+                            let x =
+                                work_area.position.x + work_area.size.width as i32 - width as i32;
+                            let y = work_area.position.y;
+                            let _ = window
+                                .set_size(tauri::PhysicalSize::new(width, work_area.size.height));
                             let _ = window.set_position(tauri::PhysicalPosition::new(x, y));
                             *visible = true;
                             *auto_hide = true;
