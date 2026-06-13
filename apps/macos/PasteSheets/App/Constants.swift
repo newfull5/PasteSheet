@@ -20,9 +20,11 @@ enum Constants {
     static let windowMinHeight: CGFloat = 300.0
     static let windowMaxHeight: CGFloat = 1400.0
     static let windowHideAnimationDelay: TimeInterval = 0.35
-    static let pasteRestoreDelay1: TimeInterval = 0.08
-    static let pasteRestoreDelay2: TimeInterval = 0.05
     static let pasteToggleDelay: TimeInterval = 0.05
+    // Focus restore: poll until the previous app is frontmost instead of a fixed
+    // sleep, so fast Macs paste sooner and slow Macs get enough time.
+    static let pasteFocusTimeout: TimeInterval = 0.3
+    static let pasteFocusPollInterval: TimeInterval = 0.005
     static let mouseEdgeAutoHideDelay: TimeInterval = 0.15
     static let maxItemsPerDirectory: Int64 = 30
     static let defaultDirectory = "Clipboard"
