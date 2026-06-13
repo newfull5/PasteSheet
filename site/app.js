@@ -1,11 +1,11 @@
 // PasteSheet landing page — progressive enhancement.
 // Without JS the download buttons already link to /releases/latest (works fine).
-// With JS we upgrade them to the direct .dmg asset and show the version.
+// With JS we upgrade them to the direct platform asset and show the version.
 
 const REPO = "newfull5/PasteSheets";
 const RELEASES_LATEST = `https://github.com/${REPO}/releases/latest`;
 
-// --- Resolve the latest macOS .dmg from the GitHub Releases API ---
+// --- Resolve the latest macOS .dmg and Windows .exe from the Releases API ---
 async function resolveLatestDownload() {
   try {
     const res = await fetch(`https://api.github.com/repos/${REPO}/releases/latest`, {
@@ -14,33 +14,45 @@ async function resolveLatestDownload() {
     if (!res.ok) return; // rate-limited or offline → keep the /releases/latest fallback
 
     const data = await res.json();
-    const dmg = (data.assets || []).find((a) => a.name.toLowerCase().endsWith(".dmg"));
+    const assets = data.assets || [];
+
+    const dmg = assets.find((a) => a.name.toLowerCase().endsWith(".dmg"));
     if (dmg) {
       document.querySelectorAll("#download-mac, #download-mac-2").forEach((el) => {
         el.href = dmg.browser_download_url;
       });
     }
 
-    const versionTag = document.getElementById("version-tag");
-    if (versionTag && data.tag_name) {
-      versionTag.textContent = `${data.tag_name} · Universal · macOS 13+`;
+    // Windows: a single portable .exe (or a .zip / win-tagged asset).
+    const win = assets.find((a) => {
+      const n = a.name.toLowerCase();
+      return n.endsWith(".exe") || ((n.endsWith(".zip") || n.endsWith(".msi")) && n.includes("win"));
+    });
+    if (win) {
+      document.querySelectorAll("#download-win, #download-win-2").forEach((el) => {
+        el.href = win.browser_download_url;
+      });
+    }
+
+    if (data.tag_name) {
+      const mac = document.getElementById("version-tag");
+      if (mac) mac.textContent = `${data.tag_name} · Universal · macOS 13+`;
+      const winTag = document.getElementById("version-tag-win");
+      if (winTag) winTag.textContent = `${data.tag_name} · Windows 10/11`;
     }
   } catch {
-    /* network error → fallback link stays */
+    /* network error → fallback links stay */
   }
 }
 
-// --- OS hint: nudge non-mac visitors toward the Releases page ---
+// --- OS hint: highlight the download button matching the visitor's platform ---
 function adjustForPlatform() {
   const ua = navigator.userAgent;
+  const isWindows = /Windows/i.test(ua);
   const isMac = /Macintosh|Mac OS X/i.test(ua);
-  if (isMac) return;
-
-  // Non-macOS: the build is macOS-only for now, so point at the Releases page
-  // and relabel rather than promising a binary we don't ship yet.
-  document.querySelectorAll("#download-mac, #download-mac-2").forEach((el) => {
-    el.href = RELEASES_LATEST;
-  });
+  const id = isWindows ? "download-win" : isMac ? "download-mac" : null;
+  if (!id) return;
+  document.querySelectorAll(`#${id}, #${id}-2`).forEach((el) => el.classList.add("is-recommended"));
 }
 
 // --- Copy the Homebrew command ---
