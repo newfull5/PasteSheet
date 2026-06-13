@@ -95,7 +95,7 @@ Use the exact `edSignature` and `length` from step 5.
     <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
     <pubDate>...</pubDate>
     <enclosure
-        url="https://github.com/newfull5/PasteSheets/releases/download/vX.Y.Z/PasteSheet_X.Y.Z_universal.dmg"
+        url="https://github.com/newfull5/PasteSheet/releases/download/vX.Y.Z/PasteSheet_X.Y.Z_universal.dmg"
         length="EXACT_BYTE_COUNT"
         type="application/octet-stream"
         sparkle:edSignature="SIGNATURE_FROM_SIGN_UPDATE"

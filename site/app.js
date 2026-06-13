@@ -2,7 +2,7 @@
 // Without JS the download buttons already link to /releases/latest (works fine).
 // With JS we upgrade them to the direct platform asset and show the version.
 
-const REPO = "newfull5/PasteSheets";
+const REPO = "newfull5/PasteSheet";
 const RELEASES_LATEST = `https://github.com/${REPO}/releases/latest`;
 
 // --- Resolve the latest macOS .dmg and Windows .exe from the Releases API ---

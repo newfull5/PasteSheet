@@ -2,9 +2,23 @@
 <rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" xmlns:dc="http://purl.org/dc/elements/1.1/" version="2.0">
     <channel>
         <title>PasteSheet</title>
-        <link>https://github.com/newfull5/PasteSheets</link>
+        <link>https://github.com/newfull5/PasteSheet</link>
         <description>PasteSheet Updates</description>
         <language>en</language>
+        <item>
+            <title>Version 0.4.9</title>
+            <description><![CDATA[<ul><li>Repository renamed to PasteSheet — all internal URLs updated.</li></ul>]]></description>
+            <sparkle:version>11</sparkle:version>
+            <sparkle:shortVersionString>0.4.9</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+            <pubDate>Sat, 14 Jun 2026 12:00:00 +0000</pubDate>
+            <enclosure
+                url="https://github.com/newfull5/PasteSheet/releases/download/v0.4.9/PasteSheet_0.4.9_universal.dmg"
+                length="1766714"
+                type="application/octet-stream"
+                sparkle:edSignature="Z/p/5rN1SjkO0Yk+P5CGpLAA8Of0Q5kCrlu2nduQQvlpvLvZ98eK+NTluIXHPTG/pVD4JcyjURLceH7YzVnDCA=="
+            />
+        </item>
         <item>
             <title>Version 0.4.8</title>
             <description><![CDATA[<ul><li>Windows: app icon now shows correctly in Explorer and download history.</li><li>macOS: panel animation synced with Windows (190ms cubic ease).</li></ul>]]></description>
@@ -13,7 +27,7 @@
             <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
             <pubDate>Sat, 14 Jun 2026 00:00:00 +0000</pubDate>
             <enclosure
-                url="https://github.com/newfull5/PasteSheets/releases/download/v0.4.8/PasteSheet_0.4.8_universal.dmg"
+                url="https://github.com/newfull5/PasteSheet/releases/download/v0.4.8/PasteSheet_0.4.8_universal.dmg"
                 length="1766740"
                 type="application/octet-stream"
                 sparkle:edSignature="dWvgd9Rwm1Ax2rLhRQYaXlx14+MT0tbx7DVXlRgVaYOKyWMdpbkHLRwSMNpQY4dMY5nHnc2PgRQDjTJuZyrlBg=="
@@ -27,7 +41,7 @@
             <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
             <pubDate>Sat, 14 Jun 2026 00:00:00 +0000</pubDate>
             <enclosure
-                url="https://github.com/newfull5/PasteSheets/releases/download/v0.4.7/PasteSheet_0.4.7_universal.dmg"
+                url="https://github.com/newfull5/PasteSheet/releases/download/v0.4.7/PasteSheet_0.4.7_universal.dmg"
                 length="1766756"
                 type="application/octet-stream"
                 sparkle:edSignature="eua22y5+shSf5upoAcqDiUtoJs33PNjAWCrZyrGCtjAQ/14jnRJAzR7cpzouhjn/8PmBKdwZFwQ4jxIBhfXACQ=="
@@ -41,7 +55,7 @@
             <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
             <pubDate>Sat, 14 Jun 2026 00:00:00 +0000</pubDate>
             <enclosure
-                url="https://github.com/newfull5/PasteSheets/releases/download/v0.4.6/PasteSheet_0.4.6_universal.dmg"
+                url="https://github.com/newfull5/PasteSheet/releases/download/v0.4.6/PasteSheet_0.4.6_universal.dmg"
                 length="1766665"
                 type="application/octet-stream"
                 sparkle:edSignature="z8HWpepDbIpotpZNtiz6kWFHT9VoiDkPTlBT9U0W8N4/4BD70JNDfHpKzYkKMwnzuzS3GcjyY5t+KuOCsMYgAg=="
@@ -55,7 +69,7 @@
             <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
             <pubDate>Sat, 14 Jun 2026 00:00:00 +0000</pubDate>
             <enclosure
-                url="https://github.com/newfull5/PasteSheets/releases/download/v0.4.5/PasteSheet_0.4.5_universal.dmg"
+                url="https://github.com/newfull5/PasteSheet/releases/download/v0.4.5/PasteSheet_0.4.5_universal.dmg"
                 length="1758571"
                 type="application/octet-stream"
                 sparkle:edSignature="Qz+mpdk5eWX0qA6mTNs2v3uxrcU9a0eJZlM49fGWeIBNdaxz12LsZK2FrAaOvarXZRXYkvLKZ89x00jdbj6JBQ=="
@@ -69,7 +83,7 @@
             <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
             <pubDate>Sat, 13 Jun 2026 14:41:57 +0000</pubDate>
             <enclosure
-                url="https://github.com/newfull5/PasteSheets/releases/download/v0.4.4/PasteSheet_0.4.4_universal.dmg"
+                url="https://github.com/newfull5/PasteSheet/releases/download/v0.4.4/PasteSheet_0.4.4_universal.dmg"
                 length="1999894"
                 type="application/octet-stream"
                 sparkle:edSignature="yu1YErwdnTpZZ4JJ2iomroPLW0PuX/LVAsT3zOkKgFs+doZn3SOUIoBtGYeTzgzk2IklrzN5lI2AntYDYO9+Ag=="
@@ -83,7 +97,7 @@
             <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
             <pubDate>Sat, 13 Jun 2026 12:42:46 +0000</pubDate>
             <enclosure
-                url="https://github.com/newfull5/PasteSheets/releases/download/v0.4.3/PasteSheet_0.4.3_universal.dmg"
+                url="https://github.com/newfull5/PasteSheet/releases/download/v0.4.3/PasteSheet_0.4.3_universal.dmg"
                 length="1994488"
                 type="application/octet-stream"
                 sparkle:edSignature="LlPSP5qNxXZFZgASJEejtSJzX3MD4GTaJyvqh8p3p1iTLcBlLoPjRq1EinBei1e5lTeO69IgtOkQwRImOftqCA=="
@@ -97,7 +111,7 @@
             <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
             <pubDate>Sat, 13 Jun 2026 12:26:26 +0000</pubDate>
             <enclosure
-                url="https://github.com/newfull5/PasteSheets/releases/download/v0.4.2/PasteSheet_0.4.2_universal.dmg"
+                url="https://github.com/newfull5/PasteSheet/releases/download/v0.4.2/PasteSheet_0.4.2_universal.dmg"
                 length="1900595"
                 type="application/octet-stream"
                 sparkle:edSignature="LryIHzJs1fgt1oT4G3zMyqTjt7F6KPe0MrG//oSzerSaADpPNir98a8MJeSzXG+DN6dY87TuGytbNG7tycoPDA=="
@@ -110,7 +124,7 @@
             <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
             <pubDate>Fri, 06 Jun 2026 14:31:31 +0000</pubDate>
             <enclosure
-                url="https://github.com/newfull5/PasteSheets/releases/download/v0.4.1/PasteSheet_0.4.1_universal.dmg"
+                url="https://github.com/newfull5/PasteSheet/releases/download/v0.4.1/PasteSheet_0.4.1_universal.dmg"
                 length="1895828"
                 type="application/octet-stream"
                 sparkle:edSignature="DOrE8d3Mk3e5xOZ8hSfeJ9fFuAcICv0bLC535VrhDaXSiRkudfQcSAjU0oTtvNdvOoiCYjtw0Uf0in3yI8XPAA=="
