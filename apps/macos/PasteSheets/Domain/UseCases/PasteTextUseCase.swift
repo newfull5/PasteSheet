@@ -13,15 +13,18 @@ final class PasteTextUseCase {
         self.keySimService = keySimService
     }
 
-    func execute(text: String) {
+    /// Returns false if Accessibility permission is missing (paste aborted and
+    /// the user was prompted to grant it); true once the paste was simulated.
+    @discardableResult
+    func execute(text: String) -> Bool {
+        guard keySimService.ensureAccessibilityPermission() else { return false }
+
         clipboardService.setText(text)
-
-        previousAppService.restorePreviousApp()
-        Thread.sleep(forTimeInterval: Constants.pasteRestoreDelay1)
-
-        previousAppService.restorePreviousApp()
-        Thread.sleep(forTimeInterval: Constants.pasteRestoreDelay2)
-
+        previousAppService.restoreAndWaitUntilFrontmost(
+            timeout: Constants.pasteFocusTimeout,
+            pollInterval: Constants.pasteFocusPollInterval
+        )
         keySimService.simulatePaste()
+        return true
     }
 }
