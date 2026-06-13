@@ -5,7 +5,7 @@ Keep your clipboard history organized, editable, and instantly accessible. Built
 
 > ⚠️ **Beta Notice:** This project is currently in **Beta**. If you experience any issues or inconveniences, please report them in the [Issues](https://github.com/newfull5/PasteSheets/issues) section.
 
-<video src="https://github.com/user-attachments/assets/89d47103-148d-4ad7-9dca-60e520867989" width="100%" autoplay loop muted playsinline></video>
+<p align="center"><img src="docs/demo.gif" alt="PasteSheet demo — press ⌘⇧V, pick a clip, paste anywhere" width="760"></p>
 
 >  currently supports **macOS**. (Windows version is under developing!)
 
