@@ -165,7 +165,12 @@ final class AppViewModel: ObservableObject {
     // MARK: - Item Actions
 
     func pasteItem(_ item: PasteItem) {
-        toggleWindow()
+        guard let panel else { return }
+        isWindowVisible = false
+        isAutoHideMode = false
+        clearAutoHideTimer()
+        panel.orderOut(nil)
+
         DispatchQueue.global(qos: .userInitiated).asyncAfter(deadline: .now() + Constants.pasteToggleDelay) { [weak self] in
             self?.pasteText.execute(text: item.content)
         }
@@ -295,13 +300,19 @@ final class AppViewModel: ObservableObject {
             })
         } else {
             let posService = WindowPositionService()
-            if let pos = posService.calculatePosition(windowWidth: Constants.windowWidth) {
-                panel.setFrame(NSRect(x: pos.origin.x, y: pos.origin.y, width: Constants.windowWidth, height: pos.height), display: true)
-            }
+            guard let pos = posService.calculatePosition(windowWidth: Constants.windowWidth) else { return }
+            let targetFrame = NSRect(x: pos.origin.x, y: pos.origin.y, width: Constants.windowWidth, height: pos.height)
+            let offscreenFrame = NSRect(x: pos.origin.x + Constants.windowWidth, y: pos.origin.y, width: Constants.windowWidth, height: pos.height)
+            panel.setFrame(offscreenFrame, display: true)
             panel.alphaValue = 1
             panel.orderFrontRegardless()
             NSApp.activate(ignoringOtherApps: true)
             panel.makeKey()
+            NSAnimationContext.runAnimationGroup { ctx in
+                ctx.duration = 0.25
+                ctx.timingFunction = CAMediaTimingFunction(name: .easeOut)
+                panel.animator().setFrame(targetFrame, display: true)
+            }
             isWindowVisible = true
             onWindowBecameVisible()
         }
@@ -310,12 +321,18 @@ final class AppViewModel: ObservableObject {
     func showWindowFromEdge() {
         guard let panel, !isWindowVisible else { return }
         let posService = WindowPositionService()
-        if let pos = posService.calculatePosition(windowWidth: Constants.windowWidth) {
-            panel.setFrame(NSRect(x: pos.origin.x, y: pos.origin.y, width: Constants.windowWidth, height: pos.height), display: true)
-        }
+        guard let pos = posService.calculatePosition(windowWidth: Constants.windowWidth) else { return }
+        let targetFrame = NSRect(x: pos.origin.x, y: pos.origin.y, width: Constants.windowWidth, height: pos.height)
+        let offscreenFrame = NSRect(x: pos.origin.x + Constants.windowWidth, y: pos.origin.y, width: Constants.windowWidth, height: pos.height)
+        panel.setFrame(offscreenFrame, display: true)
         panel.alphaValue = 1
         panel.orderFrontRegardless()
         panel.makeKey()
+        NSAnimationContext.runAnimationGroup { ctx in
+            ctx.duration = 0.25
+            ctx.timingFunction = CAMediaTimingFunction(name: .easeOut)
+            panel.animator().setFrame(targetFrame, display: true)
+        }
         isWindowVisible = true
         isAutoHideMode = true
         onWindowBecameVisible()
