@@ -172,6 +172,128 @@ kbd {
 .soon { color: var(--accent-dim); }
 .dot { opacity: 0.5; }
 
+/* ---------- Hero scripted animation ---------- */
+.hero-demo { max-width: 460px; margin: 44px auto 0; }
+.hd-win {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  overflow: hidden;
+  box-shadow: 0 24px 60px -28px rgba(0, 0, 0, 0.8);
+  text-align: left;
+}
+.hd-bar {
+  display: flex;
+  gap: 7px;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+}
+.hd-bar i { width: 11px; height: 11px; border-radius: 50%; background: #3a3a3a; }
+.hd-bar i:first-child { background: #ff5f57; }
+.hd-bar i:nth-child(2) { background: #febc2e; }
+.hd-bar i:nth-child(3) { background: #28c840; }
+
+.hd-body { position: relative; height: 184px; overflow: hidden; }
+
+/* editor line */
+.hd-editor {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 22px 18px;
+  font-family: var(--mono);
+  font-size: 0.92rem;
+}
+.hd-prompt { color: var(--accent); }
+.hd-typed {
+  color: var(--text);
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  white-space: nowrap;
+}
+.hd-caret {
+  width: 8px;
+  height: 1.05rem;
+  background: var(--accent);
+  display: inline-block;
+  animation: hd-blink 1s steps(1) infinite;
+}
+@keyframes hd-blink { 50% { opacity: 0; } }
+
+/* clipboard panel (slides in from the right edge — like the app) */
+.hd-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 66%;
+  height: 100%;
+  background: var(--bg);
+  border-left: 1px solid var(--border);
+  padding: 12px;
+  transform: translateX(105%);
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.hd-head {
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  padding: 2px 8px 10px;
+}
+.hd-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+.hd-item {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  padding: 9px 10px;
+  border-radius: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border: 1px solid transparent;
+  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+.hd-item.is-active {
+  background: rgba(220, 220, 87, 0.14);
+  border-color: var(--accent-dim);
+  color: var(--text);
+}
+
+/* keycaps */
+.hd-keys {
+  position: absolute;
+  bottom: 14px;
+  left: 18px;
+  display: flex;
+  gap: 10px;
+}
+.hd-key {
+  display: flex;
+  gap: 3px;
+  opacity: 0;
+  transform: translateY(6px) scale(0.92);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+/* ---- step states ---- */
+.hero-demo[data-step="1"] .hd-key-open,
+.hero-demo[data-step="5"] .hd-key-enter { opacity: 1; transform: translateY(0) scale(1); }
+
+.hero-demo[data-step="2"] .hd-panel,
+.hero-demo[data-step="3"] .hd-panel,
+.hero-demo[data-step="4"] .hd-panel,
+.hero-demo[data-step="5"] .hd-panel { transform: translateX(0); }
+
+.hero-demo[data-step="6"] .hd-typed,
+.hero-demo[data-step="7"] .hd-typed { opacity: 1; transform: translateX(0); }
+
+@media (prefers-reduced-motion: reduce) {
+  .hd-caret { animation: none; }
+  .hd-panel { transition: none; }
+}
+
 /* ---------- Demo ---------- */
 .demo { max-width: var(--maxw); margin: 40px auto 0; }
 .demo-frame {
