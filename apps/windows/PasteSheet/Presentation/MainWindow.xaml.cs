@@ -38,6 +38,7 @@ public partial class MainWindow : Window, IWindowHost
         {
             DpiScale = VisualTreeHelper.GetDpi(this).DpiScaleX;
             ApplyNonTaskbarStyle();
+            ApplyRoundedCorners();
         };
 
         _cursorTimer.Tick += (_, _) => CursorBlink.Opacity = CursorBlink.Opacity > 0 ? 0 : 1;
@@ -132,6 +133,20 @@ public partial class MainWindow : Window, IWindowHost
         NativeMethods.SetWindowLong(helper.Handle, GWL_EXSTYLE, ex | WS_EX_TOOLWINDOW);
     }
 
+    /// Windows 11 DWM rounded corners — lets us keep AllowsTransparency off
+    /// (GPU-accelerated, fast rendering) while still showing rounded corners.
+    private void ApplyRoundedCorners()
+    {
+        try
+        {
+            var handle = new WindowInteropHelper(this).Handle;
+            const int DWMWA_WINDOW_CORNER_PREFERENCE = 33;
+            int preference = 2; // DWMWCP_ROUND
+            NativeMethods.DwmSetWindowAttribute(handle, DWMWA_WINDOW_CORNER_PREFERENCE, ref preference, sizeof(int));
+        }
+        catch { /* pre-Win11: falls back to square corners */ }
+    }
+
     private void HideOnFocusLoss()
     {
         if (!IsVisible) return;
@@ -173,8 +188,8 @@ public partial class MainWindow : Window, IWindowHost
         {
             case RowKind.Directory: _vm.ShowItemView(row.Directory!.Name); break;
             case RowKind.Item: _vm.PasteItem(row.Item!); break;
-            case RowKind.NewFolder: _vm.PromptNewFolder(); break;
-            case RowKind.NewItem: _vm.PromptNewItem(); break;
+            case RowKind.NewFolder: _vm.StartNewFolder(); break;
+            case RowKind.NewItem: _vm.StartNewItem(); break;
         }
     }
 
@@ -200,6 +215,39 @@ public partial class MainWindow : Window, IWindowHost
 
     private void OnInlineSave(object sender, RoutedEventArgs e) => _vm.SaveEdit();
     private void OnInlineCancel(object sender, RoutedEventArgs e) => _vm.CancelEdit();
+
+    private void OnEditBoxLoaded(object sender, RoutedEventArgs e)
+    {
+        if (sender is TextBox tb)
+            tb.Dispatcher.BeginInvoke(() => { tb.Focus(); Keyboard.Focus(tb); tb.CaretIndex = tb.Text.Length; },
+                DispatcherPriority.Input);
+    }
+
+    // MARK: - Inline new folder / item
+
+    private void OnNewRowClick(object sender, MouseButtonEventArgs e)
+    {
+        if ((sender as FrameworkElement)?.DataContext is not RowItem row) return;
+        if (row.Kind == RowKind.NewFolder) _vm.StartNewFolder();
+        else _vm.StartNewItem();
+        if (List.Items.Count > 0) List.ScrollIntoView(List.Items[List.Items.Count - 1]);
+    }
+
+    private void OnNewSave(object sender, RoutedEventArgs e) => _vm.CommitNew();
+    private void OnNewCancel(object sender, RoutedEventArgs e) => _vm.CancelNew();
+
+    /// When the New row's input becomes visible, focus it so the user can type
+    /// immediately. IsVisibleChanged is the reliable hook for a templated row.
+    private void OnNewInputShown(object sender, DependencyPropertyChangedEventArgs e)
+    {
+        if (sender is not TextBox tb || !tb.IsVisible) return;
+        tb.Dispatcher.BeginInvoke(() =>
+        {
+            tb.Focus();
+            Keyboard.Focus(tb);
+            tb.CaretIndex = tb.Text.Length;
+        }, DispatcherPriority.Input);
+    }
 
     private static RowItem? RowItemFrom(object sender) =>
         (sender as FrameworkElement)?.DataContext as RowItem;
@@ -253,4 +301,7 @@ internal static class NativeMethods
 
     [System.Runtime.InteropServices.DllImport("user32.dll")]
     public static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
+
+    [System.Runtime.InteropServices.DllImport("dwmapi.dll")]
+    public static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
 }

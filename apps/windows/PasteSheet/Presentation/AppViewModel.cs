@@ -150,7 +150,7 @@ public sealed class AppViewModel : INotifyPropertyChanged
             foreach (var d in FilteredDirectories)
                 Rows.Add(new RowItem { Kind = RowKind.Directory, Directory = d });
             foreach (var it in FilteredItems)
-                Rows.Add(new RowItem { Kind = RowKind.Item, Item = it });
+                Rows.Add(new RowItem { Kind = RowKind.Item, Item = it, Vm = this, IsEditing = EditingItemId == it.Id, ShowFolderLabel = true });
         }
         else if (CurrentView == ViewType.Directories)
         {
@@ -161,7 +161,7 @@ public sealed class AppViewModel : INotifyPropertyChanged
         else
         {
             foreach (var it in FilteredItems)
-                Rows.Add(new RowItem { Kind = RowKind.Item, Item = it });
+                Rows.Add(new RowItem { Kind = RowKind.Item, Item = it, Vm = this, IsEditing = EditingItemId == it.Id });
             Rows.Add(new RowItem { Kind = RowKind.NewItem });
         }
         OnChanged(nameof(HeaderTitle));
@@ -181,6 +181,7 @@ public sealed class AppViewModel : INotifyPropertyChanged
 
     public void ShowDirectoryView()
     {
+        IsCreatingNew = false;
         var lastDir = CurrentDirectory;
         _currentView = ViewType.Directories;
         _searchQuery = "";
@@ -194,6 +195,7 @@ public sealed class AppViewModel : INotifyPropertyChanged
 
     public void ShowItemView(string directoryName)
     {
+        IsCreatingNew = false;
         CurrentDirectory = directoryName;
         _currentView = ViewType.Items;
         _searchQuery = "";
@@ -207,6 +209,7 @@ public sealed class AppViewModel : INotifyPropertyChanged
 
     public void ShowSettingsView()
     {
+        IsCreatingNew = false;
         _searchQuery = "";
         CurrentView = ViewType.Settings;
         OnChanged(nameof(SearchQuery));
@@ -266,6 +269,7 @@ public sealed class AppViewModel : INotifyPropertyChanged
         EditingItemId = item.Id;
         OnChanged(nameof(EditContent));
         OnChanged(nameof(EditMemo));
+        RebuildRows();
     }
 
     public void SaveEdit()
@@ -282,7 +286,7 @@ public sealed class AppViewModel : INotifyPropertyChanged
         catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"Save edit: {ex}"); }
     }
 
-    public void CancelEdit() => EditingItemId = null;
+    public void CancelEdit() { EditingItemId = null; RebuildRows(); }
 
     public void CreateItem(string content, string? memo)
     {
@@ -358,29 +362,49 @@ public sealed class AppViewModel : INotifyPropertyChanged
         };
     }
 
-    public void PromptNewFolder()
+    // MARK: - Inline "New Folder / New Item" creation (in-place, like macOS)
+
+    private bool _isCreatingNew;
+    public bool IsCreatingNew { get => _isCreatingNew; private set { _isCreatingNew = value; OnChanged(); } }
+    private RowKind _newKind = RowKind.NewItem;
+
+    public string NewInputContent { get; set; } = "";
+    public string NewInputMemo { get; set; } = "";
+
+    public void StartNewFolder()
     {
-        Modal = new ModalState
-        {
-            Title = "New Folder",
-            Message = "Enter a name for the new folder:",
-            ConfirmText = "Create",
-            ShowInput = true,
-            OnConfirm = name => { if (!string.IsNullOrWhiteSpace(name)) CreateDirectory(name.Trim()); }
-        };
+        _newKind = RowKind.NewFolder;
+        NewInputContent = ""; NewInputMemo = "";
+        OnChanged(nameof(NewInputContent)); OnChanged(nameof(NewInputMemo));
+        IsCreatingNew = true;
     }
 
-    public void PromptNewItem()
+    public void StartNewItem()
     {
-        Modal = new ModalState
-        {
-            Title = "New Item",
-            Message = "Enter the content:",
-            ConfirmText = "Create",
-            ShowInput = true,
-            OnConfirm = content => { if (!string.IsNullOrWhiteSpace(content)) CreateItem(content, null); }
-        };
+        _newKind = RowKind.NewItem;
+        NewInputContent = ""; NewInputMemo = "";
+        OnChanged(nameof(NewInputContent)); OnChanged(nameof(NewInputMemo));
+        IsCreatingNew = true;
     }
+
+    public void CommitNew()
+    {
+        if (!IsCreatingNew) return;
+        if (_newKind == RowKind.NewFolder)
+        {
+            var name = NewInputContent.Trim();
+            if (name.Length > 0) CreateDirectory(name);
+        }
+        else
+        {
+            var content = NewInputContent.Trim();
+            if (content.Length > 0)
+                CreateItem(content, string.IsNullOrWhiteSpace(NewInputMemo) ? null : NewInputMemo);
+        }
+        IsCreatingNew = false;
+    }
+
+    public void CancelNew() => IsCreatingNew = false;
 
     public void ConfirmModal()
     {
@@ -594,6 +618,7 @@ public sealed class AppViewModel : INotifyPropertyChanged
             if (Modal is not null) { Modal = null; return true; }
             if (DetailItem is not null) { DetailItem = null; return true; }
             if (EditingItemId is not null) { EditingItemId = null; return true; }
+            if (IsCreatingNew) { CancelNew(); return true; }
             if (CurrentView == ViewType.Settings) { ShowDirectoryView(); return true; }
             if (!string.IsNullOrEmpty(SearchQuery)) { SearchQuery = ""; return true; }
             ToggleWindow();
@@ -609,6 +634,16 @@ public sealed class AppViewModel : INotifyPropertyChanged
 
         // Ctrl+Enter saves edit
         if (EditingItemId is not null && isInput && key == Key.Return && hasCmd) { SaveEdit(); return true; }
+        // Inline new-row commit: Enter for a folder name, Ctrl+Enter for item content.
+        if (IsCreatingNew && isInput && key == Key.Return)
+        {
+            if (_newKind == RowKind.NewFolder) { CommitNew(); return true; }
+            if (hasCmd) { CommitNew(); return true; }
+        }
+
+        // While editing or creating with a focused text box, let it own all other
+        // keys (caret movement, typing) instead of hijacking them for list nav.
+        if (isInput && (EditingItemId is not null || IsCreatingNew)) return false;
         // Ctrl+E starts edit
         if (key == Key.E && hasCmd && CurrentView == ViewType.Items)
         {
@@ -657,7 +692,7 @@ public sealed class AppViewModel : INotifyPropertyChanged
             {
                 var dirs = FilteredDirectories;
                 if (SelectedIndex < dirs.Count) ShowItemView(dirs[SelectedIndex].Name);
-                else PromptNewFolder();
+                else StartNewFolder();
                 return true;
             }
             if (CurrentView == ViewType.Items) { ExecuteItemAction(); return true; }
@@ -710,7 +745,7 @@ public sealed class AppViewModel : INotifyPropertyChanged
     {
         var its = FilteredItems;
         if (SelectedIndex < its.Count) ExecuteActionOnItem(its[SelectedIndex]);
-        else PromptNewItem();
+        else StartNewItem();
     }
 
     private void ExecuteActionOnItem(PasteItem item)
