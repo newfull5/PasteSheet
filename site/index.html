@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PasteSheet — A smart clipboard manager for macOS</title>
-  <meta name="description" content="PasteSheet is a smart clipboard manager designed to make pasting easier. Keep your clipboard history organized, editable, and instantly accessible." />
+  <title>PasteSheet — A smart clipboard manager for macOS & Windows</title>
+  <meta name="description" content="PasteSheet is a smart clipboard manager for macOS and Windows designed to make pasting easier. Keep your clipboard history organized, editable, and instantly accessible." />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="PasteSheet — A smart clipboard manager for macOS" />
+  <meta property="og:title" content="PasteSheet — A smart clipboard manager for macOS & Windows" />
   <meta property="og:description" content="Keep your clipboard history organized, editable, and instantly accessible." />
   <meta property="og:url" content="https://newfull5.github.io/PasteSheets/" />
   <meta property="og:image" content="https://newfull5.github.io/PasteSheets/assets/og-icon.png" />
@@ -34,7 +34,7 @@
     <!-- Hero -->
     <section class="hero">
       <div class="app-tile app-tile-lg"><img src="assets/icon.png" alt="PasteSheet app icon" /></div>
-      <p class="eyebrow">Clipboard manager for macOS</p>
+      <p class="eyebrow">Clipboard manager for macOS &amp; Windows</p>
       <h1>Make pasting <span class="accent">effortless</span>.</h1>
       <p class="lede">
         Keep your clipboard history organized, editable, and instantly accessible —
@@ -46,6 +46,9 @@
           <span class="btn-icon"></span>
           <span class="btn-label">Download for macOS</span>
         </a>
+        <a class="btn btn-primary" id="download-win" href="https://github.com/newfull5/PasteSheets/releases/latest" target="_blank" rel="noopener">
+          <span class="btn-label">Download for Windows</span>
+        </a>
         <button class="btn btn-secondary" id="brew-copy" type="button" title="Copy to clipboard">
           <code>brew install --cask newfull5/tap/pastesheet</code>
           <span class="copy-hint" id="brew-hint">Copy</span>
@@ -55,7 +58,7 @@
       <div class="cta-meta">
         <span id="version-tag">Universal · macOS 13+</span>
         <span class="dot">·</span>
-        <span class="soon">Windows — coming soon</span>
+        <span id="version-tag-win">Windows 10/11</span>
       </div>
     </section>
 
@@ -153,7 +156,7 @@
         <article class="card">
           <div class="card-icon">⚡</div>
           <h3>Global hotkey</h3>
-          <p>Summon PasteSheet from anywhere with <kbd>⌘</kbd><kbd>⇧</kbd><kbd>V</kbd> — it pastes straight into your active app.</p>
+          <p>Summon PasteSheet from anywhere with <kbd>⌘</kbd><kbd>⇧</kbd><kbd>V</kbd> (<kbd>Ctrl</kbd><kbd>⇧</kbd><kbd>V</kbd> on Windows) — it pastes straight into your active app.</p>
         </article>
         <article class="card">
           <div class="card-icon">🔄</div>
@@ -176,16 +179,23 @@
       <p class="tip">
         <strong>Pro tip:</strong> flick your cursor to the <em>right edge</em> of the screen to peek at your clipboard instantly.
       </p>
+      <p class="tip platform-note">On Windows, <kbd>⌘</kbd> maps to <kbd>Ctrl</kbd>.</p>
     </section>
 
     <!-- Download CTA -->
     <section class="download-cta">
       <h2>Ready to paste smarter?</h2>
-      <a class="btn btn-primary btn-lg" id="download-mac-2" href="https://github.com/newfull5/PasteSheets/releases/latest" target="_blank" rel="noopener">
-        Download for macOS
-      </a>
+      <div class="cta">
+        <a class="btn btn-primary btn-lg" id="download-mac-2" href="https://github.com/newfull5/PasteSheets/releases/latest" target="_blank" rel="noopener">
+          Download for macOS
+        </a>
+        <a class="btn btn-primary btn-lg" id="download-win-2" href="https://github.com/newfull5/PasteSheets/releases/latest" target="_blank" rel="noopener">
+          Download for Windows
+        </a>
+      </div>
       <p class="install-alt">
-        or install with Homebrew: <code>brew install --cask newfull5/tap/pastesheet</code>
+        macOS: install with Homebrew — <code>brew install --cask newfull5/tap/pastesheet</code><br />
+        Windows: a single portable <code>.exe</code> — no installer required.
       </p>
     </section>
   </main>
