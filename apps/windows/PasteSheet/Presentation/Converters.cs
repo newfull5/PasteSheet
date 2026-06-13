@@ -85,26 +85,6 @@ public sealed class ActionButtonBrushConverter : IValueConverter
         throw new NotSupportedException();
 }
 
-/// True/Visible when the row being bound is the one currently in inline-edit
-/// mode. values[0] = AppViewModel.EditingItemId (long?), values[1] = row item id.
-public sealed class RowEditingVisibilityConverter : IMultiValueConverter
-{
-    public bool Invert { get; set; }
-
-    public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
-    {
-        bool editing = values.Length == 2
-            && values[0] is long e
-            && values[1] is long id
-            && e == id;
-        if (Invert) editing = !editing;
-        return editing ? Visibility.Visible : Visibility.Collapsed;
-    }
-
-    public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture) =>
-        throw new NotSupportedException();
-}
-
 /// Confirm-modal button color: danger (red) vs normal (accent). Background flag
 /// switches between fill and text color.
 public sealed class ConfirmButtonBrushConverter : IValueConverter

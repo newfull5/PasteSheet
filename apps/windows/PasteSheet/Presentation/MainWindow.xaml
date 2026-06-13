@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:p="clr-namespace:PasteSheet.Presentation"
         Title="PasteSheet"
-        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        WindowStyle="None" AllowsTransparency="False" Background="#121212"
         ShowInTaskbar="False" Topmost="True" ResizeMode="NoResize"
         ShowActivated="True" SnapsToDevicePixels="True"
         TextOptions.TextFormattingMode="Display"
@@ -24,8 +24,6 @@
         <p:TimeoutSegmentConverter x:Key="SegFg" Background="False" />
         <p:ConfirmButtonBrushConverter x:Key="ConfirmBg" Background="True" />
         <p:ConfirmButtonBrushConverter x:Key="ConfirmFg" Background="False" />
-        <p:RowEditingVisibilityConverter x:Key="RowEditVis" />
-        <p:RowEditingVisibilityConverter x:Key="RowNotEditVis" Invert="True" />
 
         <SolidColorBrush x:Key="Bg" Color="#121212" />
         <SolidColorBrush x:Key="Panel" Color="#1A1A1A" />
@@ -198,6 +196,31 @@
             </Setter>
         </Style>
 
+        <!-- Inline edit form, realized only for the row being edited (DataContext = AppViewModel). -->
+        <DataTemplate x:Key="InlineEditTemplate">
+            <StackPanel>
+                <Border Background="#0DDCDC57" CornerRadius="4" Padding="8"
+                        BorderBrush="#33DCDC57" BorderThickness="1" Margin="0,0,0,8">
+                    <TextBox Background="Transparent" BorderThickness="0" Loaded="OnEditBoxLoaded"
+                             Foreground="{StaticResource Accent}" CaretBrush="{StaticResource Accent}" FontSize="13" FontWeight="SemiBold"
+                             Text="{Binding EditMemo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                </Border>
+                <Border Background="#08FFFFFF" CornerRadius="6" Padding="8"
+                        BorderBrush="#33DCDC57" BorderThickness="1">
+                    <TextBox Background="Transparent" BorderThickness="0"
+                             Foreground="White" CaretBrush="White" FontSize="14" MinHeight="120"
+                             AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
+                             Text="{Binding EditContent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                </Border>
+                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                    <Button Content="Save" Style="{StaticResource ActionButton}" Margin="0,0,8,0"
+                            Click="OnInlineSave" Background="{StaticResource Accent}" Foreground="#121212" BorderThickness="0" />
+                    <Button Content="Cancel" Style="{StaticResource ActionButton}"
+                            Click="OnInlineCancel" Background="#0DFFFFFF" Foreground="{StaticResource SubText}" />
+                </StackPanel>
+            </StackPanel>
+        </DataTemplate>
+
         <!-- List row container: stretch, no default selection chrome -->
         <Style TargetType="ListBoxItem">
             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -281,6 +304,8 @@
                 <ListBox Grid.Row="1" x:Name="List" Margin="6,0"
                          Background="Transparent" BorderThickness="0"
                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         VirtualizingPanel.IsVirtualizing="True"
+                         VirtualizingPanel.VirtualizationMode="Recycling"
                          ItemsSource="{Binding Rows}"
                          SelectedIndex="{Binding SelectedIndex, Mode=TwoWay}"
                          MouseDoubleClick="OnListDoubleClick"
@@ -314,11 +339,6 @@
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
                                                             <Setter Property="Background" Value="{StaticResource Accent}" />
-                                                            <Setter Property="Effect">
-                                                                <Setter.Value>
-                                                                    <DropShadowEffect Color="#DCDC57" ShadowDepth="0" BlurRadius="8" />
-                                                                </Setter.Value>
-                                                            </Setter>
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
@@ -339,11 +359,66 @@
                                         <!-- Dashed rounded border (white @ 0.05, dash 5) -->
                                         <Rectangle RadiusX="6" RadiusY="6" Stroke="#0DFFFFFF" StrokeThickness="1"
                                                    StrokeDashArray="5 5" SnapsToDevicePixels="True" />
-                                        <StackPanel Orientation="Horizontal" Margin="12">
+
+                                        <!-- Idle: + label, click to expand -->
+                                        <StackPanel Orientation="Horizontal" Margin="12" Background="Transparent"
+                                                    MouseLeftButtonUp="OnNewRowClick"
+                                                    Visibility="{Binding DataContext.IsCreatingNew, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolVisInvert}}">
                                             <TextBlock Text="＋" FontSize="18" FontWeight="Bold"
                                                        Foreground="{StaticResource Accent}" Margin="0,0,12,0" />
                                             <TextBlock Text="{Binding NewLabel}" FontSize="14"
                                                        Foreground="#CCDCDC57" VerticalAlignment="Center" />
+                                        </StackPanel>
+
+                                        <!-- Active: inline creation form -->
+                                        <StackPanel Margin="12"
+                                                    Visibility="{Binding DataContext.IsCreatingNew, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolVis}}">
+                                            <!-- Folder: name field -->
+                                            <Grid Visibility="{Binding IsNewFolder, Converter={StaticResource BoolVis}}">
+                                                <TextBox x:Name="NewFolderBox" FontSize="14" Foreground="White" CaretBrush="White"
+                                                         Background="Transparent" BorderThickness="0"
+                                                         IsVisibleChanged="OnNewInputShown"
+                                                         Text="{Binding DataContext.NewInputContent, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                                <TextBlock Text="Folder Name..." FontSize="14" Foreground="#80FFFFFF"
+                                                           IsHitTestVisible="False" VerticalAlignment="Center"
+                                                           Visibility="{Binding Text, ElementName=NewFolderBox, Converter={StaticResource EmptyVis}}" />
+                                            </Grid>
+                                            <!-- Item: memo + content fields -->
+                                            <StackPanel Visibility="{Binding IsNewItem, Converter={StaticResource BoolVis}}">
+                                                <Border Background="#0DDCDC57" CornerRadius="4" Padding="8"
+                                                        BorderBrush="#33DCDC57" BorderThickness="1" Margin="0,0,0,8">
+                                                    <Grid>
+                                                        <TextBox x:Name="NewItemMemoBox" Background="Transparent" BorderThickness="0"
+                                                                 Foreground="{StaticResource Accent}" CaretBrush="{StaticResource Accent}" FontSize="13" FontWeight="SemiBold"
+                                                                 IsVisibleChanged="OnNewInputShown"
+                                                                 Text="{Binding DataContext.NewInputMemo, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                                        <TextBlock Text="Memo (Optional)..." FontSize="13" FontWeight="SemiBold" Foreground="#80DCDC57"
+                                                                   IsHitTestVisible="False" VerticalAlignment="Center"
+                                                                   Visibility="{Binding Text, ElementName=NewItemMemoBox, Converter={StaticResource EmptyVis}}" />
+                                                    </Grid>
+                                                </Border>
+                                                <Border Background="#08FFFFFF" CornerRadius="6" Padding="8"
+                                                        BorderBrush="#33DCDC57" BorderThickness="1">
+                                                    <Grid>
+                                                        <TextBox x:Name="NewItemContentBox" Background="Transparent" BorderThickness="0"
+                                                                 Foreground="White" CaretBrush="White" FontSize="14" MinHeight="80"
+                                                                 AcceptsReturn="True" TextWrapping="Wrap"
+                                                                 VerticalScrollBarVisibility="Auto"
+                                                                 Text="{Binding DataContext.NewInputContent, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                                        <TextBlock Text="Content..." FontSize="14" Foreground="#80FFFFFF"
+                                                                   IsHitTestVisible="False" VerticalAlignment="Top"
+                                                                   Visibility="{Binding Text, ElementName=NewItemContentBox, Converter={StaticResource EmptyVis}}" />
+                                                    </Grid>
+                                                </Border>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                                <Button Content="Save" Style="{StaticResource ActionButton}" Margin="0,0,8,0"
+                                                        Click="OnNewSave"
+                                                        Background="{StaticResource Accent}" Foreground="#121212" BorderThickness="0" />
+                                                <Button Content="Cancel" Style="{StaticResource ActionButton}"
+                                                        Click="OnNewCancel"
+                                                        Background="#0DFFFFFF" Foreground="{StaticResource SubText}" />
+                                            </StackPanel>
                                         </StackPanel>
                                     </Grid>
 
@@ -366,24 +441,14 @@
                                                             <Setter Property="Background" Value="{StaticResource Accent}" />
                                                             <Setter Property="Height" Value="Auto" />
                                                             <Setter Property="VerticalAlignment" Value="Stretch" />
-                                                            <Setter Property="Effect">
-                                                                <Setter.Value>
-                                                                    <DropShadowEffect Color="#DCDC57" ShadowDepth="0" BlurRadius="8" />
-                                                                </Setter.Value>
-                                                            </Setter>
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
                                             </Border.Style>
                                         </Border>
 
-                                        <StackPanel Grid.Column="1">
-                                            <StackPanel.Visibility>
-                                                <MultiBinding Converter="{StaticResource RowNotEditVis}">
-                                                    <Binding Path="DataContext.EditingItemId" RelativeSource="{RelativeSource AncestorType=Window}" />
-                                                    <Binding Path="Item.Id" />
-                                                </MultiBinding>
-                                            </StackPanel.Visibility>
+                                        <StackPanel Grid.Column="1"
+                                                    Visibility="{Binding IsEditing, Converter={StaticResource BoolVisInvert}}">
                                             <!-- Memo + folder label -->
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
@@ -414,7 +479,7 @@
                                                                 <Setter Property="TextTrimming" Value="None" />
                                                                 <Setter Property="TextWrapping" Value="Wrap" />
                                                                 <Setter Property="MaxHeight" Value="300" />
-                                                                <Setter Property="Text" Value="{Binding Content}" />
+                                                                <Setter Property="Text" Value="{Binding ContentPreview}" />
                                                             </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>
@@ -442,37 +507,21 @@
                                             </StackPanel>
                                         </StackPanel>
 
-                                        <!-- ===== Inline edit mode (in-place, like macOS) ===== -->
-                                        <StackPanel Grid.Column="1">
-                                            <StackPanel.Visibility>
-                                                <MultiBinding Converter="{StaticResource RowEditVis}">
-                                                    <Binding Path="DataContext.EditingItemId" RelativeSource="{RelativeSource AncestorType=Window}" />
-                                                    <Binding Path="Item.Id" />
-                                                </MultiBinding>
-                                            </StackPanel.Visibility>
-                                            <Border Background="#0DDCDC57" CornerRadius="4" Padding="8"
-                                                    BorderBrush="#33DCDC57" BorderThickness="1" Margin="0,0,0,8">
-                                                <TextBox Background="Transparent" BorderThickness="0"
-                                                         Foreground="{StaticResource Accent}" FontSize="13" FontWeight="SemiBold"
-                                                         Text="{Binding DataContext.EditMemo, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                            </Border>
-                                            <Border Background="#08FFFFFF" CornerRadius="6" Padding="8"
-                                                    BorderBrush="#33DCDC57" BorderThickness="1">
-                                                <TextBox Background="Transparent" BorderThickness="0"
-                                                         Foreground="White" FontSize="14" MinHeight="120"
-                                                         AcceptsReturn="True" TextWrapping="Wrap"
-                                                         VerticalScrollBarVisibility="Auto"
-                                                         Text="{Binding DataContext.EditContent, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                            </Border>
-                                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                                <Button Content="Save" Style="{StaticResource ActionButton}" Margin="0,0,8,0"
-                                                        Click="OnInlineSave"
-                                                        Background="{StaticResource Accent}" Foreground="#121212" BorderThickness="0" />
-                                                <Button Content="Cancel" Style="{StaticResource ActionButton}"
-                                                        Click="OnInlineCancel"
-                                                        Background="#0DFFFFFF" Foreground="{StaticResource SubText}" />
-                                            </StackPanel>
-                                        </StackPanel>
+                                        <!-- ===== Inline edit mode (in-place, like macOS). The template is
+                                             applied only when Content is non-null (i.e. this row is the one
+                                             being edited), so 11 rows don't each build a heavy form. ===== -->
+                                        <ContentControl Grid.Column="1" Focusable="False" Content="{Binding EditForm}">
+                                            <ContentControl.Style>
+                                                <Style TargetType="ContentControl">
+                                                    <Setter Property="ContentTemplate" Value="{StaticResource InlineEditTemplate}" />
+                                                    <Style.Triggers>
+                                                        <Trigger Property="Content" Value="{x:Null}">
+                                                            <Setter Property="ContentTemplate" Value="{x:Null}" />
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </ContentControl.Style>
+                                        </ContentControl>
                                     </Grid>
                                 </Grid>
                             </Border>
@@ -719,7 +768,7 @@
                                 Margin="0,16,0,0" BorderBrush="#1AFFFFFF" BorderThickness="1"
                                 Visibility="{Binding Modal.ShowInput, Converter={StaticResource BoolVis}}">
                             <TextBox x:Name="ModalInput" Background="Transparent" BorderThickness="0"
-                                     Foreground="White" FontSize="14"
+                                     Foreground="White" CaretBrush="White" FontSize="14"
                                      Text="{Binding Modal.InputValue, UpdateSourceTrigger=PropertyChanged}" />
                         </Border>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
