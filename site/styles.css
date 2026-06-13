@@ -74,6 +74,7 @@ kbd {
 .app-tile img { width: 100%; height: 100%; object-fit: contain; display: block; }
 .app-tile-sm { width: 30px; height: 30px; }
 .app-tile-lg {
+  display: flex; /* block-level so margin auto centers it on its own line */
   width: 92px;
   height: 92px;
   border-radius: 24%;
