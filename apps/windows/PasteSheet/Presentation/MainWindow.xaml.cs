@@ -49,8 +49,8 @@ public partial class MainWindow : Window, IWindowHost
 
     bool IWindowHost.IsVisible => IsVisible;
 
-    private const double SlideOffset = 48;
-    private static readonly Duration SlideDuration = new(TimeSpan.FromMilliseconds(190));
+    private static readonly Duration SlideDuration = new(TimeSpan.FromMilliseconds(Constants.SlideDurationMs));
+    private const double SlideOffset = Constants.SlideOffsetPx;
 
     public void ShowPanel()
     {

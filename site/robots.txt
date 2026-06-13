@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://newfull5.github.io/PasteSheets/sitemap.xml

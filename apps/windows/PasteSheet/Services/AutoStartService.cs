@@ -9,8 +9,10 @@ public sealed class AutoStartService
     private const string RunKey = @"Software\Microsoft\Windows\CurrentVersion\Run";
     private const string ValueName = "PasteSheet";
 
+    // Environment.ProcessPath resolves to the real .exe path even for a
+    // single-file published app (Assembly.Location would return "" there).
     private static string ExecutablePath =>
-        Environment.ProcessPath ?? System.Reflection.Assembly.GetExecutingAssembly().Location;
+        Environment.ProcessPath ?? throw new InvalidOperationException("Cannot resolve executable path");
 
     public void Enable()
     {
