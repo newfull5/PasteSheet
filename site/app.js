@@ -73,8 +73,7 @@ function wireHeroDemo() {
   function apply(step) {
     demo.dataset.step = String(step);
     items.forEach((it) => it.classList.remove("is-active"));
-    if (step === 3) items[0].classList.add("is-active");
-    if (step >= 4 && step <= 7) target.classList.add("is-active");
+    if (step >= 3 && step <= 7) target.classList.add("is-active");
     typed.textContent = step >= 6 ? targetText : "";
   }
 

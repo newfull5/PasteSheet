@@ -172,8 +172,8 @@ kbd {
 .soon { color: var(--accent-dim); }
 .dot { opacity: 0.5; }
 
-/* ---------- Demo: scripted "paste anywhere" animation ---------- */
-.demo { max-width: 860px; margin: 40px auto 0; }
+/* ---------- Demo: scripted "paste anywhere" animation (mirrors the macOS app) ---------- */
+.demo { max-width: 880px; margin: 40px auto 0; }
 .demo-anim { width: 100%; }
 .hd-win {
   border: 1px solid var(--border);
@@ -195,119 +195,70 @@ kbd {
 .hd-bar i:first-child { background: #ff5f57; }
 .hd-bar i:nth-child(2) { background: #febc2e; }
 .hd-bar i:nth-child(3) { background: #28c840; }
-.hd-title {
-  flex: 1;
-  text-align: center;
-  font-size: 0.8rem;
-  color: var(--text-dim);
-  margin-right: 54px; /* balance the three dots on the left */
-}
+.hd-title { flex: 1; text-align: center; font-size: 0.8rem; color: var(--text-dim); margin-right: 54px; }
 
-.hd-body { position: relative; height: 340px; overflow: hidden; }
+.hd-body { position: relative; height: 420px; overflow: hidden; }
 
-/* target app: a note where the clip gets pasted */
+/* target note */
 .hd-doc { padding: 30px 34px; }
 .hd-doc-title { font-size: 1.2rem; font-weight: 700; color: var(--text); margin-bottom: 18px; }
-.hd-doc-line {
-  display: flex;
-  align-items: center;
-  font-family: var(--mono);
-  font-size: 1rem;
-  min-height: 1.5rem;
-}
-.hd-typed {
-  color: var(--text);
-  opacity: 0;
-  transform: translateX(-6px);
-  transition: opacity 0.3s ease, transform 0.3s ease;
-  white-space: nowrap;
-}
-.hd-caret {
-  width: 9px;
-  height: 1.25rem;
-  background: var(--accent);
-  display: inline-block;
-  animation: hd-blink 1.05s steps(1) infinite;
-}
+.hd-doc-line { display: flex; align-items: center; font-family: var(--mono); font-size: 1rem; min-height: 1.5rem; }
+.hd-typed { color: var(--text); opacity: 0; transform: translateX(-6px); transition: opacity 0.3s ease, transform 0.3s ease; white-space: nowrap; }
+.hd-caret { width: 9px; height: 1.25rem; background: var(--accent); display: inline-block; animation: hd-blink 1.05s steps(1) infinite; }
 @keyframes hd-blink { 50% { opacity: 0; } }
 
-/* PasteSheet panel — slides in from the right edge, like the real app */
+/* PasteSheet panel — mirrors the real macOS app */
 .hd-panel {
   position: absolute;
   top: 0;
   right: 0;
-  width: 56%;
-  max-width: 430px;
+  width: 60%;
+  max-width: 440px;
   height: 100%;
   background: var(--bg);
   border-left: 1px solid var(--border);
-  padding: 16px 14px;
+  padding: 16px 12px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 4px;
   transform: translateX(106%);
   transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
   box-shadow: -24px 0 60px -24px rgba(0, 0, 0, 0.6);
 }
-.hd-phead {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-weight: 700;
-  font-size: 0.95rem;
-  color: var(--text);
-  padding: 0 4px;
-}
-.hd-gear { color: var(--text-dim); }
-.hd-search {
-  font-size: 0.82rem;
-  color: var(--text-dim);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 9px;
-  padding: 9px 12px;
-}
-.hd-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
-.hd-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 11px 12px;
-  border-radius: 10px;
-  border: 1px solid transparent;
-  transition: background 0.18s ease, border-color 0.18s ease;
-}
-.hd-c {
-  font-family: var(--mono);
-  font-size: 0.82rem;
-  color: var(--text-dim);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.hd-t {
-  flex: none;
-  font-size: 0.6rem;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--text-dim);
-  background: var(--surface-2);
-  border-radius: 5px;
-  padding: 2px 6px;
-}
-.hd-item.is-active { background: rgba(220, 220, 87, 0.14); border-color: var(--accent-dim); }
-.hd-item.is-active .hd-c { color: var(--text); }
+.hd-phead { display: flex; align-items: center; gap: 10px; padding: 2px 6px 10px; }
+.hd-back { color: var(--accent); font-size: 0.95rem; }
+.hd-folder { flex: 1; color: var(--accent); font-size: 1.1rem; font-weight: 600; letter-spacing: 0.02em; }
+.hd-cur { font-weight: 600; animation: hd-blink 1.05s steps(1) infinite; }
+.hd-gear { color: var(--accent); opacity: 0.7; font-size: 1.05rem; }
+
+.hd-list { list-style: none; display: flex; flex-direction: column; gap: 2px; }
+
+/* item row — matches HistoryItemRow: accent bar + memo + content + (selected) detail */
+.hd-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border-radius: 6px; transition: background 0.18s ease; }
+.hd-accent { flex: none; width: 4px; border-radius: 2px; align-self: stretch; min-height: 16px; background: rgba(104, 116, 141, 0.4); transition: background 0.2s ease, box-shadow 0.2s ease; }
+.hd-it { flex: 1; min-width: 0; }
+.hd-memo { font-size: 0.8rem; font-weight: 500; color: #e2e2b6; margin-bottom: 3px; }
+.hd-c { font-size: 0.86rem; color: rgba(255, 255, 255, 0.7); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hd-detail { max-height: 0; opacity: 0; overflow: hidden; transition: max-height 0.28s ease, opacity 0.28s ease; }
+.hd-date { font-family: var(--mono); font-size: 0.68rem; color: rgba(104, 116, 141, 0.65); padding-top: 8px; }
+.hd-acts { display: flex; gap: 8px; padding-top: 8px; }
+.hd-act { font-size: 0.66rem; font-weight: 600; padding: 4px 10px; border-radius: 4px; background: rgba(255, 255, 255, 0.05); color: var(--subTextColor, #68748d); border: 1px solid rgba(255, 255, 255, 0.1); }
+.hd-act.is-on { background: var(--accent); color: #111; border-color: transparent; }
+
+/* selected item (vm.selectedIndex) */
+.hd-item.is-active { background: rgba(220, 220, 87, 0.08); }
+.hd-item.is-active .hd-accent { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+.hd-item.is-active .hd-c { color: #fff; white-space: normal; }
+.hd-item.is-active .hd-detail { max-height: 96px; opacity: 1; }
+
+/* New Item row */
+.hd-new { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 6px; border: 1px dashed rgba(255, 255, 255, 0.08); margin-top: 2px; }
+.hd-new b { color: var(--accent); font-size: 1.05rem; }
+.hd-new span { color: var(--accent); opacity: 0.8; font-size: 0.86rem; }
 
 /* keycaps */
 .hd-keys { position: absolute; bottom: 18px; left: 24px; display: flex; gap: 12px; }
-.hd-key {
-  display: flex;
-  gap: 4px;
-  opacity: 0;
-  transform: translateY(8px) scale(0.92);
-  transition: opacity 0.2s ease, transform 0.2s ease;
-}
+.hd-key { display: flex; gap: 4px; opacity: 0; transform: translateY(8px) scale(0.92); transition: opacity 0.2s ease, transform 0.2s ease; }
 
 /* ---- step states ---- */
 .demo-anim[data-step="1"] .hd-key-open,
@@ -322,7 +273,7 @@ kbd {
 .demo-anim[data-step="7"] .hd-typed { opacity: 1; transform: translateX(0); }
 
 @media (prefers-reduced-motion: reduce) {
-  .hd-caret { animation: none; }
+  .hd-caret, .hd-cur { animation: none; }
   .hd-panel { transition: none; }
 }
 
