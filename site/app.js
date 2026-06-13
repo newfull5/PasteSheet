@@ -61,6 +61,40 @@ function wireBrewCopy() {
   });
 }
 
+// --- Hero "paste flow" animation: drive a step timeline (CSS does the visuals) ---
+function wireHeroDemo() {
+  const demo = document.querySelector(".hero-demo");
+  if (!demo) return;
+  const items = demo.querySelectorAll(".hd-item");
+  const target = demo.querySelector(".hd-item.is-target") || items[items.length - 1];
+  const typed = demo.querySelector(".hd-typed");
+  const targetText = target.textContent.trim();
+
+  function apply(step) {
+    demo.dataset.step = String(step);
+    items.forEach((it) => it.classList.remove("is-active"));
+    if (step === 3) items[0].classList.add("is-active");
+    if (step >= 4 && step <= 7) target.classList.add("is-active");
+    typed.textContent = step >= 6 ? targetText : "";
+  }
+
+  // Respect reduced motion: show the finished, pasted state and stop.
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    apply(7);
+    return;
+  }
+
+  const durations = [900, 700, 700, 700, 950, 600, 750, 1600]; // per step
+  let step = 0;
+  (function tick() {
+    apply(step);
+    const wait = durations[step];
+    step = (step + 1) % durations.length;
+    setTimeout(tick, wait);
+  })();
+}
+
 adjustForPlatform();
 wireBrewCopy();
 resolveLatestDownload();
+wireHeroDemo();
