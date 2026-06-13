@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PasteSheet — A smart clipboard manager for macOS</title>
+  <meta name="description" content="PasteSheet is a smart clipboard manager designed to make pasting easier. Keep your clipboard history organized, editable, and instantly accessible." />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="PasteSheet — A smart clipboard manager for macOS" />
+  <meta property="og:description" content="Keep your clipboard history organized, editable, and instantly accessible." />
+  <meta property="og:url" content="https://newfull5.github.io/PasteSheets/" />
+
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="nav">
+    <a class="brand" href="#top">
+      <span class="brand-mark">⌘</span>
+      <span class="brand-name">PasteSheet</span>
+    </a>
+    <nav class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#shortcuts">Shortcuts</a>
+      <a href="https://github.com/newfull5/PasteSheets" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <!-- Hero -->
+    <section class="hero">
+      <p class="eyebrow">Clipboard manager for macOS</p>
+      <h1>Make pasting <span class="accent">effortless</span>.</h1>
+      <p class="lede">
+        Keep your clipboard history organized, editable, and instantly accessible —
+        one keystroke away, without ever leaving the keyboard.
+      </p>
+
+      <div class="cta">
+        <a class="btn btn-primary" id="download-mac" href="https://github.com/newfull5/PasteSheets/releases/latest" target="_blank" rel="noopener">
+          <span class="btn-icon"></span>
+          <span class="btn-label">Download for macOS</span>
+        </a>
+        <button class="btn btn-secondary" id="brew-copy" type="button" title="Copy to clipboard">
+          <code>brew install --cask pastesheet</code>
+          <span class="copy-hint" id="brew-hint">Copy</span>
+        </button>
+      </div>
+
+      <div class="cta-meta">
+        <span id="version-tag">Universal · macOS 13+</span>
+        <span class="dot">·</span>
+        <span class="soon">Windows — coming soon</span>
+      </div>
+    </section>
+
+    <!-- Demo -->
+    <section class="demo">
+      <div class="demo-frame">
+        <video src="assets/demo.mp4" autoplay loop muted playsinline preload="metadata"></video>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section id="features" class="features">
+      <h2>Built for speed.</h2>
+      <div class="grid">
+        <article class="card">
+          <div class="card-icon">⌨️</div>
+          <h3>Keyboard-driven</h3>
+          <p>Navigate, search, edit, and paste entirely with the keyboard. Your hands never leave home row.</p>
+        </article>
+        <article class="card">
+          <div class="card-icon">🗂️</div>
+          <h3>Organized history</h3>
+          <p>Group clips into directories, edit them inline, and find anything with instant search.</p>
+        </article>
+        <article class="card">
+          <div class="card-icon">⚡</div>
+          <h3>Global hotkey</h3>
+          <p>Summon PasteSheet from anywhere with <kbd>⌘</kbd><kbd>⇧</kbd><kbd>V</kbd> — it pastes straight into your active app.</p>
+        </article>
+        <article class="card">
+          <div class="card-icon">🔄</div>
+          <h3>Auto-updates</h3>
+          <p>Stays current in the background, so you always have the latest fixes and features.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- Shortcuts -->
+    <section id="shortcuts" class="shortcuts">
+      <h2>Every action, a shortcut.</h2>
+      <div class="shortcut-list">
+        <div class="shortcut"><span>Toggle app</span><span class="keys"><kbd>⌘</kbd><kbd>⇧</kbd><kbd>V</kbd></span></div>
+        <div class="shortcut"><span>Navigate</span><span class="keys"><kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd></span></div>
+        <div class="shortcut"><span>Paste / Select</span><span class="keys"><kbd>↵</kbd></span></div>
+        <div class="shortcut"><span>Edit item</span><span class="keys"><kbd>⌘</kbd><kbd>E</kbd></span></div>
+        <div class="shortcut"><span>Close</span><span class="keys"><kbd>esc</kbd></span></div>
+      </div>
+      <p class="tip">
+        <strong>Pro tip:</strong> flick your cursor to the <em>right edge</em> of the screen to peek at your clipboard instantly.
+      </p>
+    </section>
+
+    <!-- Download CTA -->
+    <section class="download-cta">
+      <h2>Ready to paste smarter?</h2>
+      <a class="btn btn-primary btn-lg" id="download-mac-2" href="https://github.com/newfull5/PasteSheets/releases/latest" target="_blank" rel="noopener">
+        Download for macOS
+      </a>
+      <p class="install-alt">
+        or install with Homebrew: <code>brew tap newfull5/tap &amp;&amp; brew install --cask pastesheet</code>
+      </p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <span>PasteSheet</span>
+      <span class="dot">·</span>
+      <a href="https://github.com/newfull5/PasteSheets" target="_blank" rel="noopener">GitHub</a>
+      <span class="dot">·</span>
+      <a href="https://github.com/newfull5/PasteSheets/releases" target="_blank" rel="noopener">Releases</a>
+      <span class="dot">·</span>
+      <span>Apache-2.0</span>
+      <span class="badge">Beta</span>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
