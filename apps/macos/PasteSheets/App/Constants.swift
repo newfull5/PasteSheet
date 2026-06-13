@@ -19,6 +19,9 @@ enum Constants {
     static let windowWidth: CGFloat = 380.0
     static let windowMinHeight: CGFloat = 300.0
     static let windowMaxHeight: CGFloat = 1400.0
+    // Panel slide animation — source of truth: config/animation.json
+    static let panelSlideDuration: TimeInterval = 0.190
+    static let panelSlideOffset: CGFloat = 48.0
     static let windowHideAnimationDelay: TimeInterval = 0.35
     static let pasteToggleDelay: TimeInterval = 0.05
     // Focus restore: poll until the previous app is frontmost instead of a fixed
