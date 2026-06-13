@@ -6,6 +6,20 @@
         <description>PasteSheet Updates</description>
         <language>en</language>
         <item>
+            <title>Version 0.4.3</title>
+            <description><![CDATA[<ul><li>Add the app icon — it was showing the generic macOS placeholder.</li></ul>]]></description>
+            <sparkle:version>5</sparkle:version>
+            <sparkle:shortVersionString>0.4.3</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+            <pubDate>Sat, 13 Jun 2026 12:42:46 +0000</pubDate>
+            <enclosure
+                url="https://github.com/newfull5/PasteSheets/releases/download/v0.4.3/PasteSheet_0.4.3_universal.dmg"
+                length="1994488"
+                type="application/octet-stream"
+                sparkle:edSignature="LlPSP5qNxXZFZgASJEejtSJzX3MD4GTaJyvqh8p3p1iTLcBlLoPjRq1EinBei1e5lTeO69IgtOkQwRImOftqCA=="
+            />
+        </item>
+        <item>
             <title>Version 0.4.2</title>
             <description><![CDATA[<ul><li>Reliable paste on macOS: adds an Accessibility-permission check, restores focus to the previous app by polling until it is frontmost, and supports macOS 14 cooperative activation.</li></ul>]]></description>
             <sparkle:version>4</sparkle:version>
