@@ -63,12 +63,12 @@ function wireBrewCopy() {
 
 // --- Hero "paste flow" animation: drive a step timeline (CSS does the visuals) ---
 function wireHeroDemo() {
-  const demo = document.querySelector(".hero-demo");
+  const demo = document.querySelector(".demo-anim");
   if (!demo) return;
   const items = demo.querySelectorAll(".hd-item");
   const target = demo.querySelector(".hd-item.is-target") || items[items.length - 1];
   const typed = demo.querySelector(".hd-typed");
-  const targetText = target.textContent.trim();
+  const targetText = (target.querySelector(".hd-c") || target).textContent.trim();
 
   function apply(step) {
     demo.dataset.step = String(step);

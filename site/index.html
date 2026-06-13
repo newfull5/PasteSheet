@@ -57,37 +57,39 @@
         <span class="dot">·</span>
         <span class="soon">Windows — coming soon</span>
       </div>
+    </section>
 
-      <!-- Scripted "paste flow" animation: panel slides in, ⌘⇧V, item selected, pasted -->
-      <div class="hero-demo" data-step="0" aria-hidden="true">
+    <!-- Demo: scripted "paste anywhere" animation -->
+    <section class="demo">
+      <div class="demo-anim" data-step="0" aria-hidden="true">
         <div class="hd-win">
-          <div class="hd-bar"><i></i><i></i><i></i></div>
+          <div class="hd-bar">
+            <i></i><i></i><i></i>
+            <span class="hd-title">Untitled — Notes</span>
+          </div>
           <div class="hd-body">
-            <div class="hd-editor">
-              <span class="hd-prompt">›</span>
-              <span class="hd-typed"></span><span class="hd-caret"></span>
+            <!-- target app: a note where the clip gets pasted -->
+            <div class="hd-doc">
+              <div class="hd-doc-title">Untitled</div>
+              <div class="hd-doc-line"><span class="hd-typed"></span><span class="hd-caret"></span></div>
             </div>
-            <div class="hd-panel">
-              <div class="hd-head">PasteSheet</div>
+            <!-- PasteSheet panel slides in from the right edge -->
+            <aside class="hd-panel">
+              <div class="hd-phead"><span>PasteSheet</span><span class="hd-gear">⌃</span></div>
+              <div class="hd-search">Search clipboard…</div>
               <ul class="hd-list">
-                <li class="hd-item">npm run build</li>
-                <li class="hd-item is-target">https://newfull5.github.io/PasteSheets</li>
-                <li class="hd-item">Hello, team 👋</li>
+                <li class="hd-item"><span class="hd-c">git push origin main</span><span class="hd-t">code</span></li>
+                <li class="hd-item is-target"><span class="hd-c">https://newfull5.github.io/PasteSheets</span><span class="hd-t">link</span></li>
+                <li class="hd-item"><span class="hd-c">scoh@bhsn.ai</span><span class="hd-t">text</span></li>
+                <li class="hd-item"><span class="hd-c">Hello, team 👋</span><span class="hd-t">text</span></li>
               </ul>
-            </div>
+            </aside>
             <div class="hd-keys">
               <span class="hd-key hd-key-open"><kbd>⌘</kbd><kbd>⇧</kbd><kbd>V</kbd></span>
               <span class="hd-key hd-key-enter"><kbd>↵</kbd></span>
             </div>
           </div>
         </div>
-      </div>
-    </section>
-
-    <!-- Demo -->
-    <section class="demo">
-      <div class="demo-frame">
-        <video src="assets/demo.mp4" poster="assets/demo-poster.jpg" autoplay loop muted playsinline preload="metadata"></video>
       </div>
     </section>
 
