@@ -4,9 +4,9 @@
 Keep your clipboard history organized, editable, and instantly accessible — one
 keystroke away, without ever leaving the keyboard.
 
-🌐 **[Website](https://newfull5.github.io/PasteSheets/)** · 📦 **[Releases](https://github.com/newfull5/PasteSheets/releases)** · 🐛 **[Issues](https://github.com/newfull5/PasteSheets/issues)**
+🌐 **[Website](https://newfull5.github.io/PasteSheet/)** · 📦 **[Releases](https://github.com/newfull5/PasteSheet/releases)** · 🐛 **[Issues](https://github.com/newfull5/PasteSheet/issues)**
 
-> ⚠️ **Beta Notice:** This project is currently in **Beta**. If you experience any issues or inconveniences, please report them in the [Issues](https://github.com/newfull5/PasteSheets/issues) section.
+> ⚠️ **Beta Notice:** This project is currently in **Beta**. If you experience any issues or inconveniences, please report them in the [Issues](https://github.com/newfull5/PasteSheet/issues) section.
 
 <p align="center"><img src="docs/demo.gif" alt="PasteSheet demo — press ⌘⇧V, pick a clip, paste anywhere" width="760"></p>
 
@@ -27,14 +27,14 @@ brew install --cask newfull5/tap/pastesheet
 
 **Method 2: Direct Download**
 
-1. Download the latest `.dmg` from the [**Releases**](https://github.com/newfull5/PasteSheets/releases/latest) page.
+1. Download the latest `.dmg` from the [**Releases**](https://github.com/newfull5/PasteSheet/releases/latest) page.
 2. Open the `.dmg` and drag **PasteSheet** to your **Applications** folder.
 
 > The build is a universal binary, so it runs natively on both Apple Silicon and Intel Macs.
 
 ### Windows
 
-1. Download the latest `PasteSheet-*-win-x64.exe` from the [**Releases**](https://github.com/newfull5/PasteSheets/releases/latest) page.
+1. Download the latest `PasteSheet-*-win-x64.exe` from the [**Releases**](https://github.com/newfull5/PasteSheet/releases/latest) page.
 2. Run it — it's a single self-contained executable, **no installer and no .NET runtime required**.
 
 ## Usage

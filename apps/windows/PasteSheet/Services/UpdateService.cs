@@ -12,9 +12,9 @@ namespace PasteSheet.Services;
 public sealed class UpdateService
 {
     private const string LatestReleaseApi =
-        "https://api.github.com/repos/newfull5/PasteSheets/releases/latest";
+        "https://api.github.com/repos/newfull5/PasteSheet/releases/latest";
     private const string ReleasesPage =
-        "https://github.com/newfull5/PasteSheets/releases/latest";
+        "https://github.com/newfull5/PasteSheet/releases/latest";
 
     private static readonly HttpClient Http = CreateClient();
 
