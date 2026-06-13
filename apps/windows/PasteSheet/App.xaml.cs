@@ -79,9 +79,10 @@ public partial class AppEntry : Application
 
     private void SetupTray()
     {
+        var iconStream = GetResourceStream(new Uri("pack://application:,,,/Assets/icon.ico"))?.Stream;
         _trayIcon = new NotifyIcon
         {
-            Icon = SystemIcons.Application,
+            Icon = iconStream != null ? new Icon(iconStream) : SystemIcons.Application,
             Visible = true,
             Text = "PasteSheet"
         };
