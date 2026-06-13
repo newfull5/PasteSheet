@@ -10,7 +10,8 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AssemblyName>PasteSheet</AssemblyName>
     <RootNamespace>PasteSheet</RootNamespace>
-    <Version>0.4.6</Version>
+    <ApplicationIcon>Assets\icon.ico</ApplicationIcon>
+    <Version>0.4.8</Version>
     <!-- WinForms (NotifyIcon/Screen) warns about manifest DPI; WPF honors it, so silence it. -->
     <NoWarn>$(NoWarn);WFAC010</NoWarn>
   </PropertyGroup>
@@ -27,6 +28,10 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.10" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\icon.ico" />
   </ItemGroup>
 
 </Project>

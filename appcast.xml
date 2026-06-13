@@ -6,6 +6,20 @@
         <description>PasteSheet Updates</description>
         <language>en</language>
         <item>
+            <title>Version 0.4.8</title>
+            <description><![CDATA[<ul><li>Windows: app icon now shows correctly in Explorer and download history.</li><li>macOS: panel animation synced with Windows (190ms cubic ease).</li></ul>]]></description>
+            <sparkle:version>10</sparkle:version>
+            <sparkle:shortVersionString>0.4.8</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+            <pubDate>Sat, 14 Jun 2026 00:00:00 +0000</pubDate>
+            <enclosure
+                url="https://github.com/newfull5/PasteSheets/releases/download/v0.4.8/PasteSheet_0.4.8_universal.dmg"
+                length="1766740"
+                type="application/octet-stream"
+                sparkle:edSignature="dWvgd9Rwm1Ax2rLhRQYaXlx14+MT0tbx7DVXlRgVaYOKyWMdpbkHLRwSMNpQY4dMY5nHnc2PgRQDjTJuZyrlBg=="
+            />
+        </item>
+        <item>
             <title>Version 0.4.7</title>
             <description><![CDATA[<ul><li>DMG now includes an Applications folder shortcut for easy drag-and-drop install.</li><li>Sparkle XPC services fully signed — fixes "Update Error" on macOS 15.</li><li>Panel animation synced with Windows (190ms cubic ease).</li></ul>]]></description>
             <sparkle:version>9</sparkle:version>
