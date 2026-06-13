@@ -6,6 +6,48 @@
         <description>PasteSheet Updates</description>
         <language>en</language>
         <item>
+            <title>Version 0.4.7</title>
+            <description><![CDATA[<ul><li>DMG now includes an Applications folder shortcut for easy drag-and-drop install.</li><li>Sparkle XPC services fully signed — fixes "Update Error" on macOS 15.</li><li>Panel animation synced with Windows (190ms cubic ease).</li></ul>]]></description>
+            <sparkle:version>9</sparkle:version>
+            <sparkle:shortVersionString>0.4.7</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+            <pubDate>Sat, 14 Jun 2026 00:00:00 +0000</pubDate>
+            <enclosure
+                url="https://github.com/newfull5/PasteSheets/releases/download/v0.4.7/PasteSheet_0.4.7_universal.dmg"
+                length="1766756"
+                type="application/octet-stream"
+                sparkle:edSignature="eua22y5+shSf5upoAcqDiUtoJs33PNjAWCrZyrGCtjAQ/14jnRJAzR7cpzouhjn/8PmBKdwZFwQ4jxIBhfXACQ=="
+            />
+        </item>
+        <item>
+            <title>Version 0.4.6</title>
+            <description><![CDATA[<ul><li>Panel animation synced across macOS and Windows (190ms, cubic ease).</li><li>Windows build now automatically attached to every GitHub release.</li></ul>]]></description>
+            <sparkle:version>8</sparkle:version>
+            <sparkle:shortVersionString>0.4.6</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+            <pubDate>Sat, 14 Jun 2026 00:00:00 +0000</pubDate>
+            <enclosure
+                url="https://github.com/newfull5/PasteSheets/releases/download/v0.4.6/PasteSheet_0.4.6_universal.dmg"
+                length="1766665"
+                type="application/octet-stream"
+                sparkle:edSignature="z8HWpepDbIpotpZNtiz6kWFHT9VoiDkPTlBT9U0W8N4/4BD70JNDfHpKzYkKMwnzuzS3GcjyY5t+KuOCsMYgAg=="
+            />
+        </item>
+        <item>
+            <title>Version 0.4.5</title>
+            <description><![CDATA[<ul><li>Windows CI: the Windows .exe is now automatically built and attached to every release.</li><li>Landing site updated to announce the Windows build.</li></ul>]]></description>
+            <sparkle:version>7</sparkle:version>
+            <sparkle:shortVersionString>0.4.5</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+            <pubDate>Sat, 14 Jun 2026 00:00:00 +0000</pubDate>
+            <enclosure
+                url="https://github.com/newfull5/PasteSheets/releases/download/v0.4.5/PasteSheet_0.4.5_universal.dmg"
+                length="1758571"
+                type="application/octet-stream"
+                sparkle:edSignature="Qz+mpdk5eWX0qA6mTNs2v3uxrcU9a0eJZlM49fGWeIBNdaxz12LsZK2FrAaOvarXZRXYkvLKZ89x00jdbj6JBQ=="
+            />
+        </item>
+        <item>
             <title>Version 0.4.4</title>
             <description><![CDATA[<ul><li>Stable code signing: macOS now keeps your Accessibility permission across updates — no more re-granting it after every update.</li></ul>]]></description>
             <sparkle:version>6</sparkle:version>
