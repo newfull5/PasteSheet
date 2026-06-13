@@ -8,9 +8,8 @@ public static class Constants
     public const double WindowWidth = 380.0;
     public const double WindowMinHeight = 300.0;
     public const double WindowMaxHeight = 1400.0;
-    public const int PasteRestoreDelayMs1 = 80;
-    public const int PasteRestoreDelayMs2 = 50;
-    public const int PasteToggleDelayMs = 60;
+    // Tiny settle after the target regains foreground, before sending Ctrl+V.
+    public const int PasteSettleDelayMs = 15;
     public const long MaxItemsPerDirectory = 30;
     public const string DefaultDirectory = "Clipboard";
     public const string DefaultShortcut = "Control+Shift+V";

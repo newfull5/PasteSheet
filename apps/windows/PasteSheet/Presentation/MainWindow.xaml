@@ -8,7 +8,8 @@
         ShowActivated="True" SnapsToDevicePixels="True"
         TextOptions.TextFormattingMode="Display"
         UseLayoutRounding="True"
-        FontFamily="Segoe UI">
+        TextOptions.TextRenderingMode="ClearType"
+        FontFamily="Segoe UI Variable Text, Segoe UI">
 
     <Window.Resources>
         <p:BoolToVisibilityConverter x:Key="BoolVis" />
@@ -23,6 +24,8 @@
         <p:TimeoutSegmentConverter x:Key="SegFg" Background="False" />
         <p:ConfirmButtonBrushConverter x:Key="ConfirmBg" Background="True" />
         <p:ConfirmButtonBrushConverter x:Key="ConfirmFg" Background="False" />
+        <p:RowEditingVisibilityConverter x:Key="RowEditVis" />
+        <p:RowEditingVisibilityConverter x:Key="RowNotEditVis" Invert="True" />
 
         <SolidColorBrush x:Key="Bg" Color="#121212" />
         <SolidColorBrush x:Key="Panel" Color="#1A1A1A" />
@@ -86,17 +89,55 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="CheckBox">
-                        <Border x:Name="track" Width="42" Height="24" CornerRadius="12"
-                                Background="#33FFFFFF">
+                        <Border x:Name="track" Width="42" Height="24" CornerRadius="12">
+                            <Border.Background>
+                                <SolidColorBrush Color="#33FFFFFF" />
+                            </Border.Background>
                             <Border x:Name="thumb" Width="18" Height="18" CornerRadius="9"
-                                    Background="White" HorizontalAlignment="Left" Margin="3,0,0,0" />
+                                    HorizontalAlignment="Left" Margin="3,0,0,0"
+                                    RenderTransformOrigin="0.5,0.5">
+                                <Border.Background>
+                                    <SolidColorBrush Color="#FFFFFFFF" />
+                                </Border.Background>
+                                <Border.RenderTransform>
+                                    <TranslateTransform x:Name="thumbT" X="0" />
+                                </Border.RenderTransform>
+                            </Border>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="track" Property="Background" Value="#DCDC57" />
-                                <Setter TargetName="thumb" Property="HorizontalAlignment" Value="Right" />
-                                <Setter TargetName="thumb" Property="Margin" Value="0,0,3,0" />
-                                <Setter TargetName="thumb" Property="Background" Value="#121212" />
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="thumbT" Storyboard.TargetProperty="X"
+                                                             To="18" Duration="0:0:0.18">
+                                                <DoubleAnimation.EasingFunction>
+                                                    <CubicEase EasingMode="EaseOut" />
+                                                </DoubleAnimation.EasingFunction>
+                                            </DoubleAnimation>
+                                            <ColorAnimation Storyboard.TargetName="track" Storyboard.TargetProperty="Background.Color"
+                                                            To="#DCDC57" Duration="0:0:0.18" />
+                                            <ColorAnimation Storyboard.TargetName="thumb" Storyboard.TargetProperty="Background.Color"
+                                                            To="#121212" Duration="0:0:0.18" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="thumbT" Storyboard.TargetProperty="X"
+                                                             To="0" Duration="0:0:0.18">
+                                                <DoubleAnimation.EasingFunction>
+                                                    <CubicEase EasingMode="EaseOut" />
+                                                </DoubleAnimation.EasingFunction>
+                                            </DoubleAnimation>
+                                            <ColorAnimation Storyboard.TargetName="track" Storyboard.TargetProperty="Background.Color"
+                                                            To="#33FFFFFF" Duration="0:0:0.18" />
+                                            <ColorAnimation Storyboard.TargetName="thumb" Storyboard.TargetProperty="Background.Color"
+                                                            To="#FFFFFFFF" Duration="0:0:0.18" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -193,7 +234,7 @@
                     </Grid.ColumnDefinitions>
 
                     <!-- Back button -->
-                    <Button Grid.Column="0" Content="◀" FontSize="16" Margin="0,0,8,0"
+                    <Button Grid.Column="0" Content="&#x25C0;" FontFamily="Segoe UI Symbol" FontSize="16" Margin="0,0,8,0"
                             Foreground="{StaticResource Accent}" Style="{StaticResource IconButton}"
                             Click="OnBackClick"
                             Visibility="{Binding ShowBack, Converter={StaticResource BoolVis}}" />
@@ -230,7 +271,7 @@
                     </Grid>
 
                     <!-- Settings gear -->
-                    <Button Grid.Column="2" Content="⚙" FontSize="20"
+                    <Button Grid.Column="2" Content="&#xE713;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="18"
                             Foreground="#B3DCDC57" Style="{StaticResource IconButton}"
                             Click="OnSettingsClick"
                             Visibility="{Binding CurrentView, Converter={StaticResource NotSettingsVis}, ConverterParameter=Settings}" />
@@ -337,6 +378,12 @@
                                         </Border>
 
                                         <StackPanel Grid.Column="1">
+                                            <StackPanel.Visibility>
+                                                <MultiBinding Converter="{StaticResource RowNotEditVis}">
+                                                    <Binding Path="DataContext.EditingItemId" RelativeSource="{RelativeSource AncestorType=Window}" />
+                                                    <Binding Path="Item.Id" />
+                                                </MultiBinding>
+                                            </StackPanel.Visibility>
                                             <!-- Memo + folder label -->
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
@@ -394,6 +441,38 @@
                                                 </StackPanel>
                                             </StackPanel>
                                         </StackPanel>
+
+                                        <!-- ===== Inline edit mode (in-place, like macOS) ===== -->
+                                        <StackPanel Grid.Column="1">
+                                            <StackPanel.Visibility>
+                                                <MultiBinding Converter="{StaticResource RowEditVis}">
+                                                    <Binding Path="DataContext.EditingItemId" RelativeSource="{RelativeSource AncestorType=Window}" />
+                                                    <Binding Path="Item.Id" />
+                                                </MultiBinding>
+                                            </StackPanel.Visibility>
+                                            <Border Background="#0DDCDC57" CornerRadius="4" Padding="8"
+                                                    BorderBrush="#33DCDC57" BorderThickness="1" Margin="0,0,0,8">
+                                                <TextBox Background="Transparent" BorderThickness="0"
+                                                         Foreground="{StaticResource Accent}" FontSize="13" FontWeight="SemiBold"
+                                                         Text="{Binding DataContext.EditMemo, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                            </Border>
+                                            <Border Background="#08FFFFFF" CornerRadius="6" Padding="8"
+                                                    BorderBrush="#33DCDC57" BorderThickness="1">
+                                                <TextBox Background="Transparent" BorderThickness="0"
+                                                         Foreground="White" FontSize="14" MinHeight="120"
+                                                         AcceptsReturn="True" TextWrapping="Wrap"
+                                                         VerticalScrollBarVisibility="Auto"
+                                                         Text="{Binding DataContext.EditContent, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                            </Border>
+                                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                                <Button Content="Save" Style="{StaticResource ActionButton}" Margin="0,0,8,0"
+                                                        Click="OnInlineSave"
+                                                        Background="{StaticResource Accent}" Foreground="#121212" BorderThickness="0" />
+                                                <Button Content="Cancel" Style="{StaticResource ActionButton}"
+                                                        Click="OnInlineCancel"
+                                                        Background="#0DFFFFFF" Foreground="{StaticResource SubText}" />
+                                            </StackPanel>
+                                        </StackPanel>
                                     </Grid>
                                 </Grid>
                             </Border>
@@ -415,12 +494,12 @@
                         </ControlTemplate>
                     </Thumb.Template>
                 </Thumb>
-            </Grid>
 
-            <!-- Settings panel -->
-            <Border Background="{StaticResource Bg}" CornerRadius="16"
-                    Visibility="{Binding CurrentView, Converter={StaticResource SettingsVis}, ConverterParameter=Settings}">
-                <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,56,0,0">
+                <!-- Settings panel (lives in the content row so the header /
+                     back button stay visible, matching macOS) -->
+                <Border Grid.Row="1" Background="{StaticResource Bg}"
+                        Visibility="{Binding CurrentView, Converter={StaticResource SettingsVis}, ConverterParameter=Settings}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0">
                     <StackPanel Margin="16">
 
                         <!-- ===== Shortcut ===== -->
@@ -581,7 +660,8 @@
                         </Border>
                     </StackPanel>
                 </ScrollViewer>
-            </Border>
+                </Border>
+            </Grid>
 
             <!-- Detail overlay -->
             <Border Background="#99000000" CornerRadius="16"
@@ -620,31 +700,6 @@
                                      TextWrapping="Wrap" IsTabStop="False" />
                         </ScrollViewer>
                     </Grid>
-                </Border>
-            </Border>
-
-            <!-- Edit overlay -->
-            <Border Background="#CC000000" CornerRadius="16"
-                    Visibility="{Binding IsEditing, Converter={StaticResource BoolVis}}">
-                <Border Background="#1E1E1E" CornerRadius="8" Margin="20" Padding="16" VerticalAlignment="Center">
-                    <StackPanel>
-                        <TextBlock Text="Edit Item" Foreground="{StaticResource Accent}" FontWeight="SemiBold" Margin="0,0,0,10" />
-                        <Border Background="#0DDCDC57" CornerRadius="4" Padding="6" Margin="0,0,0,8"
-                                BorderBrush="#33DCDC57" BorderThickness="1">
-                            <TextBox x:Name="EditMemoBox" Background="Transparent" BorderThickness="0"
-                                     Foreground="{StaticResource Accent}" FontSize="13" FontWeight="SemiBold"
-                                     Text="{Binding EditMemo, UpdateSourceTrigger=PropertyChanged}" />
-                        </Border>
-                        <Border Background="#08FFFFFF" CornerRadius="6" Padding="6"
-                                BorderBrush="#33DCDC57" BorderThickness="1">
-                            <TextBox x:Name="EditBox" Background="Transparent" BorderThickness="0"
-                                     Foreground="{StaticResource Fg}" AcceptsReturn="True" MinHeight="120"
-                                     TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
-                                     Text="{Binding EditContent, UpdateSourceTrigger=PropertyChanged}" />
-                        </Border>
-                        <TextBlock Text="Ctrl+Enter to save  •  Esc to cancel"
-                                   Foreground="{StaticResource SubText}" FontSize="11" Margin="0,8,0,0" />
-                    </StackPanel>
                 </Border>
             </Border>
 

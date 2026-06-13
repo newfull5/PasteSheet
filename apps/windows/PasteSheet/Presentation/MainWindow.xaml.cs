@@ -5,6 +5,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using PasteSheet.App;
 using PasteSheet.Services;
@@ -47,11 +48,28 @@ public partial class MainWindow : Window, IWindowHost
 
     bool IWindowHost.IsVisible => IsVisible;
 
+    private const double SlideOffset = 48;
+    private static readonly Duration SlideDuration = new(TimeSpan.FromMilliseconds(190));
+
     public void ShowPanel()
     {
         PositionWindow();
+        double dockedLeft = Left;
+
+        // Start just off the right edge, transparent, then slide/fade into place.
+        BeginAnimation(LeftProperty, null);
+        BeginAnimation(OpacityProperty, null);
+        Opacity = 0;
+        Left = dockedLeft + SlideOffset;
         Show();
         Activate();
+
+        var ease = new CubicEase { EasingMode = EasingMode.EaseOut };
+        BeginAnimation(LeftProperty,
+            new DoubleAnimation(dockedLeft + SlideOffset, dockedLeft, SlideDuration) { EasingFunction = ease });
+        BeginAnimation(OpacityProperty,
+            new DoubleAnimation(0, 1, SlideDuration));
+
         Dispatcher.BeginInvoke(() =>
         {
             SearchBox.Focus();
@@ -59,7 +77,31 @@ public partial class MainWindow : Window, IWindowHost
         }, DispatcherPriority.Input);
     }
 
-    public void HidePanel() => Hide();
+    public void HidePanel()
+    {
+        if (!IsVisible) return;
+        double from = Left;
+        var ease = new CubicEase { EasingMode = EasingMode.EaseIn };
+        var slide = new DoubleAnimation(from, from + SlideOffset, SlideDuration) { EasingFunction = ease };
+        var fade = new DoubleAnimation(Opacity, 0, SlideDuration);
+        fade.Completed += (_, _) =>
+        {
+            BeginAnimation(LeftProperty, null);
+            BeginAnimation(OpacityProperty, null);
+            Opacity = 1;
+            Hide();
+        };
+        BeginAnimation(LeftProperty, slide);
+        BeginAnimation(OpacityProperty, fade);
+    }
+
+    public void HidePanelImmediate()
+    {
+        BeginAnimation(LeftProperty, null);
+        BeginAnimation(OpacityProperty, null);
+        Opacity = 1;
+        Hide();
+    }
 
     public void FocusSearch() => SearchBox.Focus();
 
@@ -95,7 +137,7 @@ public partial class MainWindow : Window, IWindowHost
         if (!IsVisible) return;
         if (_vm.HasModal) return; // keep open while a modal is up
         _vm.OnPanelHidden();
-        Hide();
+        HidePanel();
     }
 
     // MARK: - Keyboard
@@ -118,9 +160,6 @@ public partial class MainWindow : Window, IWindowHost
         {
             case nameof(AppViewModel.HasModal) when _vm.HasModal && _vm.Modal!.ShowInput:
                 Dispatcher.BeginInvoke(() => { ModalInput.Focus(); ModalInput.SelectAll(); }, DispatcherPriority.Input);
-                break;
-            case nameof(AppViewModel.IsEditing) when _vm.IsEditing:
-                Dispatcher.BeginInvoke(() => { EditBox.Focus(); EditBox.CaretIndex = EditBox.Text.Length; }, DispatcherPriority.Input);
                 break;
         }
     }
@@ -158,6 +197,9 @@ public partial class MainWindow : Window, IWindowHost
     {
         if (RowItemFrom(sender) is { Item: { } item }) _vm.DeleteItem(item.Id);
     }
+
+    private void OnInlineSave(object sender, RoutedEventArgs e) => _vm.SaveEdit();
+    private void OnInlineCancel(object sender, RoutedEventArgs e) => _vm.CancelEdit();
 
     private static RowItem? RowItemFrom(object sender) =>
         (sender as FrameworkElement)?.DataContext as RowItem;

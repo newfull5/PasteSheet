@@ -247,14 +247,15 @@ public sealed class AppViewModel : INotifyPropertyChanged
 
     // MARK: - Item Actions
 
-    public void PasteItem(PasteItem item)
+    public async void PasteItem(PasteItem item)
     {
-        Host?.HidePanel();
-        Task.Run(async () =>
-        {
-            await Task.Delay(Constants.PasteToggleDelayMs);
-            _pasteText.Execute(item.Content);
-        });
+        // Order matters: hand focus back to the target while we still own the
+        // foreground (allowed), THEN hide, THEN paste. Hiding first would drop
+        // our foreground and the OS would block the focus handover.
+        _pasteText.PrepareAndRestoreFocus(item.Content);
+        Host?.HidePanelImmediate();
+        // Adaptive: waits only until the target regains foreground, then pastes.
+        await _pasteText.SendPasteWhenReadyAsync();
     }
 
     public void StartEdit(PasteItem item)
