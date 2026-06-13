@@ -404,6 +404,114 @@ public sealed class AppViewModel : INotifyPropertyChanged
         set { _settingsUseCase.SetAutoStart(value); OnChanged(); }
     }
 
+    public bool AutoHideEnabled
+    {
+        get => _settingsUseCase.GetSetting("auto_hide_enabled") == "true";
+        set
+        {
+            _settingsUseCase.SetSetting("auto_hide_enabled", value ? "true" : "false");
+            _autoHideEnabled = value;
+            OnChanged();
+            if (value) ResetAutoHideTimer(); else ClearAutoHideTimer();
+        }
+    }
+
+    public int AutoHideTimeout
+    {
+        get
+        {
+            return int.TryParse(_settingsUseCase.GetSetting("auto_hide_timeout"), out var t)
+                ? t : Constants.DefaultAutoHideTimeout;
+        }
+        set
+        {
+            _settingsUseCase.SetSetting("auto_hide_timeout", value.ToString());
+            _autoHideTimeout = value;
+            OnChanged();
+            if (_autoHideEnabled) ResetAutoHideTimer();
+        }
+    }
+
+    public void SetAutoHideTimeout(int seconds) => AutoHideTimeout = seconds;
+
+    public bool AutoUpdateEnabled
+    {
+        get => _settingsUseCase.GetSetting("auto_update_enabled") != "false";
+        set { _settingsUseCase.SetSetting("auto_update_enabled", value ? "true" : "false"); OnChanged(); }
+    }
+
+    /// Formatted toggle shortcut, e.g. "Ctrl Shift V" (Windows-style).
+    public string ShortcutDisplay
+    {
+        get
+        {
+            var raw = _settingsUseCase.GetSetting("shortcut") ?? Constants.DefaultShortcut;
+            var parts = raw.Split('+', StringSplitOptions.RemoveEmptyEntries)
+                .Select(p => p switch
+                {
+                    "CommandOrControl" or "Command" or "Ctrl" or "Control" => "Ctrl",
+                    "Option" => "Alt",
+                    "Super" => "Win",
+                    _ => p
+                });
+            return string.Join(" ", parts);
+        }
+    }
+
+    public string AppVersion => _updateService.CurrentVersion;
+    public string DeveloperName => "newfull5";
+
+    private readonly UpdateService _updateService = new();
+
+    public async void CheckForUpdates()
+    {
+        var result = await _updateService.CheckAsync();
+        if (result is not { } r)
+        {
+            Modal = new ModalState
+            {
+                Title = "Check for Updates",
+                Message = "Could not reach the update server. Please try again later.",
+                ConfirmText = "OK",
+                CancelText = "Close",
+                OnConfirm = _ => { }
+            };
+            return;
+        }
+
+        if (r.HasUpdate)
+        {
+            Modal = new ModalState
+            {
+                Title = "Update Available",
+                Message = $"Version {r.LatestVersion} is available (you have {_updateService.CurrentVersion}). Open the download page?",
+                ConfirmText = "Download",
+                OnConfirm = _ => _updateService.OpenReleasesPage()
+            };
+        }
+        else
+        {
+            Modal = new ModalState
+            {
+                Title = "You're up to date",
+                Message = $"PasteSheet {_updateService.CurrentVersion} is the latest version.",
+                ConfirmText = "OK",
+                CancelText = "Close",
+                OnConfirm = _ => { }
+            };
+        }
+    }
+
+    /// Silent background check used at startup; returns the result so the caller
+    /// can surface an unobtrusive notification (e.g. a tray balloon).
+    public async Task<UpdateService.UpdateCheckResult?> CheckUpdateSilentAsync()
+    {
+        if (!AutoUpdateEnabled) return null;
+        return await _updateService.CheckAsync();
+    }
+
+    public void OpenReleasesPage() => _updateService.OpenReleasesPage();
+
     // MARK: - Window
 
     public void ToggleWindow()

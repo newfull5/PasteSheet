@@ -7,6 +7,7 @@ public static class Constants
     public const double MouseEdgeThreshold = 2.0;
     public const double WindowWidth = 380.0;
     public const double WindowMinHeight = 300.0;
+    public const double WindowMaxHeight = 1400.0;
     public const int PasteRestoreDelayMs1 = 80;
     public const int PasteRestoreDelayMs2 = 50;
     public const int PasteToggleDelayMs = 60;

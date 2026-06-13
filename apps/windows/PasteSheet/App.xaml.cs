@@ -59,7 +59,23 @@ public partial class AppEntry : Application
         SetupTray();
         SetupHotkey(settingsUseCase);
         StartBackgroundServices();
+        CheckUpdatesOnStartup();
     }
+
+    private async void CheckUpdatesOnStartup()
+    {
+        var result = await _vm.CheckUpdateSilentAsync();
+        if (result is { HasUpdate: true } r)
+        {
+            _trayIcon.BalloonTipTitle = "PasteSheet update available";
+            _trayIcon.BalloonTipText = $"Version {r.LatestVersion} is available. Click to download.";
+            _trayIcon.BalloonTipClicked -= OnUpdateBalloonClicked;
+            _trayIcon.BalloonTipClicked += OnUpdateBalloonClicked;
+            _trayIcon.ShowBalloonTip(8000);
+        }
+    }
+
+    private void OnUpdateBalloonClicked(object? sender, EventArgs e) => _vm.OpenReleasesPage();
 
     private void SetupTray()
     {

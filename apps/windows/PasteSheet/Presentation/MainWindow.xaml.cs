@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
@@ -160,6 +161,47 @@ public partial class MainWindow : Window, IWindowHost
 
     private static RowItem? RowItemFrom(object sender) =>
         (sender as FrameworkElement)?.DataContext as RowItem;
+
+    // MARK: - Settings handlers
+
+    private void OnTimeoutClick(object sender, RoutedEventArgs e)
+    {
+        if (sender is FrameworkElement { Tag: string tag } && int.TryParse(tag, out var seconds))
+            _vm.SetAutoHideTimeout(seconds);
+    }
+
+    private void OnCheckUpdatesClick(object sender, RoutedEventArgs e) => _vm.CheckForUpdates();
+
+    // MARK: - Detail modal handlers
+
+    private void OnDetailCopy(object sender, RoutedEventArgs e)
+    {
+        if (_vm.DetailItem is { } item)
+        {
+            try { System.Windows.Clipboard.SetText(item.Content); } catch { }
+        }
+    }
+
+    private void OnDetailClose(object sender, RoutedEventArgs e) => _vm.DetailItem = null;
+
+    private void OnDetailBackdrop(object sender, MouseButtonEventArgs e)
+    {
+        if (ReferenceEquals(e.OriginalSource, sender)) _vm.DetailItem = null;
+    }
+
+    private void OnModalBackdrop(object sender, MouseButtonEventArgs e)
+    {
+        if (ReferenceEquals(e.OriginalSource, sender)) _vm.CancelModal();
+    }
+
+    // MARK: - Resize handle (vertical drag, clamped 300..1400)
+
+    private void OnResizeDrag(object sender, DragDeltaEventArgs e)
+    {
+        Height = Math.Clamp(Height + e.VerticalChange, Constants.WindowMinHeight, Constants.WindowMaxHeight);
+    }
+
+    private void OnResizeCompleted(object sender, DragCompletedEventArgs e) { }
 }
 
 internal static class NativeMethods

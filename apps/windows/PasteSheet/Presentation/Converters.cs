@@ -85,6 +85,66 @@ public sealed class ActionButtonBrushConverter : IValueConverter
         throw new NotSupportedException();
 }
 
+/// Confirm-modal button color: danger (red) vs normal (accent). Background flag
+/// switches between fill and text color.
+public sealed class ConfirmButtonBrushConverter : IValueConverter
+{
+    public bool Background { get; set; }
+
+    private static readonly Brush Accent = FrozenA(0xFF, 0xDC, 0xDC, 0x57);
+    private static readonly Brush Danger = FrozenA(0xFF, 0xEF, 0x44, 0x44);
+    private static readonly Brush Black = FrozenA(0xFF, 0x12, 0x12, 0x12);
+    private static readonly Brush White = FrozenA(0xFF, 0xFF, 0xFF, 0xFF);
+
+    private static Brush FrozenA(byte a, byte r, byte g, byte b)
+    {
+        var br = new SolidColorBrush(Color.FromArgb(a, r, g, b));
+        br.Freeze();
+        return br;
+    }
+
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        bool danger = value is bool b && b;
+        if (Background) return danger ? Danger : Accent;
+        return danger ? White : Black;
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) =>
+        throw new NotSupportedException();
+}
+
+/// Highlights a segmented timeout button (3/5/10/30/60). The bound value is the
+/// currently selected timeout int; the parameter is this button's value.
+public sealed class TimeoutSegmentConverter : IValueConverter
+{
+    public bool Background { get; set; }
+
+    private static readonly Brush Selected = FrozenA(0x26, 0xFF, 0xFF, 0xFF); // white 0.15
+    private static readonly Brush White = FrozenA(0xFF, 0xFF, 0xFF, 0xFF);
+    private static readonly Brush SubText = FrozenA(0xFF, 0x68, 0x74, 0x8D);
+    private static readonly Brush Transparent = FrozenA(0x00, 0x00, 0x00, 0x00);
+
+    private static Brush FrozenA(byte a, byte r, byte g, byte b)
+    {
+        var br = new SolidColorBrush(Color.FromArgb(a, r, g, b));
+        br.Freeze();
+        return br;
+    }
+
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        int selected = value is int i ? i : -1;
+        int self = int.TryParse(parameter as string, out var p) ? p : -2;
+        bool active = selected == self;
+        if (Background) return active ? Selected : Transparent;
+        return active ? White : SubText;
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) =>
+        throw new NotSupportedException();
+}
+
 /// Visible when the bound ViewType equals the parameter (e.g. "Settings").
 public sealed class ViewTypeVisibilityConverter : IValueConverter
 {
