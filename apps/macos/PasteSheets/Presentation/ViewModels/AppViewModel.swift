@@ -302,14 +302,14 @@ final class AppViewModel: ObservableObject {
             let posService = WindowPositionService()
             guard let pos = posService.calculatePosition(windowWidth: Constants.windowWidth) else { return }
             let targetFrame = NSRect(x: pos.origin.x, y: pos.origin.y, width: Constants.windowWidth, height: pos.height)
-            let offscreenFrame = NSRect(x: pos.origin.x + Constants.panelSlideOffset, y: pos.origin.y, width: Constants.windowWidth, height: pos.height)
+            let offscreenFrame = NSRect(x: pos.origin.x + Constants.windowWidth, y: pos.origin.y, width: Constants.windowWidth, height: pos.height)
             panel.setFrame(offscreenFrame, display: true)
             panel.alphaValue = 1
             panel.orderFrontRegardless()
             NSApp.activate(ignoringOtherApps: true)
             panel.makeKey()
             NSAnimationContext.runAnimationGroup { ctx in
-                ctx.duration = Constants.panelSlideDuration
+                ctx.duration = 0.25
                 ctx.timingFunction = CAMediaTimingFunction(name: .easeOut)
                 panel.animator().setFrame(targetFrame, display: true)
             }
@@ -323,13 +323,13 @@ final class AppViewModel: ObservableObject {
         let posService = WindowPositionService()
         guard let pos = posService.calculatePosition(windowWidth: Constants.windowWidth) else { return }
         let targetFrame = NSRect(x: pos.origin.x, y: pos.origin.y, width: Constants.windowWidth, height: pos.height)
-        let offscreenFrame = NSRect(x: pos.origin.x + Constants.panelSlideOffset, y: pos.origin.y, width: Constants.windowWidth, height: pos.height)
+        let offscreenFrame = NSRect(x: pos.origin.x + Constants.windowWidth, y: pos.origin.y, width: Constants.windowWidth, height: pos.height)
         panel.setFrame(offscreenFrame, display: true)
         panel.alphaValue = 1
         panel.orderFrontRegardless()
         panel.makeKey()
         NSAnimationContext.runAnimationGroup { ctx in
-            ctx.duration = Constants.panelSlideDuration
+            ctx.duration = 0.25
             ctx.timingFunction = CAMediaTimingFunction(name: .easeOut)
             panel.animator().setFrame(targetFrame, display: true)
         }
