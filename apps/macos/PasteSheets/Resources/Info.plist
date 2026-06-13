@@ -19,7 +19,7 @@
     <key>LSUIElement</key>
     <true/>
     <key>SUFeedURL</key>
-    <string>https://raw.githubusercontent.com/newfull5/PasteSheets/main/appcast.xml</string>
+    <string>https://raw.githubusercontent.com/newfull5/PasteSheet/main/appcast.xml</string>
     <key>SUPublicEDKey</key>
     <string>BKWpRQTjKQV/3QGSqPce778hpmXCicygJi4D3WbqH3M=</string>
 </dict>

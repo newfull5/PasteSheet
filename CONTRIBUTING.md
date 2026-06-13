@@ -1,6 +1,6 @@
 # Contributing Guide
 
-Thank you for your interest in contributing to [PasteSheets](https://github.com/newfull5/PasteSheets)! Your contributions help move the project forward.
+Thank you for your interest in contributing to [PasteSheets](https://github.com/newfull5/PasteSheet)! Your contributions help move the project forward.
 
 ## 📋 Issue Reporting Guidelines
 
