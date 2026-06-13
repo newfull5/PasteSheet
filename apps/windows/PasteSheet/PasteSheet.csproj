@@ -10,7 +10,7 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AssemblyName>PasteSheet</AssemblyName>
     <RootNamespace>PasteSheet</RootNamespace>
-    <Version>0.4.1</Version>
+    <Version>0.4.4</Version>
     <!-- WinForms (NotifyIcon/Screen) warns about manifest DPI; WPF honors it, so silence it. -->
     <NoWarn>$(NoWarn);WFAC010</NoWarn>
   </PropertyGroup>
