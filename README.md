@@ -1,49 +1,58 @@
 # PasteSheet
 
 **PasteSheet: A smart clipboard manager designed to make pasting easier**  
-Keep your clipboard history organized, editable, and instantly accessible. Built with Rust & Tauri for maximum performance.
+Keep your clipboard history organized, editable, and instantly accessible — one
+keystroke away, without ever leaving the keyboard.
+
+🌐 **[Website](https://newfull5.github.io/PasteSheets/)** · 📦 **[Releases](https://github.com/newfull5/PasteSheets/releases)** · 🐛 **[Issues](https://github.com/newfull5/PasteSheets/issues)**
 
 > ⚠️ **Beta Notice:** This project is currently in **Beta**. If you experience any issues or inconveniences, please report them in the [Issues](https://github.com/newfull5/PasteSheets/issues) section.
 
 <p align="center"><img src="docs/demo.gif" alt="PasteSheet demo — press ⌘⇧V, pick a clip, paste anywhere" width="760"></p>
 
->  currently supports **macOS**. (Windows version is under developing!)
+PasteSheet ships as **native apps** on both platforms — no Electron, no web view:
+
+- **macOS** — Swift / SwiftUI
+- **Windows** — WPF (.NET 8), distributed as a single self-contained `.exe` (no installer required)
 
 ## Installation
 
-### Method 1: Homebrew (Recommended)
-You can install PasteSheet via Homebrew by tapping the official repository:
+### macOS
+
+**Method 1: Homebrew (Recommended)**
 
 ```bash
-# 1. Tap the repository
-brew tap newfull5/tap
-
-# 2. Install the app
-brew install --cask pastesheet
+brew install --cask newfull5/tap/pastesheet
 ```
 
-### Method 2: Direct Download
-1. Download the latest `.dmg` file:
-   [**Download PasteSheet v0.1.0-beta (macOS ARM64)**](https://github.com/newfull5/PasteSheets/releases/download/v0.1.0-beta/PasteSheet_0.1.0_aarch64.dmg)
-2. Open the `.dmg` file and drag **PasteSheet** to your **Applications** folder.
+**Method 2: Direct Download**
 
-*(Note: If you are using an Intel-based Mac, please check the [Releases](https://github.com/newfull5/PasteSheets/releases) page for the appropriate version.)*
+1. Download the latest `.dmg` from the [**Releases**](https://github.com/newfull5/PasteSheets/releases/latest) page.
+2. Open the `.dmg` and drag **PasteSheet** to your **Applications** folder.
+
+> The build is a universal binary, so it runs natively on both Apple Silicon and Intel Macs.
+
+### Windows
+
+1. Download the latest `PasteSheet-*-win-x64.exe` from the [**Releases**](https://github.com/newfull5/PasteSheets/releases/latest) page.
+2. Run it — it's a single self-contained executable, **no installer and no .NET runtime required**.
 
 ## Usage
 
-| Action | Shortcut |
-| :--- | :--- |
-| **Toggle App** | `Cmd` + `Shift` + `V` |
-| **Navigate** | `↑` `↓` `←` `→` Arrow Keys |
-| **Paste / Select** | `Enter` |
-| **Edit Item** | `Cmd` + `E` |
-| **Close** | `Esc` |
+| Action | macOS | Windows |
+| :--- | :--- | :--- |
+| **Toggle App** | `Cmd` + `Shift` + `V` | `Ctrl` + `Shift` + `V` |
+| **Navigate** | `↑` `↓` `←` `→` Arrow Keys | `↑` `↓` `←` `→` Arrow Keys |
+| **Paste / Select** | `Enter` | `Enter` |
+| **Edit Item** | `Cmd` + `E` | `Ctrl` + `E` |
+| **Close** | `Esc` | `Esc` |
 
 **Pro Tip:** Move your mouse cursor to the **right edge** of the screen to quickly peek at your clipboard!
 
 ## 🛠 Troubleshooting
 
 ### ⚠️ macOS "Damaged" Error
+
 Since this app is not signed with an Apple Developer certificate, macOS may show a "damaged" error or block the app from opening. To fix this, run the following command in your terminal:
 
 ```bash
