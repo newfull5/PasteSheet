@@ -11,7 +11,7 @@
     <AssemblyName>PasteSheet</AssemblyName>
     <RootNamespace>PasteSheet</RootNamespace>
     <ApplicationIcon>Assets\icon.ico</ApplicationIcon>
-    <Version>0.4.8</Version>
+    <Version>0.4.9</Version>
     <!-- WinForms (NotifyIcon/Screen) warns about manifest DPI; WPF honors it, so silence it. -->
     <NoWarn>$(NoWarn);WFAC010</NoWarn>
   </PropertyGroup>

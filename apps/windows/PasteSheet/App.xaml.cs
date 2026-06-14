@@ -1,4 +1,5 @@
 using System.Drawing;
+using System.Threading;
 using System.Windows;
 using System.Windows.Forms;
 using PasteSheet.Data.DataSources;
@@ -17,6 +18,12 @@ public partial class AppEntry : Application
     private NotifyIcon _trayIcon = null!;
     private AppViewModel _vm = null!;
 
+    // Single-instance guard. A second launch signals the running instance to
+    // surface its panel, then exits — so the exe never opens twice.
+    private const string SingleInstanceId = "PasteSheet.SingleInstance.6f1c2a9e";
+    private Mutex? _singleInstanceMutex;
+    private EventWaitHandle? _activationEvent;
+
     private readonly ClipboardService _clipboardService = new();
     private readonly ForegroundWindowService _foregroundWindowService = new();
     private readonly KeySimulationService _keySimService = new();
@@ -27,6 +34,16 @@ public partial class AppEntry : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+
+        // If another instance is already running, signal it to show and bail out.
+        _singleInstanceMutex = new Mutex(initiallyOwned: true, SingleInstanceId, out bool createdNew);
+        if (!createdNew)
+        {
+            try { EventWaitHandle.OpenExisting(SingleInstanceId).Set(); }
+            catch { /* the other instance may be shutting down; nothing to do */ }
+            Shutdown();
+            return;
+        }
 
         try { DatabaseManager.Shared.Initialize(); }
         catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"DB init failed: {ex}"); Shutdown(); return; }
@@ -58,8 +75,24 @@ public partial class AppEntry : Application
 
         SetupTray();
         SetupHotkey(settingsUseCase);
+        SetupActivationListener();
         StartBackgroundServices();
         CheckUpdatesOnStartup();
+    }
+
+    // Listen for a second launch (which signals SingleInstanceId) and surface
+    // the panel on the UI thread when it happens.
+    private void SetupActivationListener()
+    {
+        _activationEvent = new EventWaitHandle(false, EventResetMode.AutoReset, SingleInstanceId);
+        ThreadPool.RegisterWaitForSingleObject(
+            _activationEvent,
+            (_, _) => Dispatcher.Invoke(() =>
+            {
+                _window.SaveForegroundBeforeShow();
+                if (!(_vm.Host?.IsVisible ?? false)) _vm.ToggleWindow();
+            }),
+            null, Timeout.Infinite, executeOnlyOnce: false);
     }
 
     private async void CheckUpdatesOnStartup()
@@ -137,6 +170,8 @@ public partial class AppEntry : Application
     {
         _trayIcon?.Dispose();
         _hotkeyService?.Dispose();
+        _activationEvent?.Dispose();
+        _singleInstanceMutex?.Dispose();
         base.OnExit(e);
     }
 }
