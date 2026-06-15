@@ -355,6 +355,7 @@ final class AppViewModel: ObservableObject {
         guard autoHideEnabled, isWindowVisible else { return }
         clearAutoHideTimer()
         autoHideTimer = Timer.scheduledTimer(withTimeInterval: TimeInterval(autoHideTimeout), repeats: false) { [weak self] _ in
+            guard self?.modalConfig == nil, self?.editingItemId == nil else { return }
             self?.toggleWindow()
         }
     }
