@@ -6,6 +6,20 @@
         <description>PasteSheet Updates</description>
         <language>en</language>
         <item>
+            <title>Version 0.5.0</title>
+            <description><![CDATA[<ul><li>New folder via keyboard: Enter opens the name field, and Enter after typing creates the folder.</li><li>Keep the panel open during modals and inline edits; confirm modals with Enter.</li></ul>]]></description>
+            <sparkle:version>12</sparkle:version>
+            <sparkle:shortVersionString>0.5.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+            <pubDate>Tue, 16 Jun 2026 06:27:01 +0000</pubDate>
+            <enclosure
+                url="https://github.com/newfull5/PasteSheet/releases/download/v0.5.0/PasteSheet_0.5.0_universal.dmg"
+                length="1770832"
+                type="application/octet-stream"
+                sparkle:edSignature="dp/1rs96LqKGNOkaV5yU1T4p0JGFUhoogE/9aaPJV8gXCeVtXQHRYcaj71LR8R3O+8TehuJGMOsRhBykbpb+CA=="
+            />
+        </item>
+        <item>
             <title>Version 0.4.9</title>
             <description><![CDATA[<ul><li>Repository renamed to PasteSheet — all internal URLs updated.</li></ul>]]></description>
             <sparkle:version>11</sparkle:version>
