@@ -36,6 +36,7 @@ final class AppViewModel: ObservableObject {
     @Published var isAutoHideMode = false
     @Published var shouldFocusSearch = false
     @Published var shouldStartFolderCreation = false
+    @Published var shouldStartItemCreation = false
 
     // MARK: - Auto-hide
     private var autoHideEnabled = false
@@ -460,7 +461,16 @@ final class AppViewModel: ObservableObject {
                 return true
             }
             if currentView == .items {
-                executeItemAction()
+                let items = filteredItems
+                if selectedIndex < items.count {
+                    executeItemAction()
+                    return true
+                }
+                // New Item row: when its TextField/TextEditor is focused, let the
+                // Enter fall through to the field so it inserts a newline / commits.
+                if isInput { return false }
+                // Otherwise activate the inline creation form for a new item.
+                shouldStartItemCreation = true
                 return true
             }
         }
