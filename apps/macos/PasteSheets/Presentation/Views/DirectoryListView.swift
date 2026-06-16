@@ -4,6 +4,7 @@ struct DirectoryListView: View {
     @ObservedObject var vm: AppViewModel
     @State private var isCreating = false
     @State private var newFolderName = ""
+    @FocusState private var folderFieldFocused: Bool
 
     var body: some View {
         ScrollViewReader { proxy in
@@ -36,6 +37,13 @@ struct DirectoryListView: View {
                     proxy.scrollTo(idx, anchor: .center)
                 }
             }
+            .onChange(of: vm.shouldStartFolderCreation) { start in
+                if start {
+                    isCreating = true
+                    folderFieldFocused = true
+                    vm.shouldStartFolderCreation = false
+                }
+            }
         }
     }
 
@@ -54,6 +62,7 @@ struct DirectoryListView: View {
                 .textFieldStyle(.plain)
                 .font(.system(size: 14))
                 .foregroundColor(.white)
+                .focused($folderFieldFocused)
                 .onExitCommand {
                     isCreating = false
                     newFolderName = ""

@@ -35,6 +35,7 @@ final class AppViewModel: ObservableObject {
     @Published var buttonFocusIndex = 0
     @Published var isAutoHideMode = false
     @Published var shouldFocusSearch = false
+    @Published var shouldStartFolderCreation = false
 
     // MARK: - Auto-hide
     private var autoHideEnabled = false
@@ -380,8 +381,6 @@ final class AppViewModel: ObservableObject {
         let fr = panel?.firstResponder
         let isInput = fr is NSTextView || fr is NSTextField
         let hasCmd = event.modifierFlags.contains(.command)
-        let msg = "[VM] key=\(event.keyCode) isInput=\(isInput) view=\(currentView) idx=\(selectedIndex) count=\(listCount) fr=\(String(describing: fr))\n"
-        FileHandle.standardError.write(Data(msg.utf8))
 
         // Escape chain
         if event.keyCode == 53 { // Escape
@@ -451,7 +450,13 @@ final class AppViewModel: ObservableObject {
                 let dirs = filteredDirectories
                 if selectedIndex < dirs.count {
                     showItemView(directoryName: dirs[selectedIndex].name)
+                    return true
                 }
+                // New Folder row: when its TextField is focused, let the Enter
+                // fall through to the field's onCommit so the folder is created.
+                if isInput { return false }
+                // Otherwise activate the inline TextField for folder creation.
+                shouldStartFolderCreation = true
                 return true
             }
             if currentView == .items {
