@@ -32,6 +32,7 @@ struct SearchResultView: View {
                                 activeButtonIndex: vm.selectedIndex == globalIdx ? vm.buttonFocusIndex : -1,
                                 isEditing: vm.editingItemId == item.id,
                                 showFolderLabel: true,
+                                searchQuery: vm.searchQuery,
                                 editContent: $vm.editContent,
                                 editMemo: $vm.editMemo,
                                 onPaste: { vm.pasteItem(item) },
