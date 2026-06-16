@@ -6,6 +6,20 @@
         <description>PasteSheet Updates</description>
         <language>en</language>
         <item>
+            <title>Version 0.5.3</title>
+            <description><![CDATA[<ul><li>Fix search results not updating as you type.</li><li>Long text shows snippet around the match so highlights are always visible.</li></ul>]]></description>
+            <sparkle:version>15</sparkle:version>
+            <sparkle:shortVersionString>0.5.3</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+            <pubDate>Mon, 16 Jun 2026 21:40:00 +0000</pubDate>
+            <enclosure
+                url="https://github.com/newfull5/PasteSheet/releases/download/v0.5.3/PasteSheet_0.5.3_universal.dmg"
+                length="1777832"
+                type="application/octet-stream"
+                sparkle:edSignature="yK0RGubJKutfBPyP2+Qv7D7QBLVFPdmxuHDj//ootqtSvA3O5e9f3alvbC7lV5dzZYMo+uockrpmReMIisYIDw=="
+            />
+        </item>
+        <item>
             <title>Version 0.5.2</title>
             <description><![CDATA[<ul><li>ESC back navigation: press ESC to go back, ESC at home closes the window.</li><li>Search highlighting: matched text is highlighted with accent color.</li></ul>]]></description>
             <sparkle:version>14</sparkle:version>

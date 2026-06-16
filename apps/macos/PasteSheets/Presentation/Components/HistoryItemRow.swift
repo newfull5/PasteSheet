@@ -89,7 +89,7 @@ struct HistoryItemRow: View {
         }
 
         // Content
-        highlightedText(item.content, baseColor: isSelected ? .white : .white.opacity(0.7))
+        highlightedText(snippetForSearch(item.content), baseColor: isSelected ? .white : .white.opacity(0.7))
             .font(.system(size: 14))
             .lineLimit(isSelected ? 15 : 1)
             .truncationMode(.tail)
@@ -136,6 +136,17 @@ struct HistoryItemRow: View {
             ActionButton(label: "Save", isActive: true, isDanger: false, action: onSave)
             ActionButton(label: "Cancel", isActive: false, isDanger: false, action: onCancel)
         }
+    }
+
+    private func snippetForSearch(_ text: String) -> String {
+        guard !searchQuery.isEmpty else { return text }
+        let lower = text.lowercased()
+        let query = searchQuery.lowercased()
+        guard let range = lower.range(of: query) else { return text }
+        let matchStart = lower.distance(from: lower.startIndex, to: range.lowerBound)
+        if matchStart <= 60 { return text }
+        let snippetStart = text.index(text.startIndex, offsetBy: max(0, matchStart - 20))
+        return "…" + String(text[snippetStart...])
     }
 
     private func highlightedText(_ text: String, baseColor: Color) -> Text {

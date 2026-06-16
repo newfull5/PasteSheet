@@ -9,7 +9,7 @@ struct SearchResultView: View {
     var body: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                LazyVStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 4) {
                     if !dirs.isEmpty {
                         sectionHeader("Folders")
                         ForEach(Array(dirs.enumerated()), id: \.element.id) { index, dir in
