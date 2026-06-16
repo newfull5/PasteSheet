@@ -29,7 +29,7 @@ struct ItemListView: View {
                     }
 
                     newItemRow
-                        .id(vm.filteredItems.count)
+                        .id("new-item-row")
 
                     if vm.filteredItems.isEmpty && !isCreating {
                         Text("No items found in this folder")
@@ -44,7 +44,17 @@ struct ItemListView: View {
             }
             .onChange(of: vm.selectedIndex) { idx in
                 withAnimation(.easeInOut(duration: 0.15)) {
-                    proxy.scrollTo(idx, anchor: .center)
+                    if idx == vm.filteredItems.count {
+                        proxy.scrollTo("new-item-row", anchor: .center)
+                    } else {
+                        proxy.scrollTo(idx, anchor: .center)
+                    }
+                }
+            }
+            .onChange(of: vm.shouldStartItemCreation) { start in
+                if start {
+                    isCreating = true
+                    vm.shouldStartItemCreation = false
                 }
             }
         }
