@@ -6,6 +6,20 @@
         <description>PasteSheet Updates</description>
         <language>en</language>
         <item>
+            <title>Version 0.5.2</title>
+            <description><![CDATA[<ul><li>ESC back navigation: press ESC to go back, ESC at home closes the window.</li><li>Search highlighting: matched text is highlighted with accent color.</li></ul>]]></description>
+            <sparkle:version>14</sparkle:version>
+            <sparkle:shortVersionString>0.5.2</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+            <pubDate>Mon, 16 Jun 2026 16:00:00 +0000</pubDate>
+            <enclosure
+                url="https://github.com/newfull5/PasteSheet/releases/download/v0.5.2/PasteSheet_0.5.2_universal.dmg"
+                length="1777026"
+                type="application/octet-stream"
+                sparkle:edSignature="b1x2nrSd9fjQ3zTenUbKSD65HC+GFxO1TeFaC5Np3lg1UOooFFRE3ZrrHtfYxy9pfvsKjEA4dxq3StikAvw6CQ=="
+            />
+        </item>
+        <item>
             <title>Version 0.5.1</title>
             <description><![CDATA[<ul><li>New Item via keyboard: Enter opens and focuses the input form.</li><li>Fixed the New Item form not closing after Save; the new item now appears immediately.</li></ul>]]></description>
             <sparkle:version>13</sparkle:version>
