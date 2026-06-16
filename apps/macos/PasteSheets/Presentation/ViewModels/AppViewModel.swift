@@ -390,6 +390,7 @@ final class AppViewModel: ObservableObject {
             if editingItemId != nil { editingItemId = nil; return true }
             if currentView == .settings { showDirectoryView(); return true }
             if !searchQuery.isEmpty { searchQuery = ""; return true }
+            if currentView == .items { showDirectoryView(); return true }
             toggleWindow()
             return true
         }

@@ -13,9 +13,11 @@ struct HistoryItemRow: View {
     let onDelete: () -> Void
     let onSave: () -> Void
     let onCancel: () -> Void
+    let searchQuery: String
 
     init(item: PasteItem, isSelected: Bool, activeButtonIndex: Int = -1,
          isEditing: Bool = false, showFolderLabel: Bool = false,
+         searchQuery: String = "",
          editContent: Binding<String>, editMemo: Binding<String>,
          onPaste: @escaping () -> Void, onEdit: @escaping () -> Void,
          onDelete: @escaping () -> Void, onSave: @escaping () -> Void,
@@ -32,6 +34,7 @@ struct HistoryItemRow: View {
         self.onDelete = onDelete
         self.onSave = onSave
         self.onCancel = onCancel
+        self.searchQuery = searchQuery
     }
 
     private let accent = Color(nsColor: Constants.accentColor)
@@ -69,9 +72,8 @@ struct HistoryItemRow: View {
         // Header: memo + folder label
         HStack {
             if let memo = item.memo, !memo.isEmpty {
-                Text(memo)
+                highlightedText(memo, baseColor: Color(nsColor: Constants.memoColor))
                     .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(Color(nsColor: Constants.memoColor)) // #e2e2b6
                     .lineLimit(1)
             }
             Spacer()
@@ -87,9 +89,8 @@ struct HistoryItemRow: View {
         }
 
         // Content
-        Text(item.content)
+        highlightedText(item.content, baseColor: isSelected ? .white : .white.opacity(0.7))
             .font(.system(size: 14))
-            .foregroundColor(isSelected ? .white : .white.opacity(0.7))
             .lineLimit(isSelected ? 15 : 1)
             .truncationMode(.tail)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -135,6 +136,29 @@ struct HistoryItemRow: View {
             ActionButton(label: "Save", isActive: true, isDanger: false, action: onSave)
             ActionButton(label: "Cancel", isActive: false, isDanger: false, action: onCancel)
         }
+    }
+
+    private func highlightedText(_ text: String, baseColor: Color) -> Text {
+        guard !searchQuery.isEmpty else {
+            return Text(text).foregroundColor(baseColor)
+        }
+        let lower = text.lowercased()
+        let query = searchQuery.lowercased()
+        var result = Text("")
+        var current = lower.startIndex
+        while let range = lower.range(of: query, range: current..<lower.endIndex) {
+            if current < range.lowerBound {
+                result = result + Text(text[current..<range.lowerBound]).foregroundColor(baseColor)
+            }
+            result = result + Text(text[range])
+                .foregroundColor(Color(nsColor: Constants.accentColor))
+                .bold()
+            current = range.upperBound
+        }
+        if current < lower.endIndex {
+            result = result + Text(text[current..<lower.endIndex]).foregroundColor(baseColor)
+        }
+        return result
     }
 
     private func formatDate(_ str: String) -> String {
