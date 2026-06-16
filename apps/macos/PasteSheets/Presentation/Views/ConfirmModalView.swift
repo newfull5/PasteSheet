@@ -55,6 +55,7 @@ struct ConfirmModalView: View {
                         config.onConfirm(config.showInput ? inputValue : nil)
                         onDismiss()
                     }
+                    .keyboardShortcut(.defaultAction)
                     .buttonStyle(.plain)
                     .foregroundColor(config.isDanger ? .white : .black)
                     .fontWeight(.bold)
