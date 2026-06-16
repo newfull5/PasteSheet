@@ -6,6 +6,20 @@
         <description>PasteSheet Updates</description>
         <language>en</language>
         <item>
+            <title>Version 0.5.1</title>
+            <description><![CDATA[<ul><li>New Item via keyboard: Enter opens and focuses the input form.</li><li>Fixed the New Item form not closing after Save; the new item now appears immediately.</li></ul>]]></description>
+            <sparkle:version>13</sparkle:version>
+            <sparkle:shortVersionString>0.5.1</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+            <pubDate>Tue, 16 Jun 2026 07:12:01 +0000</pubDate>
+            <enclosure
+                url="https://github.com/newfull5/PasteSheet/releases/download/v0.5.1/PasteSheet_0.5.1_universal.dmg"
+                length="1773595"
+                type="application/octet-stream"
+                sparkle:edSignature="Y5xzLbbHtw4N01HROWZSvmeiXPrKhpBCvEtQ/T0NTfMuXr3JfQg5b00g/X10Q1XAN9CrmKOdmVWIzeErY+R3CQ=="
+            />
+        </item>
+        <item>
             <title>Version 0.5.0</title>
             <description><![CDATA[<ul><li>New folder via keyboard: Enter opens the name field, and Enter after typing creates the folder.</li><li>Keep the panel open during modals and inline edits; confirm modals with Enter.</li></ul>]]></description>
             <sparkle:version>12</sparkle:version>
