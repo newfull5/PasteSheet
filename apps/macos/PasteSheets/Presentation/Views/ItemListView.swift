@@ -2,7 +2,10 @@ import SwiftUI
 
 struct ItemListView: View {
     @ObservedObject var vm: AppViewModel
-    @State private var isCreating = false
+    private var isCreating: Bool {
+        get { vm.isCreatingItem }
+        nonmutating set { vm.isCreatingItem = newValue }
+    }
     @State private var newMemo = ""
     @State private var newContent = ""
 
