@@ -22,7 +22,12 @@ final class AppViewModel: ObservableObject {
     // MARK: - State
     @Published var currentView: ViewType = .directories
     @Published var isWindowVisible = false
-    @Published var searchQuery = ""
+    @Published var searchQuery = "" {
+        didSet {
+            guard searchQuery != oldValue else { return }
+            debounceSearch()
+        }
+    }
     @Published var selectedIndex = 0
     @Published var directories: [DirectoryInfo] = []
     @Published var allItems: [PasteItem] = []
@@ -37,6 +42,13 @@ final class AppViewModel: ObservableObject {
     @Published var shouldFocusSearch = false
     @Published var shouldStartFolderCreation = false
     @Published var shouldStartItemCreation = false
+
+    private struct SearchResult {
+        let directories: [DirectoryInfo]
+        let items: [PasteItem]
+    }
+    @Published private var searchResult: SearchResult?
+    private var searchTask: Task<Void, Never>?
 
     // MARK: - Auto-hide
     private var autoHideEnabled = false
@@ -80,12 +92,12 @@ final class AppViewModel: ObservableObject {
 
     var filteredDirectories: [DirectoryInfo] {
         guard !searchQuery.isEmpty else { return directories }
-        return searchUseCase.search(query: searchQuery, allItems: allItems, allDirectories: directories).directories
+        return searchResult?.directories ?? []
     }
 
     var filteredItems: [PasteItem] {
         if !searchQuery.isEmpty {
-            return searchUseCase.search(query: searchQuery, allItems: allItems, allDirectories: directories).items
+            return searchResult?.items ?? []
         }
         return allItems.filter { $0.directory == currentDirectory }
     }
@@ -97,6 +109,24 @@ final class AppViewModel: ObservableObject {
             return filteredDirectories.count + 1 // +1 for "New Folder"
         } else {
             return filteredItems.count + 1 // +1 for "New Item"
+        }
+    }
+
+    private func debounceSearch() {
+        searchTask?.cancel()
+        guard !searchQuery.isEmpty else {
+            searchResult = nil
+            return
+        }
+        let query = searchQuery
+        let items = allItems
+        let dirs = directories
+        let useCase = searchUseCase
+        searchTask = Task { @MainActor [weak self] in
+            try? await Task.sleep(nanoseconds: 150_000_000)
+            guard !Task.isCancelled, let self else { return }
+            let result = useCase.search(query: query, allItems: items, allDirectories: dirs)
+            self.searchResult = SearchResult(directories: result.directories, items: result.items)
         }
     }
 
