@@ -41,9 +41,14 @@ final class AppViewModel: ObservableObject {
     @Published var isAutoHideMode = false
     @Published var shouldFocusSearch = false
     @Published var shouldStartFolderCreation = false
-    @Published var isCreatingFolder = false
+    @Published var isCreatingFolder = false {
+        didSet { if !isCreatingFolder { panel?.makeFirstResponder(nil) } }
+    }
     @Published var shouldStartItemCreation = false
-    @Published var isCreatingItem = false
+    @Published var isCreatingItem = false {
+        didSet { if !isCreatingItem { panel?.makeFirstResponder(nil) } }
+    }
+    @Published var shouldSaveNewItem = false
 
     private struct SearchResult {
         let directories: [DirectoryInfo]
@@ -186,6 +191,8 @@ final class AppViewModel: ObservableObject {
         // Start fresh on open: clear any previous search so the next keystroke
         // searches immediately, and show the directory list from the top.
         searchQuery = ""
+        isCreatingFolder = false
+        isCreatingItem = false
         if currentView == .directories {
             selectedIndex = 0
         }
@@ -420,6 +427,8 @@ final class AppViewModel: ObservableObject {
             if modalConfig != nil { modalConfig = nil; return true }
             if detailItem != nil { detailItem = nil; return true }
             if editingItemId != nil { editingItemId = nil; return true }
+            if isCreatingFolder { isCreatingFolder = false; return true }
+            if isCreatingItem { isCreatingItem = false; return true }
             if currentView == .settings { showDirectoryView(); return true }
             if !searchQuery.isEmpty { searchQuery = ""; return true }
             if currentView == .items { showDirectoryView(); return true }
@@ -430,19 +439,29 @@ final class AppViewModel: ObservableObject {
         if modalConfig != nil { return false }
         if detailItem != nil { return false }
 
-        // Cmd+Enter to save edit
-        if editingItemId != nil && isInput && event.keyCode == 36 && hasCmd {
-            saveEdit()
-            return true
+        // Cmd+Enter to save edit or new item
+        if isInput && event.keyCode == 36 && hasCmd {
+            if editingItemId != nil {
+                saveEdit()
+                return true
+            }
+            if isCreatingItem {
+                shouldSaveNewItem = true
+                return true
+            }
         }
 
         // Arrow keys always navigate, even when search field is focused
         switch event.keyCode {
         case 125: // Down
+            isCreatingFolder = false
+            isCreatingItem = false
             selectedIndex = (selectedIndex + 1) % max(listCount, 1)
             buttonFocusIndex = 0
             return true
         case 126: // Up
+            isCreatingFolder = false
+            isCreatingItem = false
             selectedIndex = (selectedIndex - 1 + max(listCount, 1)) % max(listCount, 1)
             buttonFocusIndex = 0
             return true

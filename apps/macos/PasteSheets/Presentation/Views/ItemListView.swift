@@ -62,6 +62,18 @@ struct ItemListView: View {
                     vm.shouldStartItemCreation = false
                 }
             }
+            .onChange(of: vm.shouldSaveNewItem) { save in
+                if save {
+                    let c = newContent.trimmingCharacters(in: .whitespacesAndNewlines)
+                    if !c.isEmpty {
+                        vm.createItem(content: c, memo: newMemo.isEmpty ? nil : newMemo)
+                    }
+                    isCreating = false
+                    newMemo = ""
+                    newContent = ""
+                    vm.shouldSaveNewItem = false
+                }
+            }
         }
     }
 
@@ -91,7 +103,7 @@ struct ItemListView: View {
                     .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color(nsColor: Constants.accentColor).opacity(0.2)))
 
                 HStack(spacing: 8) {
-                    ActionButton(label: "Save", isActive: true, isDanger: false) {
+                    ActionButton(label: "Save ⌘↵", isActive: true, isDanger: false) {
                         let c = newContent.trimmingCharacters(in: .whitespacesAndNewlines)
                         if !c.isEmpty {
                             vm.createItem(content: c, memo: newMemo.isEmpty ? nil : newMemo)
