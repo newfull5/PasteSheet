@@ -42,6 +42,7 @@ final class AppViewModel: ObservableObject {
     @Published var shouldFocusSearch = false
     @Published var shouldStartFolderCreation = false
     @Published var shouldStartItemCreation = false
+    @Published var isCreatingItem = false
 
     private struct SearchResult {
         let directories: [DirectoryInfo]
@@ -497,9 +498,7 @@ final class AppViewModel: ObservableObject {
                     executeItemAction()
                     return true
                 }
-                // New Item row: when its TextField/TextEditor is focused, let the
-                // Enter fall through to the field so it inserts a newline / commits.
-                if isInput { return false }
+                if isCreatingItem && isInput { return false }
                 // Otherwise activate the inline creation form for a new item.
                 shouldStartItemCreation = true
                 return true
