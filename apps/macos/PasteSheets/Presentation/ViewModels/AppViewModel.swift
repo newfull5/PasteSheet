@@ -41,6 +41,7 @@ final class AppViewModel: ObservableObject {
     @Published var isAutoHideMode = false
     @Published var shouldFocusSearch = false
     @Published var shouldStartFolderCreation = false
+    @Published var isCreatingFolder = false
     @Published var shouldStartItemCreation = false
     @Published var isCreatingItem = false
 
@@ -485,9 +486,7 @@ final class AppViewModel: ObservableObject {
                     showItemView(directoryName: dirs[selectedIndex].name)
                     return true
                 }
-                // New Folder row: when its TextField is focused, let the Enter
-                // fall through to the field's onCommit so the folder is created.
-                if isInput { return false }
+                if isCreatingFolder && isInput { return false }
                 // Otherwise activate the inline TextField for folder creation.
                 shouldStartFolderCreation = true
                 return true

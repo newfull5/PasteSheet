@@ -2,7 +2,10 @@ import SwiftUI
 
 struct DirectoryListView: View {
     @ObservedObject var vm: AppViewModel
-    @State private var isCreating = false
+    private var isCreating: Bool {
+        get { vm.isCreatingFolder }
+        nonmutating set { vm.isCreatingFolder = newValue }
+    }
     @State private var newFolderName = ""
     @FocusState private var folderFieldFocused: Bool
 

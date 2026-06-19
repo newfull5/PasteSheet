@@ -6,6 +6,20 @@
         <description>PasteSheet Updates</description>
         <language>en</language>
         <item>
+            <title>Version 0.5.7</title>
+            <description><![CDATA[<ul><li>Enter key on New Folder / New Item rows when search field has focus.</li></ul>]]></description>
+            <sparkle:version>19</sparkle:version>
+            <sparkle:shortVersionString>0.5.7</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+            <pubDate>Thu, 19 Jun 2026 15:00:00 +0000</pubDate>
+            <enclosure
+                url="https://github.com/newfull5/PasteSheet/releases/download/v0.5.7/PasteSheet_0.5.7_universal.dmg"
+                length="1779209"
+                type="application/octet-stream"
+                sparkle:edSignature="rNYFe2qQUY+HYhNTrUE1SbFY4ySiVi+lnsgAPmQcUkzxscOvHBbwT+RnCONGzB93U6NPb+cE+frKawfgh+4vDg=="
+            />
+        </item>
+        <item>
             <title>Version 0.5.6</title>
             <description><![CDATA[<ul><li>Search debounce to prevent crash on fast typing.</li><li>Enter key on New Item row when search field has focus.</li></ul>]]></description>
             <sparkle:version>18</sparkle:version>
