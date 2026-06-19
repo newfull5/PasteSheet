@@ -47,6 +47,11 @@ struct DirectoryListView: View {
                     vm.shouldStartFolderCreation = false
                 }
             }
+            .onChange(of: vm.isCreatingFolder) { creating in
+                if !creating {
+                    newFolderName = ""
+                }
+            }
         }
     }
 
@@ -66,6 +71,12 @@ struct DirectoryListView: View {
                 .font(.system(size: 14))
                 .foregroundColor(.white)
                 .focused($folderFieldFocused)
+                .onChange(of: folderFieldFocused) { focused in
+                    if !focused {
+                        isCreating = false
+                        newFolderName = ""
+                    }
+                }
                 .onExitCommand {
                     isCreating = false
                     newFolderName = ""

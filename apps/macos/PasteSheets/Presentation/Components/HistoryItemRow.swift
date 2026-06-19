@@ -133,7 +133,7 @@ struct HistoryItemRow: View {
             .overlay(RoundedRectangle(cornerRadius: 6).stroke(accent.opacity(0.2)))
 
         HStack(spacing: 8) {
-            ActionButton(label: "Save", isActive: true, isDanger: false, action: onSave)
+            ActionButton(label: "Save ⌘↵", isActive: true, isDanger: false, action: onSave)
             ActionButton(label: "Cancel", isActive: false, isDanger: false, action: onCancel)
         }
     }
