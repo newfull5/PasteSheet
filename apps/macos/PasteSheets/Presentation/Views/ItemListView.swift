@@ -8,6 +8,7 @@ struct ItemListView: View {
     }
     @State private var newMemo = ""
     @State private var newContent = ""
+    @FocusState private var memoFieldFocused: Bool
 
     var body: some View {
         ScrollViewReader { proxy in
@@ -57,6 +58,7 @@ struct ItemListView: View {
             .onChange(of: vm.shouldStartItemCreation) { start in
                 if start {
                     isCreating = true
+                    memoFieldFocused = true
                     vm.shouldStartItemCreation = false
                 }
             }
@@ -73,6 +75,7 @@ struct ItemListView: View {
                     .textFieldStyle(.plain)
                     .font(.system(size: 13, weight: .medium))
                     .foregroundColor(Color(nsColor: Constants.accentColor))
+                    .focused($memoFieldFocused)
                     .padding(8)
                     .background(Color(nsColor: Constants.accentColor).opacity(0.05))
                     .cornerRadius(4)
@@ -120,6 +123,6 @@ struct ItemListView: View {
         .background(RoundedRectangle(cornerRadius: 6).fill(isSelected ? Color(nsColor: Constants.accentColor).opacity(0.08) : Color.clear))
         .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color.white.opacity(0.05), style: StrokeStyle(lineWidth: 1, dash: [5])))
         .contentShape(Rectangle())
-        .onTapGesture { isCreating = true }
+        .onTapGesture { isCreating = true; memoFieldFocused = true }
     }
 }
