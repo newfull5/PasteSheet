@@ -9,6 +9,7 @@ struct ItemListView: View {
     @State private var newMemo = ""
     @State private var newContent = ""
     @FocusState private var memoFieldFocused: Bool
+    @FocusState private var contentFieldFocused: Bool
 
     var body: some View {
         ScrollViewReader { proxy in
@@ -28,8 +29,16 @@ struct ItemListView: View {
                             onSave: { vm.saveEdit() },
                             onCancel: { vm.cancelEdit() }
                         )
-                        .id(index)
+                        .id(item.id)
                         .onTapGesture { vm.selectedIndex = index }
+
+                        if vm.selectedIndex != index && vm.selectedIndex != index + 1
+                            && index < vm.filteredItems.count - 1 {
+                            Rectangle()
+                                .fill(Color(nsColor: Constants.dividerColor))
+                                .frame(height: 0.5)
+                                .padding(.horizontal, 8)
+                        }
                     }
 
                     newItemRow
@@ -46,32 +55,40 @@ struct ItemListView: View {
                 .padding(.horizontal, 16)
                 .padding(.vertical, 4)
             }
+            .safeAreaInset(edge: .bottom) {
+                Text("↵ paste · ⌘N new · ⌘⌫ delete")
+                    .font(.system(size: 11))
+                    .foregroundColor(Color(nsColor: Constants.textTertiary))
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 10)
+                    .background(Color(nsColor: Constants.bgContainer))
+            }
             .onChange(of: vm.selectedIndex) { idx in
                 withAnimation(.easeInOut(duration: 0.15)) {
-                    if idx == vm.filteredItems.count {
+                    let items = vm.filteredItems
+                    if idx >= items.count {
                         proxy.scrollTo("new-item-row", anchor: .center)
                     } else {
-                        proxy.scrollTo(idx, anchor: .center)
+                        proxy.scrollTo(items[idx].id, anchor: .center)
                     }
                 }
             }
             .onChange(of: vm.shouldStartItemCreation) { start in
                 if start {
                     isCreating = true
-                    memoFieldFocused = true
+                    contentFieldFocused = true
                     vm.shouldStartItemCreation = false
                 }
             }
             .onChange(of: vm.shouldSaveNewItem) { save in
                 if save {
+                    vm.shouldSaveNewItem = false
                     let c = newContent.trimmingCharacters(in: .whitespacesAndNewlines)
-                    if !c.isEmpty {
-                        vm.createItem(content: c, memo: newMemo.isEmpty ? nil : newMemo)
-                    }
+                    guard !c.isEmpty else { return }  // empty content: keep the form open
+                    vm.createItem(content: c, memo: newMemo.isEmpty ? nil : newMemo)
                     isCreating = false
                     newMemo = ""
                     newContent = ""
-                    vm.shouldSaveNewItem = false
                 }
             }
         }
@@ -83,10 +100,15 @@ struct ItemListView: View {
 
         VStack(alignment: .leading, spacing: 8) {
             if isCreating {
+                Text("CONTENT")
+                    .font(.system(size: 11))
+                    .tracking(0.4)
+                    .foregroundColor(Color(nsColor: Constants.textTertiary))
                 TextEditor(text: $newContent)
                     .font(.system(size: 14))
                     .foregroundColor(Color(nsColor: Constants.textPrimary))
                     .scrollContentBackground(.hidden)
+                    .focused($contentFieldFocused)
                     .frame(minHeight: 80)
                     .padding(8)
                     .background(Color(nsColor: Constants.surface))
@@ -94,6 +116,11 @@ struct ItemListView: View {
                     .overlay(RoundedRectangle(cornerRadius: Constants.radiusControl)
                         .stroke(Color(nsColor: Constants.neutralBorder), lineWidth: 0.5))
 
+                Text("MEMO · optional")
+                    .font(.system(size: 11))
+                    .tracking(0.4)
+                    .foregroundColor(Color(nsColor: Constants.textTertiary))
+                    .padding(.top, 2)
                 TextField("Add a note…", text: $newMemo)
                     .textFieldStyle(.plain)
                     .font(.system(size: 13, weight: .medium))
@@ -106,16 +133,16 @@ struct ItemListView: View {
                         .stroke(Color(nsColor: Constants.neutralBorder), lineWidth: 0.5))
 
                 HStack(spacing: 8) {
-                    ActionButton(label: "Save ⌘↵", variant: .goldPrimary) {
-                        let c = newContent.trimmingCharacters(in: .whitespacesAndNewlines)
-                        if !c.isEmpty {
-                            vm.createItem(content: c, memo: newMemo.isEmpty ? nil : newMemo)
-                        }
+                    Spacer()
+                    ActionButton(label: "Cancel", variant: .neutralSecondary) {
                         isCreating = false
                         newMemo = ""
                         newContent = ""
                     }
-                    ActionButton(label: "Cancel", variant: .neutralSecondary) {
+                    ActionButton(label: "Save ⌘↵", variant: .goldPrimary) {
+                        let c = newContent.trimmingCharacters(in: .whitespacesAndNewlines)
+                        guard !c.isEmpty else { return }  // empty content: keep the form open
+                        vm.createItem(content: c, memo: newMemo.isEmpty ? nil : newMemo)
                         isCreating = false
                         newMemo = ""
                         newContent = ""
@@ -140,6 +167,6 @@ struct ItemListView: View {
         .overlay(RoundedRectangle(cornerRadius: Constants.radiusControl)
             .stroke(Color(nsColor: Constants.neutralBorder), style: StrokeStyle(lineWidth: 1, dash: [5])))
         .contentShape(Rectangle())
-        .onTapGesture { isCreating = true; memoFieldFocused = true }
+        .onTapGesture { isCreating = true; contentFieldFocused = true }
     }
 }

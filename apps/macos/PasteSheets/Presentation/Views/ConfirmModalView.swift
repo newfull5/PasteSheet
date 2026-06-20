@@ -35,6 +35,21 @@ struct ConfirmModalView: View {
                     .foregroundColor(Color(nsColor: Constants.textSecondary))
                     .lineSpacing(4)
 
+                if let preview = config.preview {
+                    Text(preview.isEmpty ? "(empty)" : preview)
+                        .font(.system(size: 13, design: .monospaced))
+                        .foregroundColor(Color(nsColor: Constants.textSecondary))
+                        .lineLimit(2)
+                        .truncationMode(.tail)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 10)
+                        .background(Color(nsColor: Constants.surface))
+                        .overlay(RoundedRectangle(cornerRadius: Constants.radiusControl)
+                            .stroke(Color(nsColor: Constants.dividerColor)))
+                        .cornerRadius(Constants.radiusControl)
+                }
+
                 if config.showInput {
                     TextField("", text: $inputValue)
                         .textFieldStyle(.plain)
@@ -59,7 +74,7 @@ struct ConfirmModalView: View {
                             .stroke(Color(nsColor: Constants.neutralBorder)))
                         .cornerRadius(Constants.radiusControl)
 
-                    Button(config.confirmText) {
+                    Button(config.isDanger ? "\(config.confirmText)  ↵" : config.confirmText) {
                         config.onConfirm(config.showInput ? inputValue : nil)
                         onDismiss()
                     }

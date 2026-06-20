@@ -10,6 +10,19 @@ struct SearchResultView: View {
         ScrollViewReader { proxy in
             ScrollView {
                 VStack(alignment: .leading, spacing: 4) {
+                    if !(dirs.isEmpty && items.isEmpty) {
+                        (Text("\(dirs.count + items.count) results")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundColor(Color(nsColor: Constants.textPrimary))
+                         + Text(" for \"\(vm.searchQuery)\"")
+                            .font(.system(size: 13))
+                            .foregroundColor(Color(nsColor: Constants.textSecondary)))
+                            .lineLimit(1)
+                            .padding(.leading, 8)
+                            .padding(.top, 8)
+                            .padding(.bottom, 2)
+                    }
+
                     if !dirs.isEmpty {
                         sectionHeader("Folders", count: dirs.count)
                         ForEach(Array(dirs.enumerated()), id: \.element.id) { index, dir in
@@ -18,7 +31,7 @@ struct SearchResultView: View {
                                 isSelected: vm.selectedIndex == index,
                                 onOpen: { vm.showItemView(directoryName: dir.name) }
                             )
-                            .id(index)
+                            .id(dir.id)
                         }
                     }
 
@@ -41,7 +54,7 @@ struct SearchResultView: View {
                                 onSave: { vm.saveEdit() },
                                 onCancel: { vm.cancelEdit() }
                             )
-                            .id(globalIdx)
+                            .id(item.id)
                             .onTapGesture { vm.selectedIndex = globalIdx }
                         }
                     }
@@ -67,7 +80,14 @@ struct SearchResultView: View {
             }
             .onChange(of: vm.selectedIndex) { idx in
                 withAnimation(.easeInOut(duration: 0.15)) {
-                    proxy.scrollTo(idx, anchor: .center)
+                    if idx < dirs.count {
+                        proxy.scrollTo(dirs[idx].id, anchor: .center)
+                    } else {
+                        let itemIdx = idx - dirs.count
+                        if itemIdx < items.count {
+                            proxy.scrollTo(items[itemIdx].id, anchor: .center)
+                        }
+                    }
                 }
             }
         }

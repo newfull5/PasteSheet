@@ -6,6 +6,18 @@ struct DetailModalView: View {
 
     @State private var appeared = false
 
+    private var formattedCreatedAt: String {
+        let sqlite = DateFormatter()
+        sqlite.locale = Locale(identifier: "en_US_POSIX")
+        sqlite.timeZone = TimeZone(identifier: "UTC")
+        sqlite.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        let display = DateFormatter()
+        display.locale = Locale(identifier: "en_US_POSIX")
+        display.dateFormat = "yyyy-MM-dd HH:mm"
+        if let d = sqlite.date(from: item.createdAt) { return display.string(from: d) }
+        return item.createdAt
+    }
+
     var body: some View {
         GeometryReader { geo in
             ZStack {
@@ -60,6 +72,20 @@ struct DetailModalView: View {
                             .textSelection(.enabled)
                     }
                     .background(Color(nsColor: Constants.panelBg))
+
+                    Divider().background(Color(nsColor: Constants.dividerColor))
+
+                    HStack(spacing: 8) {
+                        Text(formattedCreatedAt)
+                        Text("·")
+                        Text("\(item.content.count) chars")
+                        Spacer()
+                    }
+                    .font(.system(size: 11))
+                    .foregroundColor(Color(nsColor: Constants.textTertiary))
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .background(Color(nsColor: Constants.surface))
                 }
                 .frame(width: geo.size.width * 0.9, height: geo.size.height * 0.8)
                 .background(

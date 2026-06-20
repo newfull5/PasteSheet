@@ -157,7 +157,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             windowWidth: Constants.windowWidth,
             isWindowVisible: { [weak self] in self?.vm.isWindowVisible ?? false },
             onEdgeReached: { [weak self] in
-                DispatchQueue.main.async { self?.vm.showWindowFromEdge() }
+                DispatchQueue.main.async {
+                    self?.previousAppService.saveCurrentApp()
+                    self?.vm.showWindowFromEdge()
+                }
             },
             onEdgeLeft: { [weak self] in
                 DispatchQueue.main.async { self?.vm.hideWindowFromEdge() }

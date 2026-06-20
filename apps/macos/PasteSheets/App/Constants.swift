@@ -42,6 +42,10 @@ enum Constants {
     // sleep, so fast Macs paste sooner and slow Macs get enough time.
     static let pasteFocusTimeout: TimeInterval = 0.3
     static let pasteFocusPollInterval: TimeInterval = 0.005
+    // After the target app is frontmost, its key window may need a frame to be
+    // ready for the synthetic Cmd+V. Without this settle the paste is sometimes
+    // silently dropped ("paste does nothing, retry works").
+    static let pasteKeyDelay: TimeInterval = 0.04
     static let mouseEdgeAutoHideDelay: TimeInterval = 0.15
     static let maxItemsPerDirectory: Int64 = 30
     static let defaultDirectory = "Clipboard"

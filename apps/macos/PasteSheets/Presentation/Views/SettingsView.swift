@@ -80,7 +80,7 @@ struct SettingsView: View {
                                             try? vm.settingsUseCase.setSetting(key: "auto_hide_timeout", value: "\(sec)")
                                         }
                                         .buttonStyle(.plain)
-                                        .font(.system(size: 13, weight: .medium))
+                                        .font(.system(size: 13, weight: autoHideTimeout == sec ? .semibold : .medium))
                                         .foregroundColor(Color(nsColor: autoHideTimeout == sec ? Constants.textPrimary : Constants.textSecondary))
                                         .padding(.horizontal, 10)
                                         .padding(.vertical, 4)

@@ -14,6 +14,7 @@ struct HistoryItemRow: View {
     let onSave: () -> Void
     let onCancel: () -> Void
     let searchQuery: String
+    @State private var deleteHovered = false
 
     init(item: PasteItem, isSelected: Bool, activeButtonIndex: Int = -1,
          isEditing: Bool = false, showFolderLabel: Bool = false,
@@ -69,14 +70,19 @@ struct HistoryItemRow: View {
             }
             Spacer()
             if showFolderLabel {
-                Text(item.directory)
-                    .font(.system(size: 10))
-                    .foregroundColor(Color(nsColor: Constants.textSecondary))
-                    .padding(.horizontal, 7)
-                    .padding(.vertical, 2)
-                    .background(Color(nsColor: Constants.surface))
-                    .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color(nsColor: Constants.neutralBorder), lineWidth: 0.5))
-                    .cornerRadius(4)
+                HStack(spacing: 4) {
+                    Circle()
+                        .fill(Color(nsColor: Constants.textSecondary))
+                        .frame(width: 5, height: 5)
+                    Text(item.directory)
+                        .font(.system(size: 10))
+                        .foregroundColor(Color(nsColor: Constants.textSecondary))
+                }
+                .padding(.horizontal, 7)
+                .padding(.vertical, 2)
+                .background(Color(nsColor: Constants.surface))
+                .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color(nsColor: Constants.neutralBorder), lineWidth: 0.5))
+                .cornerRadius(4)
             }
         }
 
@@ -97,14 +103,39 @@ struct HistoryItemRow: View {
                 ActionButton(label: "Paste", variant: .goldPrimary, isActive: activeButtonIndex == 0, action: onPaste)
                 ActionButton(label: "Edit", variant: .neutralSecondary, isActive: activeButtonIndex == 1, action: onEdit)
                 Spacer()
-                ActionButton(label: "Delete", variant: .quietDanger, isActive: activeButtonIndex == 2, action: onDelete)
+                deleteButton
             }
             .padding(.top, 8)
         }
     }
 
+    /// Quiet trailing trash icon. Idle = danger-tinted glyph, no fill; it fills
+    /// red only on keyboard focus or hover, so the destructive action stays calm
+    /// until intent. (Matches the redesign mockup.)
+    private var deleteButton: some View {
+        let emphasized = activeButtonIndex == 2 || deleteHovered
+        return Button(action: onDelete) {
+            Image(systemName: "trash")
+                .font(.system(size: 13, weight: .medium))
+                .foregroundColor(emphasized ? Color(nsColor: Constants.textPrimary) : Color(nsColor: Constants.dangerText))
+                .padding(.horizontal, 9)
+                .padding(.vertical, 6)
+                .background(
+                    RoundedRectangle(cornerRadius: Constants.radiusControl)
+                        .fill(emphasized ? Color(nsColor: Constants.danger) : Color.clear)
+                )
+        }
+        .buttonStyle(.plain)
+        .onHover { deleteHovered = $0 }
+        .help("Delete")
+    }
+
     @ViewBuilder
     private var editingView: some View {
+        Text("CONTENT")
+            .font(.system(size: 11))
+            .tracking(0.4)
+            .foregroundColor(Color(nsColor: Constants.textTertiary))
         TextEditor(text: $editContent)
             .font(.system(size: 14))
             .foregroundColor(Color(nsColor: Constants.textPrimary))
@@ -116,6 +147,11 @@ struct HistoryItemRow: View {
             .overlay(RoundedRectangle(cornerRadius: Constants.radiusControl)
                 .stroke(Color(nsColor: Constants.neutralBorder), lineWidth: 0.5))
 
+        Text("MEMO · optional")
+            .font(.system(size: 11))
+            .tracking(0.4)
+            .foregroundColor(Color(nsColor: Constants.textTertiary))
+            .padding(.top, 2)
         TextField("Add a note…", text: $editMemo)
             .textFieldStyle(.plain)
             .font(.system(size: 13, weight: .medium))
@@ -127,8 +163,9 @@ struct HistoryItemRow: View {
                 .stroke(Color(nsColor: Constants.neutralBorder), lineWidth: 0.5))
 
         HStack(spacing: 8) {
-            ActionButton(label: "Save ⌘↵", variant: .goldPrimary, action: onSave)
+            Spacer()
             ActionButton(label: "Cancel", variant: .neutralSecondary, action: onCancel)
+            ActionButton(label: "Save ⌘↵", variant: .goldPrimary, action: onSave)
         }
     }
 
@@ -149,31 +186,57 @@ struct HistoryItemRow: View {
         }
         let lower = text.lowercased()
         let query = searchQuery.lowercased()
-        var result = Text("")
+        // Matched runs get a faint gold-tint chip + bold, per the redesign mockup.
+        // AttributedString lets us set a per-run backgroundColor (a plain Text can't).
+        let chip = Color(red: 199/255, green: 202/255, blue: 70/255).opacity(0.18)
+        var attr = AttributedString()
         var current = lower.startIndex
         while let range = lower.range(of: query, range: current..<lower.endIndex) {
             if current < range.lowerBound {
-                result = result + Text(text[current..<range.lowerBound]).foregroundColor(baseColor)
+                var seg = AttributedString(String(text[current..<range.lowerBound]))
+                seg.foregroundColor = baseColor
+                attr += seg
             }
-            result = result + Text(text[range])
-                .foregroundColor(Color(nsColor: Constants.textPrimary))
-                .fontWeight(.semibold)
+            var match = AttributedString(String(text[range]))
+            match.foregroundColor = Color(nsColor: Constants.textPrimary)
+            match.backgroundColor = chip
+            match.inlinePresentationIntent = .stronglyEmphasized
+            attr += match
             current = range.upperBound
         }
         if current < lower.endIndex {
-            result = result + Text(text[current..<lower.endIndex]).foregroundColor(baseColor)
+            var seg = AttributedString(String(text[current..<lower.endIndex]))
+            seg.foregroundColor = baseColor
+            attr += seg
         }
-        return result
+        return Text(attr)
     }
 
     private func formatDate(_ str: String) -> String {
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        if let date = formatter.date(from: str) {
-            let display = DateFormatter()
-            display.dateFormat = "MMM d, h:mm a"
+        let display = DateFormatter()
+        display.locale = Locale(identifier: "en_US_POSIX")
+        display.dateFormat = "MMM d, h:mm a"
+
+        // SQLite CURRENT_TIMESTAMP is stored as "yyyy-MM-dd HH:mm:ss" in UTC.
+        let sqlite = DateFormatter()
+        sqlite.locale = Locale(identifier: "en_US_POSIX")
+        sqlite.timeZone = TimeZone(identifier: "UTC")
+        sqlite.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        if let date = sqlite.date(from: str) {
             return display.string(from: date)
         }
+
+        // Fallback: ISO8601 (with or without fractional seconds).
+        let iso = ISO8601DateFormatter()
+        iso.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        if let date = iso.date(from: str) {
+            return display.string(from: date)
+        }
+        iso.formatOptions = [.withInternetDateTime]
+        if let date = iso.date(from: str) {
+            return display.string(from: date)
+        }
+
         return str
     }
 }

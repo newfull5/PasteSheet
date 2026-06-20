@@ -8,7 +8,7 @@ struct DirectoryRow: View {
     var body: some View {
         HStack(spacing: 0) {
             SelectionBar(isSelected: isSelected)
-                .frame(height: 18)
+                .frame(maxHeight: .infinity)
                 .padding(.trailing, 10)
 
             Image(systemName: "folder")

@@ -9,17 +9,21 @@ struct DirectoryListView: View {
     @State private var newFolderName = ""
     @FocusState private var folderFieldFocused: Bool
 
+    private var totalItemCount: Int {
+        vm.filteredDirectories.reduce(0) { $0 + Int($1.count) }
+    }
+
     var body: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                VStack(spacing: 4) {
+                VStack(spacing: 2) {
                     ForEach(Array(vm.filteredDirectories.enumerated()), id: \.element.id) { index, dir in
                         DirectoryRow(
                             directory: dir,
                             isSelected: vm.selectedIndex == index,
                             onOpen: { vm.showItemView(directoryName: dir.name) }
                         )
-                        .id(index)
+                        .id(dir.id)
                         .contextMenu {
                             if dir.name != Constants.defaultDirectory {
                                 Button("Rename") { vm.renameDirectory(oldName: dir.name) }
@@ -28,16 +32,34 @@ struct DirectoryListView: View {
                         }
                     }
 
-                    // New Folder button
-                    newFolderRow
-                        .id(vm.filteredDirectories.count)
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 4)
             }
+            .safeAreaInset(edge: .bottom) {
+                VStack(spacing: 8) {
+                    newFolderRow
+                        .id("new-folder-row")
+                    HStack {
+                        Text("\(vm.filteredDirectories.count) folders · \(totalItemCount) items")
+                            .font(.system(size: 11))
+                            .foregroundColor(Color(nsColor: Constants.textTertiary))
+                        Spacer()
+                    }
+                    .padding(.bottom, 4)
+                }
+                .padding(.horizontal, 16)
+                .padding(.top, 6)
+                .background(Color(nsColor: Constants.bgContainer))
+            }
             .onChange(of: vm.selectedIndex) { idx in
                 withAnimation(.easeInOut(duration: 0.15)) {
-                    proxy.scrollTo(idx, anchor: .center)
+                    let dirs = vm.filteredDirectories
+                    if idx >= dirs.count {
+                        proxy.scrollTo("new-folder-row", anchor: .center)
+                    } else {
+                        proxy.scrollTo(dirs[idx].id, anchor: .center)
+                    }
                 }
             }
             .onChange(of: vm.shouldStartFolderCreation) { start in

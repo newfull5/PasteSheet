@@ -15,6 +15,7 @@ struct ModalConfig {
     let isDanger: Bool
     let showInput: Bool
     var inputValue: String
+    var preview: String? = nil
     let onConfirm: (String?) -> Void
 }
 
@@ -116,6 +117,18 @@ final class AppViewModel: ObservableObject {
             return filteredDirectories.count + 1 // +1 for "New Folder"
         } else {
             return filteredItems.count + 1 // +1 for "New Item"
+        }
+    }
+
+    /// Last index pointing at real content (folder/item/result), excluding the
+    /// trailing "New …" row. Keeps selection visible/on-content after a delete.
+    var lastContentIndex: Int {
+        if !searchQuery.isEmpty {
+            return max(0, filteredDirectories.count + filteredItems.count - 1)
+        } else if currentView == .directories {
+            return max(0, filteredDirectories.count - 1)
+        } else {
+            return max(0, filteredItems.count - 1)
         }
     }
 
@@ -251,24 +264,39 @@ final class AppViewModel: ObservableObject {
     }
 
     func deleteItem(id: Int64) {
+        let preview = allItems.first(where: { $0.id == id })?.content
         modalConfig = ModalConfig(
-            title: "Delete Item",
-            message: "Are you sure you want to delete this item?",
+            title: "Delete item",
+            message: "This item will be permanently deleted.",
             confirmText: "Delete",
             cancelText: "Cancel",
             isDanger: true,
             showInput: false,
             inputValue: "",
+            preview: preview,
             onConfirm: { [weak self] _ in
                 do {
                     try self?.manageItems.deleteItem(id: id)
-                    self?.loadHistory()
-                    self?.loadDirectories()
+                    self?.reloadAfterItemMutation()
                 } catch {
                     NSLog("Failed to delete item: \(error)")
                 }
             }
         )
+    }
+
+    /// Refresh the lists after an item is deleted: reload from the DB, re-run an
+    /// active search so the results drop the deleted item, and clamp the selection
+    /// so it never points past the now-shorter list.
+    private func reloadAfterItemMutation() {
+        loadHistory()
+        loadDirectories()
+        if !searchQuery.isEmpty {
+            let result = searchUseCase.search(query: searchQuery, allItems: allItems, allDirectories: directories)
+            searchResult = SearchResult(directories: result.directories, items: result.items)
+        }
+        if selectedIndex > lastContentIndex { selectedIndex = lastContentIndex }
+        buttonFocusIndex = 0
     }
 
     // MARK: - Directory Actions
@@ -316,6 +344,9 @@ final class AppViewModel: ObservableObject {
                 do {
                     try self?.manageDirectories.deleteDirectory(name: name)
                     self?.loadDirectories()
+                    if let self, self.selectedIndex > self.lastContentIndex {
+                        self.selectedIndex = self.lastContentIndex
+                    }
                 } catch {
                     NSLog("Failed to delete directory: \(error)")
                 }
@@ -396,7 +427,13 @@ final class AppViewModel: ObservableObject {
         guard autoHideEnabled, isWindowVisible else { return }
         clearAutoHideTimer()
         autoHideTimer = Timer.scheduledTimer(withTimeInterval: TimeInterval(autoHideTimeout), repeats: false) { [weak self] _ in
-            guard self?.modalConfig == nil, self?.editingItemId == nil else { return }
+            // Don't auto-hide while the user is mid-action: a modal, the detail
+            // overlay, inline editing, or a create form is open.
+            guard self?.modalConfig == nil,
+                  self?.editingItemId == nil,
+                  self?.detailItem == nil,
+                  self?.isCreatingItem == false,
+                  self?.isCreatingFolder == false else { return }
             self?.toggleWindow()
         }
     }
@@ -460,6 +497,12 @@ final class AppViewModel: ObservableObject {
                 shouldSaveNewItem = true
                 return true
             }
+        }
+
+        // Cmd+N: new item (inside a folder) or new folder (at root)
+        if event.keyCode == 45 && hasCmd && !isInput && searchQuery.isEmpty {
+            if currentView == .items { shouldStartItemCreation = true; return true }
+            if currentView == .directories { shouldStartFolderCreation = true; return true }
         }
 
         // Arrow keys always navigate, even when search field is focused
