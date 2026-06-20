@@ -2,25 +2,25 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>CFBundleName</key>
-    <string>PasteSheet</string>
-    <key>CFBundleDisplayName</key>
-    <string>PasteSheet</string>
-    <key>CFBundleIdentifier</key>
-    <string>com.newfull5.pastesheet</string>
-    <key>CFBundleVersion</key>
-    <string>20</string>
-    <key>CFBundleShortVersionString</key>
-    <string>0.5.8</string>
-    <key>CFBundlePackageType</key>
-    <string>APPL</string>
-    <key>LSMinimumSystemVersion</key>
-    <string>13.0</string>
-    <key>LSUIElement</key>
-    <true/>
-    <key>SUFeedURL</key>
-    <string>https://raw.githubusercontent.com/newfull5/PasteSheet/main/appcast.xml</string>
-    <key>SUPublicEDKey</key>
-    <string>BKWpRQTjKQV/3QGSqPce778hpmXCicygJi4D3WbqH3M=</string>
+	<key>CFBundleDisplayName</key>
+	<string>PasteSheet</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.newfull5.pastesheet</string>
+	<key>CFBundleName</key>
+	<string>PasteSheet</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>0.6.0</string>
+	<key>CFBundleVersion</key>
+	<string>21</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>13.0</string>
+	<key>LSUIElement</key>
+	<true/>
+	<key>SUFeedURL</key>
+	<string>https://raw.githubusercontent.com/newfull5/PasteSheet/main/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>BKWpRQTjKQV/3QGSqPce778hpmXCicygJi4D3WbqH3M=</string>
 </dict>
 </plist>
