@@ -5,66 +5,70 @@ struct DetailModalView: View {
     let onClose: () -> Void
 
     @State private var appeared = false
-    private let accent = Color(nsColor: Constants.accentColor)
 
     var body: some View {
         GeometryReader { geo in
             ZStack {
-                Color.black.opacity(0.6)
+                Color.black.opacity(0.55)
                     .ignoresSafeArea()
                     .onTapGesture { onClose() }
 
                 VStack(spacing: 0) {
-                    // Header
                     HStack {
-                        Text("Detail View")
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundColor(.white)
+                        Text("Detail")
+                            .font(.system(size: 15, weight: .medium))
+                            .foregroundColor(Color(nsColor: Constants.textPrimary))
                         Spacer()
-                        Button("Copy") {
+                        Button(action: {
                             NSPasteboard.general.clearContents()
                             NSPasteboard.general.setString(item.content, forType: .string)
-                        }
-                        .buttonStyle(.plain)
-                        .foregroundColor(.black)
-                        .fontWeight(.bold)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(accent)
-                        .cornerRadius(6)
-
-                        Button("Close") { onClose() }
-                            .buttonStyle(.plain)
-                            .foregroundColor(.white)
+                        }) {
+                            HStack(spacing: 4) {
+                                Image(systemName: "doc.on.doc")
+                                    .font(.system(size: 11))
+                                Text("Copy")
+                            }
+                            .font(.system(size: 11, weight: .semibold))
                             .padding(.horizontal, 12)
                             .padding(.vertical, 6)
-                            .background(Color.white.opacity(0.1))
-                            .cornerRadius(6)
+                        }
+                        .buttonStyle(.plain)
+                        .foregroundColor(Color(nsColor: Constants.panelBg))
+                        .background(Color(nsColor: Constants.accentPrimary))
+                        .cornerRadius(Constants.radiusControl)
+
+                        Button(action: { onClose() }) {
+                            Image(systemName: "xmark")
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundColor(Color(nsColor: Constants.textSecondary))
+                                .padding(6)
+                        }
+                        .buttonStyle(.plain)
                     }
                     .padding(16)
-                    .background(Color.white.opacity(0.05))
+                    .background(Color(nsColor: Constants.surface))
 
-                    Divider().background(Color.white.opacity(0.1))
+                    Divider().background(Color(nsColor: Constants.dividerColor))
 
-                    // Content (bg #1a1a1a)
                     ScrollView {
                         Text(item.content)
                             .font(.system(size: 14, design: .monospaced))
-                            .foregroundColor(.white.opacity(0.8))
-                            .lineSpacing(4)
+                            .foregroundColor(Color(red: 207/255, green: 207/255, blue: 200/255))
+                            .lineSpacing(6)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(24)
                             .textSelection(.enabled)
                     }
-                    .background(Color(nsColor: Constants.detailContentBg))
+                    .background(Color(nsColor: Constants.panelBg))
                 }
                 .frame(width: geo.size.width * 0.9, height: geo.size.height * 0.8)
                 .background(
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color(nsColor: Constants.detailModalBg))
-                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.1)))
+                    RoundedRectangle(cornerRadius: Constants.radiusCard)
+                        .fill(Color(nsColor: Constants.surface))
+                        .overlay(RoundedRectangle(cornerRadius: Constants.radiusCard)
+                            .stroke(Color(nsColor: Constants.neutralBorder)))
                 )
-                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .clipShape(RoundedRectangle(cornerRadius: Constants.radiusCard))
                 .scaleEffect(appeared ? 1 : 0.95)
                 .opacity(appeared ? 1 : 0)
             }

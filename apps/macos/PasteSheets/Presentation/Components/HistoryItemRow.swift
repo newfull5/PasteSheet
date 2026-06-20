@@ -37,18 +37,10 @@ struct HistoryItemRow: View {
         self.searchQuery = searchQuery
     }
 
-    private let accent = Color(nsColor: Constants.accentColor)
-    private let subText = Color(nsColor: Constants.subTextColor)
-
     var body: some View {
         HStack(alignment: .top, spacing: 0) {
-            // Accent bar
-            RoundedRectangle(cornerRadius: 2)
-                .fill(isSelected ? accent : subText.opacity(0.4))
-                .frame(width: 4)
-                .frame(maxHeight: isSelected ? .infinity : 16)
-                .shadow(color: isSelected ? accent : .clear, radius: 4, x: 0, y: 0) // --shadow-glow: 0 0 8px accent
-                .padding(.trailing, 12)
+            SelectionBar(isSelected: isSelected)
+                .padding(.trailing, 8)
 
             VStack(alignment: .leading, spacing: 4) {
                 if isEditing {
@@ -60,19 +52,18 @@ struct HistoryItemRow: View {
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(.horizontal, 14)
-        .padding(.vertical, 12)
+        .padding(.vertical, 11)
         .background(
-            RoundedRectangle(cornerRadius: 6)
-                .fill(isSelected ? accent.opacity(0.08) : Color.clear)
+            RoundedRectangle(cornerRadius: Constants.radiusCard)
+                .fill(isSelected ? Color(nsColor: Constants.surface) : Color.clear)
         )
     }
 
     @ViewBuilder
     private var normalView: some View {
-        // Header: memo + folder label
         HStack {
             if let memo = item.memo, !memo.isEmpty {
-                highlightedText(memo, baseColor: Color(nsColor: Constants.memoColor))
+                highlightedText(memo, baseColor: Color(nsColor: Constants.textPrimary))
                     .font(.system(size: 13, weight: .medium))
                     .lineLimit(1)
             }
@@ -80,32 +71,33 @@ struct HistoryItemRow: View {
             if showFolderLabel {
                 Text(item.directory)
                     .font(.system(size: 10))
-                    .foregroundColor(.white.opacity(0.4))
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 1)
-                    .background(Color.white.opacity(0.08))
+                    .foregroundColor(Color(nsColor: Constants.textSecondary))
+                    .padding(.horizontal, 7)
+                    .padding(.vertical, 2)
+                    .background(Color(nsColor: Constants.surface))
+                    .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color(nsColor: Constants.neutralBorder), lineWidth: 0.5))
                     .cornerRadius(4)
             }
         }
 
-        // Content
-        highlightedText(snippetForSearch(item.content), baseColor: isSelected ? .white : .white.opacity(0.7))
+        highlightedText(snippetForSearch(item.content),
+                        baseColor: Color(nsColor: isSelected ? Constants.textPrimary : Constants.textSecondary))
             .font(.system(size: 14))
             .lineLimit(isSelected ? 15 : 1)
             .truncationMode(.tail)
             .frame(maxWidth: .infinity, alignment: .leading)
 
-        // Selected: meta + actions
         if isSelected {
             Text(formatDate(item.createdAt))
-                .font(.system(size: 11, design: .monospaced))
-                .foregroundColor(subText.opacity(0.6)) // var(--color-text-sub) opacity 0.6
+                .font(.system(size: 11))
+                .foregroundColor(Color(nsColor: Constants.textTertiary))
                 .padding(.top, 8)
 
             HStack(spacing: 8) {
-                ActionButton(label: "Paste", isActive: activeButtonIndex == 0, isDanger: false, action: onPaste)
-                ActionButton(label: "Edit", isActive: activeButtonIndex == 1, isDanger: false, action: onEdit)
-                ActionButton(label: "Delete", isActive: activeButtonIndex == 2, isDanger: true, action: onDelete)
+                ActionButton(label: "Paste", variant: .goldPrimary, isActive: activeButtonIndex == 0, action: onPaste)
+                ActionButton(label: "Edit", variant: .neutralSecondary, isActive: activeButtonIndex == 1, action: onEdit)
+                Spacer()
+                ActionButton(label: "Delete", variant: .quietDanger, isActive: activeButtonIndex == 2, action: onDelete)
             }
             .padding(.top, 8)
         }
@@ -113,28 +105,30 @@ struct HistoryItemRow: View {
 
     @ViewBuilder
     private var editingView: some View {
-        TextField("Memo", text: $editMemo)
-            .textFieldStyle(.plain)
-            .font(.system(size: 13, weight: .semibold))
-            .foregroundColor(accent)
-            .padding(8)
-            .background(accent.opacity(0.05))
-            .cornerRadius(4)
-            .overlay(RoundedRectangle(cornerRadius: 4).stroke(accent.opacity(0.2)))
-
         TextEditor(text: $editContent)
             .font(.system(size: 14))
-            .foregroundColor(.white)
+            .foregroundColor(Color(nsColor: Constants.textPrimary))
             .scrollContentBackground(.hidden)
             .frame(minHeight: 120)
             .padding(8)
-            .background(Color.white.opacity(0.03))
-            .cornerRadius(6)
-            .overlay(RoundedRectangle(cornerRadius: 6).stroke(accent.opacity(0.2)))
+            .background(Color(nsColor: Constants.surface))
+            .cornerRadius(Constants.radiusControl)
+            .overlay(RoundedRectangle(cornerRadius: Constants.radiusControl)
+                .stroke(Color(nsColor: Constants.neutralBorder), lineWidth: 0.5))
+
+        TextField("Add a note…", text: $editMemo)
+            .textFieldStyle(.plain)
+            .font(.system(size: 13, weight: .medium))
+            .foregroundColor(Color(nsColor: Constants.textPrimary))
+            .padding(8)
+            .background(Color(nsColor: Constants.surface))
+            .cornerRadius(Constants.radiusControl)
+            .overlay(RoundedRectangle(cornerRadius: Constants.radiusControl)
+                .stroke(Color(nsColor: Constants.neutralBorder), lineWidth: 0.5))
 
         HStack(spacing: 8) {
-            ActionButton(label: "Save ⌘↵", isActive: true, isDanger: false, action: onSave)
-            ActionButton(label: "Cancel", isActive: false, isDanger: false, action: onCancel)
+            ActionButton(label: "Save ⌘↵", variant: .goldPrimary, action: onSave)
+            ActionButton(label: "Cancel", variant: .neutralSecondary, action: onCancel)
         }
     }
 
@@ -162,8 +156,8 @@ struct HistoryItemRow: View {
                 result = result + Text(text[current..<range.lowerBound]).foregroundColor(baseColor)
             }
             result = result + Text(text[range])
-                .foregroundColor(Color(nsColor: Constants.accentColor))
-                .bold()
+                .foregroundColor(Color(nsColor: Constants.textPrimary))
+                .fontWeight(.semibold)
             current = range.upperBound
         }
         if current < lower.endIndex {
@@ -177,54 +171,10 @@ struct HistoryItemRow: View {
         formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         if let date = formatter.date(from: str) {
             let display = DateFormatter()
-            display.dateStyle = .medium
-            display.timeStyle = .short
+            display.dateFormat = "MMM d, h:mm a"
             return display.string(from: date)
         }
         return str
     }
 }
 
-struct ActionButton: View {
-    let label: String
-    let isActive: Bool
-    let isDanger: Bool
-    let action: () -> Void
-
-    private let accent = Color(nsColor: Constants.accentColor)
-
-    var body: some View {
-        Button(action: action) {
-            Text(label)
-                .font(.system(size: 11, weight: .semibold))
-                .padding(.horizontal, 10)
-                .padding(.vertical, 4)
-        }
-        .buttonStyle(.plain)
-        .foregroundColor(foregroundColor)
-        .background(backgroundColor)
-        .cornerRadius(4)
-        .overlay(
-            RoundedRectangle(cornerRadius: 4)
-                .stroke(borderColor, lineWidth: 1)
-        )
-    }
-
-    private var foregroundColor: Color {
-        if isActive && isDanger { return .white }
-        if isActive { return .black }
-        return Color(nsColor: Constants.subTextColor)
-    }
-
-    private var backgroundColor: Color {
-        if isActive && isDanger { return Color(nsColor: Constants.dangerColor) }
-        if isActive { return accent }
-        return Color.white.opacity(0.05)
-    }
-
-    private var borderColor: Color {
-        if isActive && isDanger { return Color(nsColor: Constants.dangerColor) }
-        if isActive { return .clear }
-        return Color.white.opacity(0.1)
-    }
-}

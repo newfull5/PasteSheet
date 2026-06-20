@@ -6,8 +6,6 @@ struct ConfirmModalView: View {
     @State private var inputValue: String
     @State private var appeared = false
 
-    private let accent = Color(nsColor: Constants.accentColor)
-
     init(config: ModalConfig, onDismiss: @escaping () -> Void) {
         self.config = config
         self.onDismiss = onDismiss
@@ -16,64 +14,73 @@ struct ConfirmModalView: View {
 
     var body: some View {
         ZStack {
-            Color.black.opacity(0.6)
+            Color.black.opacity(0.55)
                 .ignoresSafeArea()
                 .onTapGesture { onDismiss() }
 
-            VStack(alignment: .leading, spacing: 16) {
-                Text(config.title)
-                    .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(accent)
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 6) {
+                    if config.isDanger {
+                        Image(systemName: "trash")
+                            .font(.system(size: 13))
+                            .foregroundColor(Color(nsColor: Constants.dangerText))
+                    }
+                    Text(config.title)
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundColor(Color(nsColor: Constants.textPrimary))
+                }
 
                 Text(config.message)
-                    .font(.system(size: 14))
-                    .foregroundColor(.white.opacity(0.9))
+                    .font(.system(size: 13))
+                    .foregroundColor(Color(nsColor: Constants.textSecondary))
                     .lineSpacing(4)
 
                 if config.showInput {
                     TextField("", text: $inputValue)
                         .textFieldStyle(.plain)
                         .font(.system(size: 14))
-                        .foregroundColor(.white)
+                        .foregroundColor(Color(nsColor: Constants.textPrimary))
                         .padding(8)
-                        .background(Color.black.opacity(0.3))
-                        .cornerRadius(8)
-                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.white.opacity(0.1)))
+                        .background(Color(nsColor: Constants.surface))
+                        .cornerRadius(Constants.radiusControl)
+                        .overlay(RoundedRectangle(cornerRadius: Constants.radiusControl)
+                            .stroke(Color(nsColor: Constants.neutralBorder)))
                 }
 
-                HStack {
+                HStack(spacing: 8) {
                     Spacer()
                     Button(config.cancelText) { onDismiss() }
                         .buttonStyle(.plain)
-                        .foregroundColor(.white)
+                        .foregroundColor(Color(nsColor: Constants.textPrimary))
                         .padding(.horizontal, 16)
                         .padding(.vertical, 8)
-                        .background(Color.white.opacity(0.05))
-                        .cornerRadius(8)
+                        .background(Color(nsColor: Constants.surface))
+                        .overlay(RoundedRectangle(cornerRadius: Constants.radiusControl)
+                            .stroke(Color(nsColor: Constants.neutralBorder)))
+                        .cornerRadius(Constants.radiusControl)
 
                     Button(config.confirmText) {
                         config.onConfirm(config.showInput ? inputValue : nil)
                         onDismiss()
                     }
-                    .keyboardShortcut(.defaultAction)
                     .buttonStyle(.plain)
-                    .foregroundColor(config.isDanger ? .white : .black)
-                    .fontWeight(.bold)
+                    .foregroundColor(config.isDanger ? Color(nsColor: Constants.textPrimary) : Color(nsColor: Constants.panelBg))
+                    .fontWeight(.semibold)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 8)
-                    .background(config.isDanger ? Color(nsColor: Constants.modalDangerColor) : accent)
-                    .cornerRadius(8)
-                    .shadow(color: (config.isDanger ? Color(nsColor: Constants.modalDangerColor) : accent).opacity(0.3),
-                            radius: 6, x: 0, y: 4) // 0 4px 12px rgba(...,0.3)
+                    .background(config.isDanger ? Color(nsColor: Constants.danger) : Color(nsColor: Constants.accentPrimary))
+                    .cornerRadius(Constants.radiusControl)
                 }
             }
-            .padding(24)
-            .frame(maxWidth: 340)
+            .padding(20)
+            .frame(maxWidth: 320)
             .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color(nsColor: Constants.bgContainer)) // rgba(18,18,18,0.98)
-                    .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.white.opacity(0.1)))
+                RoundedRectangle(cornerRadius: Constants.radiusCard)
+                    .fill(Color(nsColor: Constants.panelBg))
+                    .overlay(RoundedRectangle(cornerRadius: Constants.radiusCard)
+                        .stroke(Color(nsColor: Constants.neutralBorder)))
             )
+            .shadow(color: Color.black.opacity(0.45), radius: 24, x: 0, y: 12)
             .scaleEffect(appeared ? 1 : 0.95)
             .opacity(appeared ? 1 : 0)
         }

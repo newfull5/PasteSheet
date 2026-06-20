@@ -11,7 +11,7 @@ struct SearchResultView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 4) {
                     if !dirs.isEmpty {
-                        sectionHeader("Folders")
+                        sectionHeader("Folders", count: dirs.count)
                         ForEach(Array(dirs.enumerated()), id: \.element.id) { index, dir in
                             DirectoryRow(
                                 directory: dir,
@@ -23,7 +23,7 @@ struct SearchResultView: View {
                     }
 
                     if !items.isEmpty {
-                        sectionHeader("Items")
+                        sectionHeader("Items", count: items.count)
                         ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
                             let globalIdx = dirs.count + index
                             HistoryItemRow(
@@ -47,11 +47,19 @@ struct SearchResultView: View {
                     }
 
                     if dirs.isEmpty && items.isEmpty {
-                        Text("No matches found for your search.")
-                            .font(.system(size: 14))
-                            .foregroundColor(.white.opacity(0.4))
-                            .frame(maxWidth: .infinity)
-                            .padding(.top, 60)
+                        VStack(spacing: 8) {
+                            Image(systemName: "magnifyingglass")
+                                .font(.system(size: 28))
+                                .foregroundColor(Color(nsColor: Constants.textTertiary))
+                            Text("No matches")
+                                .font(.system(size: 15))
+                                .foregroundColor(Color(nsColor: Constants.textSecondary))
+                            Text("Nothing found for \"\(vm.searchQuery)\"")
+                                .font(.system(size: 13))
+                                .foregroundColor(Color(nsColor: Constants.textTertiary))
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.top, 60)
                     }
                 }
                 .padding(.horizontal, 16)
@@ -65,12 +73,12 @@ struct SearchResultView: View {
         }
     }
 
-    private func sectionHeader(_ title: String) -> some View {
-        Text(title)
-            .font(.system(size: 11, weight: .bold))
+    private func sectionHeader(_ title: String, count: Int) -> some View {
+        Text("\(title) (\(count))")
+            .font(.system(size: 11, weight: .semibold))
             .textCase(.uppercase)
-            .foregroundColor(.white.opacity(0.4))
-            .tracking(1)
+            .foregroundColor(Color(nsColor: Constants.textTertiary))
+            .tracking(0.8)
             .padding(.leading, 8)
             .padding(.top, 12)
             .padding(.bottom, 4)

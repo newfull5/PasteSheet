@@ -83,27 +83,30 @@ struct ItemListView: View {
 
         VStack(alignment: .leading, spacing: 8) {
             if isCreating {
-                TextField("Memo (Optional)...", text: $newMemo)
-                    .textFieldStyle(.plain)
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(Color(nsColor: Constants.accentColor))
-                    .focused($memoFieldFocused)
-                    .padding(8)
-                    .background(Color(nsColor: Constants.accentColor).opacity(0.05))
-                    .cornerRadius(4)
-
                 TextEditor(text: $newContent)
                     .font(.system(size: 14))
-                    .foregroundColor(.white)
+                    .foregroundColor(Color(nsColor: Constants.textPrimary))
                     .scrollContentBackground(.hidden)
                     .frame(minHeight: 80)
                     .padding(8)
-                    .background(Color.white.opacity(0.03))
-                    .cornerRadius(6)
-                    .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color(nsColor: Constants.accentColor).opacity(0.2)))
+                    .background(Color(nsColor: Constants.surface))
+                    .cornerRadius(Constants.radiusControl)
+                    .overlay(RoundedRectangle(cornerRadius: Constants.radiusControl)
+                        .stroke(Color(nsColor: Constants.neutralBorder), lineWidth: 0.5))
+
+                TextField("Add a note…", text: $newMemo)
+                    .textFieldStyle(.plain)
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(Color(nsColor: Constants.textPrimary))
+                    .focused($memoFieldFocused)
+                    .padding(8)
+                    .background(Color(nsColor: Constants.surface))
+                    .cornerRadius(Constants.radiusControl)
+                    .overlay(RoundedRectangle(cornerRadius: Constants.radiusControl)
+                        .stroke(Color(nsColor: Constants.neutralBorder), lineWidth: 0.5))
 
                 HStack(spacing: 8) {
-                    ActionButton(label: "Save ⌘↵", isActive: true, isDanger: false) {
+                    ActionButton(label: "Save ⌘↵", variant: .goldPrimary) {
                         let c = newContent.trimmingCharacters(in: .whitespacesAndNewlines)
                         if !c.isEmpty {
                             vm.createItem(content: c, memo: newMemo.isEmpty ? nil : newMemo)
@@ -112,7 +115,7 @@ struct ItemListView: View {
                         newMemo = ""
                         newContent = ""
                     }
-                    ActionButton(label: "Cancel", isActive: false, isDanger: false) {
+                    ActionButton(label: "Cancel", variant: .neutralSecondary) {
                         isCreating = false
                         newMemo = ""
                         newContent = ""
@@ -122,18 +125,20 @@ struct ItemListView: View {
                 HStack(spacing: 12) {
                     Text("＋")
                         .font(.system(size: 18, weight: .bold))
-                        .foregroundColor(Color(nsColor: Constants.accentColor))
-                    Text("New Item")
+                        .foregroundColor(Color(nsColor: Constants.textTertiary))
+                    Text("New item")
                         .font(.system(size: 14))
-                        .foregroundColor(Color(nsColor: Constants.accentColor).opacity(0.8))
+                        .foregroundColor(Color(nsColor: Constants.textTertiary))
                 }
             }
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 12)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(RoundedRectangle(cornerRadius: 6).fill(isSelected ? Color(nsColor: Constants.accentColor).opacity(0.08) : Color.clear))
-        .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color.white.opacity(0.05), style: StrokeStyle(lineWidth: 1, dash: [5])))
+        .background(RoundedRectangle(cornerRadius: Constants.radiusControl)
+            .fill(isSelected ? Color(nsColor: Constants.surface) : Color.clear))
+        .overlay(RoundedRectangle(cornerRadius: Constants.radiusControl)
+            .stroke(Color(nsColor: Constants.neutralBorder), style: StrokeStyle(lineWidth: 1, dash: [5])))
         .contentShape(Rectangle())
         .onTapGesture { isCreating = true; memoFieldFocused = true }
     }

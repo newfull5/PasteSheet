@@ -436,7 +436,18 @@ final class AppViewModel: ObservableObject {
             return true
         }
 
-        if modalConfig != nil { return false }
+        if modalConfig != nil {
+            if event.keyCode == 36 {
+                let cfg = modalConfig!
+                let input = cfg.showInput ? cfg.inputValue : nil
+                DispatchQueue.main.async { [weak self] in
+                    self?.modalConfig = nil
+                    cfg.onConfirm(input)
+                }
+                return true
+            }
+            return false
+        }
         if detailItem != nil { return false }
 
         // Cmd+Enter to save edit or new item

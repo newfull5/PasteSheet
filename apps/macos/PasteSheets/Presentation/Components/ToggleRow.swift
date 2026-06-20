@@ -9,12 +9,12 @@ struct ToggleRow: View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
                 Text(label)
-                    .font(.system(size: 15, weight: .medium))
-                    .foregroundColor(.white)
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(Color(nsColor: Constants.textPrimary))
                 if !description.isEmpty {
                     Text(description)
                         .font(.system(size: 12))
-                        .foregroundColor(Color(nsColor: Constants.subTextColor))
+                        .foregroundColor(Color(nsColor: Constants.textSecondary))
                 }
             }
 
@@ -22,10 +22,14 @@ struct ToggleRow: View {
 
             Toggle("", isOn: $isOn)
                 .toggleStyle(.switch)
-                .tint(Color(nsColor: Constants.accentColor))
+                .tint(Color(nsColor: Constants.accentPrimary))
         }
-        .padding(12)
-        .background(Color.white.opacity(0.03))
-        .cornerRadius(12)
+        .frame(minHeight: 28)
+        .padding(.vertical, 12)
+        .padding(.horizontal, 14)
+        .background(Color(nsColor: Constants.surface))
+        .overlay(RoundedRectangle(cornerRadius: Constants.radiusCard)
+            .stroke(Color(nsColor: Constants.neutralBorder), lineWidth: 1))
+        .cornerRadius(Constants.radiusCard)
     }
 }
