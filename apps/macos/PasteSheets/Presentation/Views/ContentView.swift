@@ -51,14 +51,14 @@ struct ContentView: View {
         }
         .frame(width: Constants.windowWidth)
         .background(
-            RoundedRectangle(cornerRadius: 16)
+            RoundedRectangle(cornerRadius: Constants.radiusCard)
                 .fill(Color(nsColor: Constants.bgContainer))
                 .overlay(
-                    RoundedRectangle(cornerRadius: 16)
-                        .strokeBorder(Color.white.opacity(0.1), lineWidth: 1)
+                    RoundedRectangle(cornerRadius: Constants.radiusCard)
+                        .strokeBorder(Color(nsColor: Constants.neutralBorder), lineWidth: 1)
                 )
         )
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .clipShape(RoundedRectangle(cornerRadius: Constants.radiusCard))
     }
 }
 

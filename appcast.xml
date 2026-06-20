@@ -6,6 +6,20 @@
         <description>PasteSheet Updates</description>
         <language>en</language>
         <item>
+            <title>Version 0.6.0</title>
+            <description><![CDATA[<ul><li>UI redesign: real search box with result count and match highlighting</li><li>Folder list icons, item counts, bottom summary; calmer selection styling</li><li>Polished detail & delete dialogs (item preview, metadata footer)</li><li>Fix: occasional paste failure (focus/timing)</li><li>Fix: delete keeps selection and refreshes instantly; ⌘N opens new item</li></ul>]]></description>
+            <sparkle:version>21</sparkle:version>
+            <sparkle:shortVersionString>0.6.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+            <pubDate>Sat, 20 Jun 2026 16:27:53 +0900</pubDate>
+            <enclosure
+                url="https://github.com/newfull5/PasteSheet/releases/download/v0.6.0/PasteSheet_0.6.0_universal.dmg"
+                length="1846058"
+                type="application/octet-stream"
+                sparkle:edSignature="ULYrHwlRxnKFug4v7ooeky3Uea0FA4L+qHbVM45eO1Ln1CgLydvaTM/Z4GyVKfynoiIztViXN/N0lq2Lqg+wAQ=="
+            />
+        </item>
+        <item>
             <title>Version 0.5.8</title>
             <description><![CDATA[<ul><li>Improved New Folder/Item creation UX: Save ⌘↵ hint, ESC/arrow cancel, stale focus fix</li></ul>]]></description>
             <sparkle:version>20</sparkle:version>

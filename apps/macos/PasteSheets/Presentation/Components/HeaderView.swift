@@ -3,9 +3,6 @@ import SwiftUI
 struct HeaderView: View {
     @ObservedObject var vm: AppViewModel
     @FocusState private var isSearchFocused: Bool
-    @State private var cursorVisible = true
-
-    private let accent = Color(nsColor: Constants.accentColor)
 
     func focusSearch() {
         isSearchFocused = true
@@ -30,51 +27,52 @@ struct HeaderView: View {
                 Button(action: { vm.showDirectoryView() }) {
                     Text("◀")
                         .font(.system(size: 16))
-                        .foregroundColor(accent)
+                        .foregroundColor(Color(nsColor: Constants.textSecondary))
                 }
                 .buttonStyle(IconButtonStyle())
             }
 
             ZStack(alignment: .leading) {
-                HStack(spacing: 0) {
-                    Text(title)
-                        .font(.system(size: showBack ? 18 : 22, weight: .medium))
-                        .tracking(showBack ? 0.54 : 0.66) // letter-spacing 0.03em
-                        .foregroundColor(accent)
-                        .lineLimit(1)
-                    Text("|")
-                        .font(.system(size: showBack ? 18 : 22, weight: .medium))
-                        .foregroundColor(accent)
-                        .opacity(cursorVisible ? 1 : 0)
-                        .onAppear {
-                            Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { _ in
-                                cursorVisible.toggle()
+                Text(title)
+                    .font(.system(size: showBack ? 17 : 20, weight: .medium))
+                    .foregroundColor(Color(nsColor: Constants.textPrimary))
+                    .lineLimit(1)
+                    .opacity(isSearchFocused || !vm.searchQuery.isEmpty ? 0 : 1)
+
+                HStack(spacing: 8) {
+                    Image(systemName: "magnifyingglass")
+                        .font(.system(size: 14))
+                        .foregroundColor(Color(nsColor: Constants.textTertiary))
+                    TextField("Search clipboard…", text: $vm.searchQuery)
+                        .textFieldStyle(.plain)
+                        .font(.system(size: 15))
+                        .foregroundColor(Color(nsColor: Constants.textPrimary))
+                        .focused($isSearchFocused)
+                        .onChange(of: vm.searchQuery) { _ in
+                            vm.selectedIndex = 0
+                        }
+                        .onChange(of: vm.isWindowVisible) { visible in
+                            if visible { isSearchFocused = false }
+                        }
+                        .onChange(of: vm.shouldFocusSearch) { focus in
+                            if focus {
+                                isSearchFocused = true
+                                vm.shouldFocusSearch = false
                             }
                         }
                 }
-                // Show the title (not the search placeholder) whenever the query is
-                // empty, even if the field is focused — prevents "Search Anything..."
-                // from showing on open.
-                .opacity(vm.searchQuery.isEmpty ? 1 : 0)
-
-                TextField("Search Anything...", text: $vm.searchQuery)
-                    .textFieldStyle(.plain)
-                    .font(.system(size: showBack ? 18 : 22, weight: .medium))
-                    .foregroundColor(accent)
-                    .focused($isSearchFocused)
-                    .opacity(vm.searchQuery.isEmpty ? 0 : 1)
-                    .onChange(of: vm.searchQuery) { _ in
-                        vm.selectedIndex = 0
-                    }
-                    .onChange(of: vm.isWindowVisible) { visible in
-                        if visible { isSearchFocused = false }
-                    }
-                    .onChange(of: vm.shouldFocusSearch) { focus in
-                        if focus {
-                            isSearchFocused = true
-                            vm.shouldFocusSearch = false
-                        }
-                    }
+                .padding(.horizontal, 10)
+                .frame(height: 34)
+                .background(
+                    RoundedRectangle(cornerRadius: Constants.radiusControl)
+                        .fill(Color(nsColor: Constants.surface))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: Constants.radiusControl)
+                        .stroke(Color(nsColor: isSearchFocused ? Constants.focusBorder : Constants.neutralBorder),
+                                lineWidth: isSearchFocused ? 1.5 : 1)
+                )
+                .opacity(isSearchFocused || !vm.searchQuery.isEmpty ? 1 : 0)
             }
 
             Spacer()
@@ -83,7 +81,7 @@ struct HeaderView: View {
                 Button(action: { vm.showSettingsView() }) {
                     Text("⚙")
                         .font(.system(size: 20))
-                        .foregroundColor(accent.opacity(0.7))
+                        .foregroundColor(Color(nsColor: Constants.textTertiary))
                 }
                 .buttonStyle(IconButtonStyle())
             }

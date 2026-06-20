@@ -14,6 +14,7 @@ struct HistoryItemRow: View {
     let onSave: () -> Void
     let onCancel: () -> Void
     let searchQuery: String
+    @State private var deleteHovered = false
 
     init(item: PasteItem, isSelected: Bool, activeButtonIndex: Int = -1,
          isEditing: Bool = false, showFolderLabel: Bool = false,
@@ -37,18 +38,10 @@ struct HistoryItemRow: View {
         self.searchQuery = searchQuery
     }
 
-    private let accent = Color(nsColor: Constants.accentColor)
-    private let subText = Color(nsColor: Constants.subTextColor)
-
     var body: some View {
         HStack(alignment: .top, spacing: 0) {
-            // Accent bar
-            RoundedRectangle(cornerRadius: 2)
-                .fill(isSelected ? accent : subText.opacity(0.4))
-                .frame(width: 4)
-                .frame(maxHeight: isSelected ? .infinity : 16)
-                .shadow(color: isSelected ? accent : .clear, radius: 4, x: 0, y: 0) // --shadow-glow: 0 0 8px accent
-                .padding(.trailing, 12)
+            SelectionBar(isSelected: isSelected)
+                .padding(.trailing, 8)
 
             VStack(alignment: .leading, spacing: 4) {
                 if isEditing {
@@ -60,81 +53,119 @@ struct HistoryItemRow: View {
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(.horizontal, 14)
-        .padding(.vertical, 12)
+        .padding(.vertical, 11)
         .background(
-            RoundedRectangle(cornerRadius: 6)
-                .fill(isSelected ? accent.opacity(0.08) : Color.clear)
+            RoundedRectangle(cornerRadius: Constants.radiusCard)
+                .fill(isSelected ? Color(nsColor: Constants.surface) : Color.clear)
         )
     }
 
     @ViewBuilder
     private var normalView: some View {
-        // Header: memo + folder label
         HStack {
             if let memo = item.memo, !memo.isEmpty {
-                highlightedText(memo, baseColor: Color(nsColor: Constants.memoColor))
+                highlightedText(memo, baseColor: Color(nsColor: Constants.textPrimary))
                     .font(.system(size: 13, weight: .medium))
                     .lineLimit(1)
             }
             Spacer()
             if showFolderLabel {
-                Text(item.directory)
-                    .font(.system(size: 10))
-                    .foregroundColor(.white.opacity(0.4))
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 1)
-                    .background(Color.white.opacity(0.08))
-                    .cornerRadius(4)
+                HStack(spacing: 4) {
+                    Circle()
+                        .fill(Color(nsColor: Constants.textSecondary))
+                        .frame(width: 5, height: 5)
+                    Text(item.directory)
+                        .font(.system(size: 10))
+                        .foregroundColor(Color(nsColor: Constants.textSecondary))
+                }
+                .padding(.horizontal, 7)
+                .padding(.vertical, 2)
+                .background(Color(nsColor: Constants.surface))
+                .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color(nsColor: Constants.neutralBorder), lineWidth: 0.5))
+                .cornerRadius(4)
             }
         }
 
-        // Content
-        highlightedText(snippetForSearch(item.content), baseColor: isSelected ? .white : .white.opacity(0.7))
+        highlightedText(snippetForSearch(item.content),
+                        baseColor: Color(nsColor: isSelected ? Constants.textPrimary : Constants.textSecondary))
             .font(.system(size: 14))
             .lineLimit(isSelected ? 15 : 1)
             .truncationMode(.tail)
             .frame(maxWidth: .infinity, alignment: .leading)
 
-        // Selected: meta + actions
         if isSelected {
             Text(formatDate(item.createdAt))
-                .font(.system(size: 11, design: .monospaced))
-                .foregroundColor(subText.opacity(0.6)) // var(--color-text-sub) opacity 0.6
+                .font(.system(size: 11))
+                .foregroundColor(Color(nsColor: Constants.textTertiary))
                 .padding(.top, 8)
 
             HStack(spacing: 8) {
-                ActionButton(label: "Paste", isActive: activeButtonIndex == 0, isDanger: false, action: onPaste)
-                ActionButton(label: "Edit", isActive: activeButtonIndex == 1, isDanger: false, action: onEdit)
-                ActionButton(label: "Delete", isActive: activeButtonIndex == 2, isDanger: true, action: onDelete)
+                ActionButton(label: "Paste", variant: .goldPrimary, isActive: activeButtonIndex == 0, action: onPaste)
+                ActionButton(label: "Edit", variant: .neutralSecondary, isActive: activeButtonIndex == 1, action: onEdit)
+                Spacer()
+                deleteButton
             }
             .padding(.top, 8)
         }
     }
 
+    /// Quiet trailing trash icon. Idle = danger-tinted glyph, no fill; it fills
+    /// red only on keyboard focus or hover, so the destructive action stays calm
+    /// until intent. (Matches the redesign mockup.)
+    private var deleteButton: some View {
+        let emphasized = activeButtonIndex == 2 || deleteHovered
+        return Button(action: onDelete) {
+            Image(systemName: "trash")
+                .font(.system(size: 13, weight: .medium))
+                .foregroundColor(emphasized ? Color(nsColor: Constants.textPrimary) : Color(nsColor: Constants.dangerText))
+                .padding(.horizontal, 9)
+                .padding(.vertical, 6)
+                .background(
+                    RoundedRectangle(cornerRadius: Constants.radiusControl)
+                        .fill(emphasized ? Color(nsColor: Constants.danger) : Color.clear)
+                )
+        }
+        .buttonStyle(.plain)
+        .onHover { deleteHovered = $0 }
+        .help("Delete")
+    }
+
     @ViewBuilder
     private var editingView: some View {
-        TextField("Memo", text: $editMemo)
-            .textFieldStyle(.plain)
-            .font(.system(size: 13, weight: .semibold))
-            .foregroundColor(accent)
-            .padding(8)
-            .background(accent.opacity(0.05))
-            .cornerRadius(4)
-            .overlay(RoundedRectangle(cornerRadius: 4).stroke(accent.opacity(0.2)))
-
+        Text("CONTENT")
+            .font(.system(size: 11))
+            .tracking(0.4)
+            .foregroundColor(Color(nsColor: Constants.textTertiary))
         TextEditor(text: $editContent)
             .font(.system(size: 14))
-            .foregroundColor(.white)
+            .foregroundColor(Color(nsColor: Constants.textPrimary))
             .scrollContentBackground(.hidden)
             .frame(minHeight: 120)
             .padding(8)
-            .background(Color.white.opacity(0.03))
-            .cornerRadius(6)
-            .overlay(RoundedRectangle(cornerRadius: 6).stroke(accent.opacity(0.2)))
+            .background(Color(nsColor: Constants.surface))
+            .cornerRadius(Constants.radiusControl)
+            .overlay(RoundedRectangle(cornerRadius: Constants.radiusControl)
+                .stroke(Color(nsColor: Constants.neutralBorder), lineWidth: 0.5))
+
+        Text("MEMO · optional")
+            .font(.system(size: 11))
+            .tracking(0.4)
+            .foregroundColor(Color(nsColor: Constants.textTertiary))
+            .padding(.top, 2)
+        TextField("Add a note…", text: $editMemo)
+            .textFieldStyle(.plain)
+            .font(.system(size: 13, weight: .medium))
+            .foregroundColor(Color(nsColor: Constants.textPrimary))
+            .padding(8)
+            .background(Color(nsColor: Constants.surface))
+            .cornerRadius(Constants.radiusControl)
+            .overlay(RoundedRectangle(cornerRadius: Constants.radiusControl)
+                .stroke(Color(nsColor: Constants.neutralBorder), lineWidth: 0.5))
 
         HStack(spacing: 8) {
-            ActionButton(label: "Save ⌘↵", isActive: true, isDanger: false, action: onSave)
-            ActionButton(label: "Cancel", isActive: false, isDanger: false, action: onCancel)
+            Spacer()
+            ActionButton(label: "Cancel", variant: .neutralSecondary, action: onCancel)
+            ActionButton(label: "Save ⌘↵", variant: .goldPrimary, action: onSave)
         }
     }
 
@@ -155,76 +186,58 @@ struct HistoryItemRow: View {
         }
         let lower = text.lowercased()
         let query = searchQuery.lowercased()
-        var result = Text("")
+        // Matched runs get a faint gold-tint chip + bold, per the redesign mockup.
+        // AttributedString lets us set a per-run backgroundColor (a plain Text can't).
+        let chip = Color(red: 199/255, green: 202/255, blue: 70/255).opacity(0.18)
+        var attr = AttributedString()
         var current = lower.startIndex
         while let range = lower.range(of: query, range: current..<lower.endIndex) {
             if current < range.lowerBound {
-                result = result + Text(text[current..<range.lowerBound]).foregroundColor(baseColor)
+                var seg = AttributedString(String(text[current..<range.lowerBound]))
+                seg.foregroundColor = baseColor
+                attr += seg
             }
-            result = result + Text(text[range])
-                .foregroundColor(Color(nsColor: Constants.accentColor))
-                .bold()
+            var match = AttributedString(String(text[range]))
+            match.foregroundColor = Color(nsColor: Constants.textPrimary)
+            match.backgroundColor = chip
+            match.inlinePresentationIntent = .stronglyEmphasized
+            attr += match
             current = range.upperBound
         }
         if current < lower.endIndex {
-            result = result + Text(text[current..<lower.endIndex]).foregroundColor(baseColor)
+            var seg = AttributedString(String(text[current..<lower.endIndex]))
+            seg.foregroundColor = baseColor
+            attr += seg
         }
-        return result
+        return Text(attr)
     }
 
     private func formatDate(_ str: String) -> String {
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        if let date = formatter.date(from: str) {
-            let display = DateFormatter()
-            display.dateStyle = .medium
-            display.timeStyle = .short
+        let display = DateFormatter()
+        display.locale = Locale(identifier: "en_US_POSIX")
+        display.dateFormat = "MMM d, h:mm a"
+
+        // SQLite CURRENT_TIMESTAMP is stored as "yyyy-MM-dd HH:mm:ss" in UTC.
+        let sqlite = DateFormatter()
+        sqlite.locale = Locale(identifier: "en_US_POSIX")
+        sqlite.timeZone = TimeZone(identifier: "UTC")
+        sqlite.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        if let date = sqlite.date(from: str) {
             return display.string(from: date)
         }
+
+        // Fallback: ISO8601 (with or without fractional seconds).
+        let iso = ISO8601DateFormatter()
+        iso.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        if let date = iso.date(from: str) {
+            return display.string(from: date)
+        }
+        iso.formatOptions = [.withInternetDateTime]
+        if let date = iso.date(from: str) {
+            return display.string(from: date)
+        }
+
         return str
     }
 }
 
-struct ActionButton: View {
-    let label: String
-    let isActive: Bool
-    let isDanger: Bool
-    let action: () -> Void
-
-    private let accent = Color(nsColor: Constants.accentColor)
-
-    var body: some View {
-        Button(action: action) {
-            Text(label)
-                .font(.system(size: 11, weight: .semibold))
-                .padding(.horizontal, 10)
-                .padding(.vertical, 4)
-        }
-        .buttonStyle(.plain)
-        .foregroundColor(foregroundColor)
-        .background(backgroundColor)
-        .cornerRadius(4)
-        .overlay(
-            RoundedRectangle(cornerRadius: 4)
-                .stroke(borderColor, lineWidth: 1)
-        )
-    }
-
-    private var foregroundColor: Color {
-        if isActive && isDanger { return .white }
-        if isActive { return .black }
-        return Color(nsColor: Constants.subTextColor)
-    }
-
-    private var backgroundColor: Color {
-        if isActive && isDanger { return Color(nsColor: Constants.dangerColor) }
-        if isActive { return accent }
-        return Color.white.opacity(0.05)
-    }
-
-    private var borderColor: Color {
-        if isActive && isDanger { return Color(nsColor: Constants.dangerColor) }
-        if isActive { return .clear }
-        return Color.white.opacity(0.1)
-    }
-}

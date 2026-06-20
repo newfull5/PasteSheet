@@ -7,8 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		01AB89FA67DE45CF23BA1E50 /* SelectionBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E1BA823CF45DE67FA89AB01 /* SelectionBar.swift */; };
 		072EE9856A76445DDF2C058D /* DatabaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99F7CB951CF7F35DA1BD2992 /* DatabaseManager.swift */; };
 		085A38249899BC2D69B81011 /* ClipboardService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 395651D47D993F57FE42C6C0 /* ClipboardService.swift */; };
+		12EF90CD78AB56EF34CD12AB /* ActionButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB12CD34EF56AB78CD90EF12 /* ActionButton.swift */; };
 		1F0E0B0D9B2A3C59B856D2B7 /* SettingsRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4F4E56CC1ED69519C3D61CF /* SettingsRepository.swift */; };
 		204D384B45719C56F8B204BC /* SettingsUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C2C7CAC63F8D5F89037107A /* SettingsUseCase.swift */; };
 		2F2F4959665BB7BD550F2965 /* PasteItemDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FFD537D30DBEAC36466060F /* PasteItemDataSource.swift */; };
@@ -55,6 +57,8 @@
 
 /* Begin PBXFileReference section */
 		025191C26440AA546961E2E7 /* PreviousAppService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviousAppService.swift; sourceTree = "<group>"; };
+		5E1BA823CF45DE67FA89AB01 /* SelectionBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionBar.swift; sourceTree = "<group>"; };
+		AB12CD34EF56AB78CD90EF12 /* ActionButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionButton.swift; sourceTree = "<group>"; };
 		0EDD504164D3496366C2AC4B /* MainPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainPanel.swift; sourceTree = "<group>"; };
 		100900CDADE9DFFF1900F43C /* DirectoryListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectoryListView.swift; sourceTree = "<group>"; };
 		14BA17EBC7D152FB9F159AF4 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -159,9 +163,11 @@
 		505608331C8361FD0C52D6A0 /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				AB12CD34EF56AB78CD90EF12 /* ActionButton.swift */,
 				B880050C7312DDA72AF2085A /* DirectoryRow.swift */,
 				D29A6042FCCD44ED74DBD034 /* HeaderView.swift */,
 				DB31D7BEA900CBB14A2364D5 /* HistoryItemRow.swift */,
+				5E1BA823CF45DE67FA89AB01 /* SelectionBar.swift */,
 				5911A0BF389F6DB46C413891 /* ToggleRow.swift */,
 			);
 			path = Components;
@@ -374,6 +380,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				12EF90CD78AB56EF34CD12AB /* ActionButton.swift in Sources */,
 				ECB3242C21E494D0A34B5B15 /* AppDelegate.swift in Sources */,
 				77EC32C2ED887E35A27AE50B /* AppViewModel.swift in Sources */,
 				448D47D81BB711E2B012A0C3 /* AutoStartService.swift in Sources */,
@@ -408,6 +415,7 @@
 				A59E028398428EF6B7834737 /* PasteTextUseCase.swift in Sources */,
 				A0CC25CAAF1E9A128CAA0A2B /* PreviousAppService.swift in Sources */,
 				641E0C0074AAFBAB54CF6A56 /* SearchResultView.swift in Sources */,
+				01AB89FA67DE45CF23BA1E50 /* SelectionBar.swift in Sources */,
 				8FE14C836DF4241F452C5EBD /* SearchUseCase.swift in Sources */,
 				5ACEF310F8E8787A5B59FF82 /* SettingsDataSource.swift in Sources */,
 				1F0E0B0D9B2A3C59B856D2B7 /* SettingsRepository.swift in Sources */,

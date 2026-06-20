@@ -17,27 +17,30 @@ struct SettingsView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                // Shortcut
                 settingsGroup("Shortcut") {
                     HStack {
                         Text("Toggle Window")
                             .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.white)
+                            .foregroundColor(Color(nsColor: Constants.textPrimary))
                         Spacer()
                         Button(action: { isRecording.toggle() }) {
                             Text(isRecording ? "Press keys..." : shortcutDisplay)
-                                .font(.system(size: 13, weight: .semibold))
+                                .font(.system(size: 13, weight: .semibold, design: .monospaced))
                                 .padding(.horizontal, 14)
                                 .padding(.vertical, 6)
-                                .background(isRecording ? Color(red: 99/255, green: 102/255, blue: 241/255).opacity(0.25) : Color.white.opacity(0.08))
-                                .foregroundColor(isRecording ? Color(red: 165/255, green: 180/255, blue: 252/255) : .white)
-                                .cornerRadius(8)
+                                .background(isRecording ? Color(nsColor: Constants.focusBorder).opacity(0.25) : Color(nsColor: Constants.surface))
+                                .foregroundColor(Color(nsColor: isRecording ? Constants.accentPrimary : Constants.textPrimary))
+                                .overlay(RoundedRectangle(cornerRadius: Constants.radiusControl)
+                                    .stroke(Color(nsColor: Constants.neutralBorder), lineWidth: 1))
+                                .cornerRadius(Constants.radiusControl)
                         }
                         .buttonStyle(.plain)
                     }
                     .padding(12)
-                    .background(Color.white.opacity(0.03))
-                    .cornerRadius(12)
+                    .background(Color(nsColor: Constants.surface))
+                    .overlay(RoundedRectangle(cornerRadius: Constants.radiusCard)
+                        .stroke(Color(nsColor: Constants.neutralBorder), lineWidth: 1))
+                    .cornerRadius(Constants.radiusCard)
                 }
 
                 // General
@@ -68,7 +71,7 @@ struct SettingsView: View {
                             HStack {
                                 Text("Hide after")
                                     .font(.system(size: 14))
-                                    .foregroundColor(Color(nsColor: Constants.subTextColor))
+                                    .foregroundColor(Color(nsColor: Constants.textSecondary))
                                 Spacer()
                                 HStack(spacing: 4) {
                                     ForEach(timeoutOptions, id: \.self) { sec in
@@ -77,21 +80,25 @@ struct SettingsView: View {
                                             try? vm.settingsUseCase.setSetting(key: "auto_hide_timeout", value: "\(sec)")
                                         }
                                         .buttonStyle(.plain)
-                                        .font(.system(size: 13, weight: .medium))
-                                        .foregroundColor(autoHideTimeout == sec ? .white : Color(nsColor: Constants.subTextColor))
+                                        .font(.system(size: 13, weight: autoHideTimeout == sec ? .semibold : .medium))
+                                        .foregroundColor(Color(nsColor: autoHideTimeout == sec ? Constants.textPrimary : Constants.textSecondary))
                                         .padding(.horizontal, 10)
                                         .padding(.vertical, 4)
-                                        .background(autoHideTimeout == sec ? Color.white.opacity(0.15) : Color.clear)
-                                        .cornerRadius(7)
+                                        .background(autoHideTimeout == sec
+                                            ? Color(nsColor: Constants.accentPrimary).opacity(0.16)
+                                            : Color.clear)
+                                        .cornerRadius(6)
                                     }
                                 }
                                 .padding(3)
-                                .background(Color.white.opacity(0.05))
-                                .cornerRadius(10)
+                                .background(Color.white.opacity(0.06))
+                                .cornerRadius(Constants.radiusControl)
                             }
                             .padding(12)
-                            .background(Color.white.opacity(0.03))
-                            .cornerRadius(12)
+                            .background(Color(nsColor: Constants.surface))
+                            .overlay(RoundedRectangle(cornerRadius: Constants.radiusCard)
+                                .stroke(Color(nsColor: Constants.neutralBorder), lineWidth: 1))
+                            .cornerRadius(Constants.radiusCard)
                         }
                     }
                 }
@@ -108,22 +115,26 @@ struct SettingsView: View {
                     HStack {
                         Text("Check for Updates")
                             .font(.system(size: 14, weight: .medium))
-                            .foregroundColor(.white)
+                            .foregroundColor(Color(nsColor: Constants.textPrimary))
                         Spacer()
                         Button(action: { vm.updateService.checkForUpdates() }) {
                             Text("Check Now")
                                 .font(.system(size: 13, weight: .semibold))
                                 .padding(.horizontal, 14)
                                 .padding(.vertical, 6)
-                                .background(Color.white.opacity(0.08))
-                                .foregroundColor(.white)
-                                .cornerRadius(8)
+                                .background(Color(nsColor: Constants.surface))
+                                .foregroundColor(Color(nsColor: Constants.textPrimary))
+                                .overlay(RoundedRectangle(cornerRadius: Constants.radiusControl)
+                                    .stroke(Color(nsColor: Constants.neutralBorder), lineWidth: 1))
+                                .cornerRadius(Constants.radiusControl)
                         }
                         .buttonStyle(.plain)
                     }
                     .padding(12)
-                    .background(Color.white.opacity(0.03))
-                    .cornerRadius(12)
+                    .background(Color(nsColor: Constants.surface))
+                    .overlay(RoundedRectangle(cornerRadius: Constants.radiusCard)
+                        .stroke(Color(nsColor: Constants.neutralBorder), lineWidth: 1))
+                    .cornerRadius(Constants.radiusCard)
                 }
 
                 // Info
@@ -163,8 +174,8 @@ struct SettingsView: View {
             Text(title)
                 .font(.system(size: 13, weight: .semibold))
                 .textCase(.uppercase)
-                .foregroundColor(Color(nsColor: Constants.subTextColor))
-                .tracking(0.5)
+                .foregroundColor(Color(nsColor: Constants.textTertiary))
+                .tracking(0.6)
                 .padding(.leading, 4)
             content()
         }
@@ -172,12 +183,14 @@ struct SettingsView: View {
 
     private func infoRow(_ label: String, _ value: String) -> some View {
         HStack {
-            Text(label).font(.system(size: 14)).foregroundColor(Color(nsColor: Constants.subTextColor))
+            Text(label).font(.system(size: 14)).foregroundColor(Color(nsColor: Constants.textSecondary))
             Spacer()
-            Text(value).font(.system(size: 14, weight: .medium)).foregroundColor(.white)
+            Text(value).font(.system(size: 14, weight: .medium)).foregroundColor(Color(nsColor: Constants.textPrimary))
         }
         .padding(12)
-        .background(Color.white.opacity(0.03))
-        .cornerRadius(12)
+        .background(Color(nsColor: Constants.surface))
+        .overlay(RoundedRectangle(cornerRadius: Constants.radiusCard)
+            .stroke(Color(nsColor: Constants.neutralBorder), lineWidth: 1))
+        .cornerRadius(Constants.radiusCard)
     }
 }

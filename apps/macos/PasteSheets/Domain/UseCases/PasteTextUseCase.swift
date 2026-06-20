@@ -24,6 +24,9 @@ final class PasteTextUseCase {
             timeout: Constants.pasteFocusTimeout,
             pollInterval: Constants.pasteFocusPollInterval
         )
+        // The app is frontmost, but its key window may need a frame to be ready
+        // for the synthetic key event. Settle briefly so Cmd+V isn't dropped.
+        Thread.sleep(forTimeInterval: Constants.pasteKeyDelay)
         keySimService.simulatePaste()
         return true
     }
