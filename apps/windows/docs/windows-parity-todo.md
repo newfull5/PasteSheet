@@ -35,7 +35,21 @@
 - **W-15/DW-06** 삭제 후 포커스 유지 → `LastContentIndex` 추가 + `DeleteItem`/`DeleteDirectory`에서 clamp
 - **W-21/DW-05** `SaveEdit` 빈내용 가드 (편집 폼 유지)
 - **W-17/DW-07** 마우스엣지 진입 시 `SaveForegroundBeforeShow()` → `App.xaml.cs` 엣지 콜백
-- **남음**: W-22(새폼 CONTENT 포커스 — XAML 필드 순서 확인 필요), 삭제 다이얼로그 제목 소문자(W-09 시각 패스에 포함)
+
+### 🎨 시각 적용됨 (2026-06-22 · 블라인드 · ⚠️ Windows 빌드/렌더 검증 필수)
+정적 검증 통과: XAML well-formed, 네온 #DCDC57 **0건**, x:Name·핸들러 보존, 새 바인딩 ↔ VM/ModalState 정합, 컨버터 자기정합, `PasteItem` 멤버 존재.
+- **W-01** 토큰 전면 적용 (Accent→#C7CA46 외 11토큰, Converters.cs frozen 색 갱신, 인라인 네온 전부 치환)
+- **W-03/05** 선택바 3px·차분 틴트, **Delete→휴지통 아이콘**(quietDanger), 비선택 행 구분선, 카운트 필 제거
+- **W-06**(부분) 소스 배지+점, 결과 카운트 줄(`ResultSummary`) — *섹션헤더·매치 골드칩은 미구현*
+- **W-08** Detail: "Detail" 중립 타이틀·Surface 헤더·중립 Close·메타 푸터(`DetailMeta`)
+- **W-09** 삭제: 소문자 제목·미리보기 블록(`Modal.Preview`)·버튼 스타일
+- **W-10** 설정: 토큰 카드+테두리·토글 골드·세그먼트 칩(MatchChip)
+- **W-11** 폼: 내용 먼저·CONTENT/MEMO 라벨·우측정렬 [Cancel][Save]·중립 테두리
+- **W-12** 헤더 중립·**깜빡 커서 제거**
+- **W-22** 새폼 진입 시 CONTENT 포커스 (`IsVisibleChanged`를 content box로 이동)
+- **W-23/24** 하단 힌트 푸터·루트 폴더 푸터(`FolderFooter`)·"No matches" 빈상태(`HasNoResults`)
+- **미구현(후속)**: 검색 매치 골드칩(run-splitting), 섹션헤더 "ITEMS (N)", 세그먼트 칩 semibold
+- **렌더 확인 필요(Windows)**: 휴지통 hover/focus, DockPanel 레이아웃, 빈상태 센터링
 
 ---
 

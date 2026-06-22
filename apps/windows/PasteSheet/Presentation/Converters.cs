@@ -42,12 +42,14 @@ public sealed class ActionButtonBrushConverter : IValueConverter
 {
     public bool Background { get; set; }
 
-    private static readonly Brush Accent = Frozen(0xDC, 0xDC, 0x57);
-    private static readonly Brush Danger = Frozen(0xFF, 0x44, 0x44);
-    private static readonly Brush SubText = Frozen(0x68, 0x74, 0x8D);
-    private static readonly Brush Black = Frozen(0x12, 0x12, 0x12);
-    private static readonly Brush White = Frozen(0xFF, 0xFF, 0xFF);
-    private static readonly Brush InactiveBg = FrozenA(0x0D, 0xFF, 0xFF, 0xFF); // white 0.05
+    // Calm gold palette (macOS 0.6.0 parity).
+    private static readonly Brush Accent = Frozen(0xC7, 0xCA, 0x46);       // accentPrimary
+    private static readonly Brush Danger = Frozen(0xE2, 0x4B, 0x4A);       // danger (filled)
+    private static readonly Brush DangerText = Frozen(0xD8, 0x5A, 0x30);   // quiet trash glyph
+    private static readonly Brush TextPrimary = Frozen(0xED, 0xED, 0xE8);
+    private static readonly Brush TextSecondary = Frozen(0x9A, 0x9A, 0x92);
+    private static readonly Brush PanelBg = Frozen(0x1B, 0x1B, 0x19);
+    private static readonly Brush Transparent = FrozenA(0x00, 0x00, 0x00, 0x00);
 
     private static Brush Frozen(byte r, byte g, byte b)
     {
@@ -72,13 +74,16 @@ public sealed class ActionButtonBrushConverter : IValueConverter
 
         if (Background)
         {
-            if (active && danger) return Danger;
+            // Trash (danger) button: no fill when idle, red fill when focused.
+            if (danger) return active ? Danger : Transparent;
+            // Paste/Edit: gold fill only when keyboard-focused, else neutral outline (transparent).
             if (active) return Accent;
-            return InactiveBg;
+            return Transparent;
         }
-        if (active && danger) return White;
-        if (active) return Black;
-        return SubText;
+        // Foreground
+        if (danger) return active ? TextPrimary : DangerText;
+        if (active) return PanelBg;
+        return TextSecondary;
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) =>
@@ -91,10 +96,10 @@ public sealed class ConfirmButtonBrushConverter : IValueConverter
 {
     public bool Background { get; set; }
 
-    private static readonly Brush Accent = FrozenA(0xFF, 0xDC, 0xDC, 0x57);
-    private static readonly Brush Danger = FrozenA(0xFF, 0xEF, 0x44, 0x44);
-    private static readonly Brush Black = FrozenA(0xFF, 0x12, 0x12, 0x12);
-    private static readonly Brush White = FrozenA(0xFF, 0xFF, 0xFF, 0xFF);
+    private static readonly Brush Accent = FrozenA(0xFF, 0xC7, 0xCA, 0x46);       // accentPrimary
+    private static readonly Brush Danger = FrozenA(0xFF, 0xE2, 0x4B, 0x4A);       // danger
+    private static readonly Brush PanelBg = FrozenA(0xFF, 0x1B, 0x1B, 0x19);      // text on gold
+    private static readonly Brush TextPrimary = FrozenA(0xFF, 0xED, 0xED, 0xE8);  // text on danger
 
     private static Brush FrozenA(byte a, byte r, byte g, byte b)
     {
@@ -107,7 +112,7 @@ public sealed class ConfirmButtonBrushConverter : IValueConverter
     {
         bool danger = value is bool b && b;
         if (Background) return danger ? Danger : Accent;
-        return danger ? White : Black;
+        return danger ? TextPrimary : PanelBg;
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) =>
@@ -120,9 +125,9 @@ public sealed class TimeoutSegmentConverter : IValueConverter
 {
     public bool Background { get; set; }
 
-    private static readonly Brush Selected = FrozenA(0x26, 0xFF, 0xFF, 0xFF); // white 0.15
-    private static readonly Brush White = FrozenA(0xFF, 0xFF, 0xFF, 0xFF);
-    private static readonly Brush SubText = FrozenA(0xFF, 0x68, 0x74, 0x8D);
+    private static readonly Brush Selected = FrozenA(0x2E, 0xC7, 0xCA, 0x46);     // matchChip (gold @18%)
+    private static readonly Brush TextPrimary = FrozenA(0xFF, 0xED, 0xED, 0xE8);
+    private static readonly Brush TextSecondary = FrozenA(0xFF, 0x9A, 0x9A, 0x92);
     private static readonly Brush Transparent = FrozenA(0x00, 0x00, 0x00, 0x00);
 
     private static Brush FrozenA(byte a, byte r, byte g, byte b)
@@ -138,7 +143,7 @@ public sealed class TimeoutSegmentConverter : IValueConverter
         int self = int.TryParse(parameter as string, out var p) ? p : -2;
         bool active = selected == self;
         if (Background) return active ? Selected : Transparent;
-        return active ? White : SubText;
+        return active ? TextPrimary : TextSecondary;
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) =>

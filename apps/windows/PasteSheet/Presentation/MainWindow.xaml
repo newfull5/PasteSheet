@@ -27,15 +27,27 @@
 
         <SolidColorBrush x:Key="Bg" Color="#121212" />
         <SolidColorBrush x:Key="Panel" Color="#1A1A1A" />
-        <SolidColorBrush x:Key="Accent" Color="#DCDC57" />
-        <SolidColorBrush x:Key="SubText" Color="#68748D" />
-        <SolidColorBrush x:Key="SubText40" Color="#6668748D" />
-        <SolidColorBrush x:Key="Memo" Color="#E2E2B6" />
-        <SolidColorBrush x:Key="Danger" Color="#FF4444" />
-        <SolidColorBrush x:Key="Fg" Color="#EAEAEA" />
+        <!-- Redesign tokens (calm gold palette, macOS 0.6.0 parity) -->
+        <SolidColorBrush x:Key="Accent" Color="#C7CA46" />
+        <SolidColorBrush x:Key="FocusBorder" Color="#B9BC44" />
+        <SolidColorBrush x:Key="TextPrimary" Color="#EDEDE8" />
+        <SolidColorBrush x:Key="TextSecondary" Color="#9A9A92" />
+        <SolidColorBrush x:Key="TextTertiary" Color="#7C7C74" />
+        <SolidColorBrush x:Key="Surface" Color="#232320" />
+        <SolidColorBrush x:Key="PanelBg" Color="#1B1B19" />
+        <SolidColorBrush x:Key="NeutralBorder" Color="#1AFFFFFF" />
+        <SolidColorBrush x:Key="Divider" Color="#0FFFFFFF" />
+        <SolidColorBrush x:Key="DangerText" Color="#D85A30" />
+        <SolidColorBrush x:Key="MatchChip" Color="#2EC7CA46" />
+        <!-- Legacy aliases re-pointed onto the new palette -->
+        <SolidColorBrush x:Key="SubText" Color="#9A9A92" />
+        <SolidColorBrush x:Key="SubText40" Color="#1AFFFFFF" />
+        <SolidColorBrush x:Key="Memo" Color="#EDEDE8" />
+        <SolidColorBrush x:Key="Danger" Color="#E24B4A" />
+        <SolidColorBrush x:Key="Fg" Color="#EDEDE8" />
         <SolidColorBrush x:Key="White10" Color="#1AFFFFFF" />
         <SolidColorBrush x:Key="White08" Color="#14FFFFFF" />
-        <SolidColorBrush x:Key="Content70" Color="#B3FFFFFF" />
+        <SolidColorBrush x:Key="Content70" Color="#9A9A92" />
 
         <!-- Borderless flat icon button -->
         <Style x:Key="IconButton" TargetType="Button">
@@ -114,7 +126,7 @@
                                                 </DoubleAnimation.EasingFunction>
                                             </DoubleAnimation>
                                             <ColorAnimation Storyboard.TargetName="track" Storyboard.TargetProperty="Background.Color"
-                                                            To="#DCDC57" Duration="0:0:0.18" />
+                                                            To="#C7CA46" Duration="0:0:0.18" />
                                             <ColorAnimation Storyboard.TargetName="thumb" Storyboard.TargetProperty="Background.Color"
                                                             To="#121212" Duration="0:0:0.18" />
                                         </Storyboard>
@@ -145,7 +157,7 @@
 
         <!-- Settings group header -->
         <Style x:Key="GroupHeader" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="{StaticResource SubText}" />
+            <Setter Property="Foreground" Value="{StaticResource TextTertiary}" />
             <Setter Property="FontSize" Value="13" />
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="Margin" Value="4,0,0,12" />
@@ -153,7 +165,9 @@
 
         <!-- Settings card -->
         <Style x:Key="Card" TargetType="Border">
-            <Setter Property="Background" Value="#08FFFFFF" />
+            <Setter Property="Background" Value="{StaticResource Surface}" />
+            <Setter Property="BorderBrush" Value="{StaticResource NeutralBorder}" />
+            <Setter Property="BorderThickness" Value="1" />
             <Setter Property="CornerRadius" Value="12" />
             <Setter Property="Padding" Value="12" />
             <Setter Property="Margin" Value="0,0,0,12" />
@@ -196,27 +210,35 @@
             </Setter>
         </Style>
 
-        <!-- Inline edit form, realized only for the row being edited (DataContext = AppViewModel). -->
+        <!-- Inline edit form, realized only for the row being edited (DataContext = AppViewModel).
+             Content field first, then memo; right-aligned [Cancel][Save]. -->
         <DataTemplate x:Key="InlineEditTemplate">
             <StackPanel>
-                <Border Background="#0DDCDC57" CornerRadius="4" Padding="8"
-                        BorderBrush="#33DCDC57" BorderThickness="1" Margin="0,0,0,8">
+                <TextBlock Text="CONTENT" FontSize="11" Foreground="{StaticResource TextTertiary}" Margin="2,0,0,4" />
+                <Border Background="{StaticResource Surface}" CornerRadius="8" Padding="8"
+                        BorderBrush="{StaticResource NeutralBorder}" BorderThickness="1">
                     <TextBox Background="Transparent" BorderThickness="0" Loaded="OnEditBoxLoaded"
-                             Foreground="{StaticResource Accent}" CaretBrush="{StaticResource Accent}" FontSize="13" FontWeight="SemiBold"
-                             Text="{Binding EditMemo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                </Border>
-                <Border Background="#08FFFFFF" CornerRadius="6" Padding="8"
-                        BorderBrush="#33DCDC57" BorderThickness="1">
-                    <TextBox Background="Transparent" BorderThickness="0"
-                             Foreground="White" CaretBrush="White" FontSize="14" MinHeight="120"
+                             Foreground="{StaticResource TextPrimary}" CaretBrush="{StaticResource Accent}" FontSize="14" MinHeight="120"
                              AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
                              Text="{Binding EditContent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                 </Border>
-                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                    <Button Content="Save" Style="{StaticResource ActionButton}" Margin="0,0,8,0"
-                            Click="OnInlineSave" Background="{StaticResource Accent}" Foreground="#121212" BorderThickness="0" />
-                    <Button Content="Cancel" Style="{StaticResource ActionButton}"
-                            Click="OnInlineCancel" Background="#0DFFFFFF" Foreground="{StaticResource SubText}" />
+                <TextBlock Text="MEMO · optional" FontSize="11" Foreground="{StaticResource TextTertiary}" Margin="2,8,0,4" />
+                <Border Background="{StaticResource Surface}" CornerRadius="8" Padding="8"
+                        BorderBrush="{StaticResource NeutralBorder}" BorderThickness="1">
+                    <Grid>
+                        <TextBox x:Name="EditMemoBox" Background="Transparent" BorderThickness="0"
+                                 Foreground="{StaticResource TextPrimary}" CaretBrush="{StaticResource Accent}" FontSize="13" FontWeight="Medium"
+                                 Text="{Binding EditMemo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock Text="Add a note…" FontSize="13" FontWeight="Medium" Foreground="{StaticResource TextTertiary}"
+                                   IsHitTestVisible="False" VerticalAlignment="Center"
+                                   Visibility="{Binding Text, ElementName=EditMemoBox, Converter={StaticResource EmptyVis}}" />
+                    </Grid>
+                </Border>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
+                    <Button Content="Cancel" Style="{StaticResource ActionButton}" Margin="0,0,8,0"
+                            Click="OnInlineCancel" Background="Transparent" Foreground="{StaticResource TextSecondary}" />
+                    <Button Content="Save  Ctrl+↵" Style="{StaticResource ActionButton}"
+                            Click="OnInlineSave" Background="{StaticResource Accent}" Foreground="{StaticResource PanelBg}" BorderThickness="0" />
                 </StackPanel>
             </StackPanel>
         </DataTemplate>
@@ -258,67 +280,80 @@
 
                     <!-- Back button -->
                     <Button Grid.Column="0" Content="&#x25C0;" FontFamily="Segoe UI Symbol" FontSize="16" Margin="0,0,8,0"
-                            Foreground="{StaticResource Accent}" Style="{StaticResource IconButton}"
+                            Foreground="{StaticResource TextSecondary}" Style="{StaticResource IconButton}"
                             Click="OnBackClick"
                             Visibility="{Binding ShowBack, Converter={StaticResource BoolVis}}" />
 
                     <!-- Title / search overlay -->
                     <Grid Grid.Column="1" VerticalAlignment="Center">
                         <TextBox x:Name="SearchBox" Background="Transparent" BorderThickness="0"
-                                 Foreground="{StaticResource Accent}"
+                                 Foreground="{StaticResource TextPrimary}" CaretBrush="{StaticResource Accent}"
                                  FontSize="22" FontWeight="Medium" Padding="0"
                                  VerticalContentAlignment="Center"
-                                 Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}">
-                            <TextBox.Style>
-                                <Style TargetType="TextBox">
-                                    <!-- Hide the real caret while empty; the title overlay shows
-                                         the blinking cursor instead. Show it once typing starts. -->
-                                    <Setter Property="CaretBrush" Value="Transparent" />
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding SearchQuery, Converter={StaticResource NotEmptyVis}}" Value="Visible">
-                                            <Setter Property="CaretBrush" Value="{StaticResource Accent}" />
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBox.Style>
-                        </TextBox>
+                                 Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}" />
                         <!-- Title shown when no query; click passes through to the textbox -->
                         <StackPanel Orientation="Horizontal" IsHitTestVisible="False"
                                     VerticalAlignment="Center"
                                     Visibility="{Binding SearchQuery, Converter={StaticResource EmptyVis}}">
-                            <TextBlock Text="{Binding HeaderTitle}" Foreground="{StaticResource Accent}"
+                            <TextBlock Text="{Binding HeaderTitle}" Foreground="{StaticResource TextPrimary}"
                                        FontSize="22" FontWeight="Medium" TextTrimming="CharacterEllipsis" />
-                            <TextBlock x:Name="CursorBlink" Text="|" Foreground="{StaticResource Accent}"
-                                       FontSize="22" FontWeight="Medium" />
                         </StackPanel>
                     </Grid>
 
                     <!-- Settings gear -->
                     <Button Grid.Column="2" Content="&#xE713;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="18"
-                            Foreground="#B3DCDC57" Style="{StaticResource IconButton}"
+                            Foreground="{StaticResource TextTertiary}" Style="{StaticResource IconButton}"
                             Click="OnSettingsClick"
                             Visibility="{Binding CurrentView, Converter={StaticResource NotSettingsVis}, ConverterParameter=Settings}" />
                 </Grid>
 
-                <!-- List -->
-                <ListBox Grid.Row="1" x:Name="List" Margin="6,0"
+                <!-- List + search summary / footers -->
+                <DockPanel Grid.Row="1"
+                           Visibility="{Binding CurrentView, Converter={StaticResource NotSettingsVis}, ConverterParameter=Settings}">
+
+                    <!-- Search result count summary (top) -->
+                    <TextBlock DockPanel.Dock="Top" Text="{Binding ResultSummary}" Margin="14,4,14,2"
+                               FontSize="13" Foreground="{StaticResource TextSecondary}"
+                               TextTrimming="CharacterEllipsis"
+                               Visibility="{Binding IsSearching, Converter={StaticResource BoolVis}}" />
+
+                    <!-- Bottom footers: hint (item list) / folder count (root) -->
+                    <TextBlock DockPanel.Dock="Bottom" Text="&#x21B5; paste · Ctrl+N new · Ctrl+&#x232B; delete"
+                               Margin="14,8,14,8" FontSize="11" Foreground="{StaticResource TextTertiary}"
+                               HorizontalAlignment="Center"
+                               Visibility="{Binding ShowItemHint, Converter={StaticResource BoolVis}}" />
+                    <TextBlock DockPanel.Dock="Bottom" Text="{Binding FolderFooter}"
+                               Margin="14,8,14,8" FontSize="11" Foreground="{StaticResource TextTertiary}"
+                               HorizontalAlignment="Center"
+                               Visibility="{Binding FolderFooter, Converter={StaticResource NotEmptyVis}}" />
+
+                    <!-- Fill area: the list, with the "No matches" empty state overlaid. -->
+                    <Grid>
+                    <StackPanel VerticalAlignment="Top" Margin="0,60,0,0" HorizontalAlignment="Center"
+                                Visibility="{Binding HasNoResults, Converter={StaticResource BoolVis}}">
+                        <TextBlock Text="&#xE721;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="28"
+                                   Foreground="{StaticResource TextTertiary}" HorizontalAlignment="Center" />
+                        <TextBlock Text="No matches" FontSize="15" Foreground="{StaticResource TextSecondary}"
+                                   HorizontalAlignment="Center" Margin="0,8,0,0" />
+                    </StackPanel>
+
+                <ListBox x:Name="List" Margin="6,0"
                          Background="Transparent" BorderThickness="0"
                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                          VirtualizingPanel.IsVirtualizing="True"
                          VirtualizingPanel.VirtualizationMode="Recycling"
                          ItemsSource="{Binding Rows}"
                          SelectedIndex="{Binding SelectedIndex, Mode=TwoWay}"
-                         MouseDoubleClick="OnListDoubleClick"
-                         Visibility="{Binding CurrentView, Converter={StaticResource NotSettingsVis}, ConverterParameter=Settings}">
+                         MouseDoubleClick="OnListDoubleClick">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <Border CornerRadius="6" Padding="0">
+                            <Border CornerRadius="12" Padding="0">
                                 <Border.Style>
                                     <Style TargetType="Border">
                                         <Setter Property="Background" Value="Transparent" />
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
-                                                <Setter Property="Background" Value="#14DCDC57" />
+                                                <Setter Property="Background" Value="{StaticResource Surface}" />
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
@@ -332,10 +367,11 @@
                                             <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
-                                        <Border Grid.Column="0" Width="4" Height="18" CornerRadius="2" Margin="0,0,12,0">
+                                        <Border Grid.Column="0" Width="3" CornerRadius="1.5" Margin="0,0,10,0"
+                                                VerticalAlignment="Stretch">
                                             <Border.Style>
                                                 <Style TargetType="Border">
-                                                    <Setter Property="Background" Value="{StaticResource SubText40}" />
+                                                    <Setter Property="Background" Value="{StaticResource NeutralBorder}" />
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
                                                             <Setter Property="Background" Value="{StaticResource Accent}" />
@@ -345,19 +381,16 @@
                                             </Border.Style>
                                         </Border>
                                         <TextBlock Grid.Column="1" Text="{Binding DirectoryName}" FontSize="15"
-                                                   Foreground="White" VerticalAlignment="Center"
+                                                   Foreground="{StaticResource TextPrimary}" VerticalAlignment="Center"
                                                    TextTrimming="CharacterEllipsis" />
-                                        <Border Grid.Column="2" Background="{StaticResource White08}" CornerRadius="10"
-                                                Padding="8,2" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding CountText}" FontSize="12"
-                                                       Foreground="{StaticResource SubText}" />
-                                        </Border>
+                                        <TextBlock Grid.Column="2" Text="{Binding CountText}" FontSize="12" FontWeight="Medium"
+                                                   Foreground="{StaticResource TextTertiary}" VerticalAlignment="Center" />
                                     </Grid>
 
                                     <!-- ============ New folder / item row ============ -->
                                     <Grid Visibility="{Binding IsNew, Converter={StaticResource BoolVis}}">
-                                        <!-- Dashed rounded border (white @ 0.05, dash 5) -->
-                                        <Rectangle RadiusX="6" RadiusY="6" Stroke="#0DFFFFFF" StrokeThickness="1"
+                                        <!-- Dashed rounded border (neutral, dash 5) -->
+                                        <Rectangle RadiusX="8" RadiusY="8" Stroke="{StaticResource NeutralBorder}" StrokeThickness="1"
                                                    StrokeDashArray="5 5" SnapsToDevicePixels="True" />
 
                                         <!-- Idle: + label, click to expand -->
@@ -365,9 +398,9 @@
                                                     MouseLeftButtonUp="OnNewRowClick"
                                                     Visibility="{Binding DataContext.IsCreatingNew, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolVisInvert}}">
                                             <TextBlock Text="＋" FontSize="18" FontWeight="Bold"
-                                                       Foreground="{StaticResource Accent}" Margin="0,0,12,0" />
+                                                       Foreground="{StaticResource TextTertiary}" Margin="0,0,12,0" />
                                             <TextBlock Text="{Binding NewLabel}" FontSize="14"
-                                                       Foreground="#CCDCDC57" VerticalAlignment="Center" />
+                                                       Foreground="{StaticResource TextTertiary}" VerticalAlignment="Center" />
                                         </StackPanel>
 
                                         <!-- Active: inline creation form -->
@@ -375,49 +408,51 @@
                                                     Visibility="{Binding DataContext.IsCreatingNew, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolVis}}">
                                             <!-- Folder: name field -->
                                             <Grid Visibility="{Binding IsNewFolder, Converter={StaticResource BoolVis}}">
-                                                <TextBox x:Name="NewFolderBox" FontSize="14" Foreground="White" CaretBrush="White"
+                                                <TextBox x:Name="NewFolderBox" FontSize="14" Foreground="{StaticResource TextPrimary}" CaretBrush="{StaticResource Accent}"
                                                          Background="Transparent" BorderThickness="0"
                                                          IsVisibleChanged="OnNewInputShown"
                                                          Text="{Binding DataContext.NewInputContent, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                                <TextBlock Text="Folder Name..." FontSize="14" Foreground="#80FFFFFF"
+                                                <TextBlock Text="Folder Name…" FontSize="14" Foreground="{StaticResource TextTertiary}"
                                                            IsHitTestVisible="False" VerticalAlignment="Center"
                                                            Visibility="{Binding Text, ElementName=NewFolderBox, Converter={StaticResource EmptyVis}}" />
                                             </Grid>
-                                            <!-- Item: memo + content fields -->
+                                            <!-- Item: content field first, then memo -->
                                             <StackPanel Visibility="{Binding IsNewItem, Converter={StaticResource BoolVis}}">
-                                                <Border Background="#0DDCDC57" CornerRadius="4" Padding="8"
-                                                        BorderBrush="#33DCDC57" BorderThickness="1" Margin="0,0,0,8">
-                                                    <Grid>
-                                                        <TextBox x:Name="NewItemMemoBox" Background="Transparent" BorderThickness="0"
-                                                                 Foreground="{StaticResource Accent}" CaretBrush="{StaticResource Accent}" FontSize="13" FontWeight="SemiBold"
-                                                                 IsVisibleChanged="OnNewInputShown"
-                                                                 Text="{Binding DataContext.NewInputMemo, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                                        <TextBlock Text="Memo (Optional)..." FontSize="13" FontWeight="SemiBold" Foreground="#80DCDC57"
-                                                                   IsHitTestVisible="False" VerticalAlignment="Center"
-                                                                   Visibility="{Binding Text, ElementName=NewItemMemoBox, Converter={StaticResource EmptyVis}}" />
-                                                    </Grid>
-                                                </Border>
-                                                <Border Background="#08FFFFFF" CornerRadius="6" Padding="8"
-                                                        BorderBrush="#33DCDC57" BorderThickness="1">
+                                                <TextBlock Text="CONTENT" FontSize="11" Foreground="{StaticResource TextTertiary}" Margin="2,0,0,4" />
+                                                <Border Background="{StaticResource Surface}" CornerRadius="8" Padding="8"
+                                                        BorderBrush="{StaticResource NeutralBorder}" BorderThickness="1">
                                                     <Grid>
                                                         <TextBox x:Name="NewItemContentBox" Background="Transparent" BorderThickness="0"
-                                                                 Foreground="White" CaretBrush="White" FontSize="14" MinHeight="80"
+                                                                 Foreground="{StaticResource TextPrimary}" CaretBrush="{StaticResource Accent}" FontSize="14" MinHeight="80"
                                                                  AcceptsReturn="True" TextWrapping="Wrap"
                                                                  VerticalScrollBarVisibility="Auto"
+                                                                 IsVisibleChanged="OnNewInputShown"
                                                                  Text="{Binding DataContext.NewInputContent, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                                        <TextBlock Text="Content..." FontSize="14" Foreground="#80FFFFFF"
+                                                        <TextBlock Text="Content…" FontSize="14" Foreground="{StaticResource TextTertiary}"
                                                                    IsHitTestVisible="False" VerticalAlignment="Top"
                                                                    Visibility="{Binding Text, ElementName=NewItemContentBox, Converter={StaticResource EmptyVis}}" />
                                                     </Grid>
                                                 </Border>
+                                                <TextBlock Text="MEMO · optional" FontSize="11" Foreground="{StaticResource TextTertiary}" Margin="2,8,0,4" />
+                                                <Border Background="{StaticResource Surface}" CornerRadius="8" Padding="8"
+                                                        BorderBrush="{StaticResource NeutralBorder}" BorderThickness="1">
+                                                    <Grid>
+                                                        <TextBox x:Name="NewItemMemoBox" Background="Transparent" BorderThickness="0"
+                                                                 Foreground="{StaticResource TextPrimary}" CaretBrush="{StaticResource Accent}" FontSize="13" FontWeight="Medium"
+                                                                 Text="{Binding DataContext.NewInputMemo, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                                        <TextBlock Text="Add a note…" FontSize="13" FontWeight="Medium" Foreground="{StaticResource TextTertiary}"
+                                                                   IsHitTestVisible="False" VerticalAlignment="Center"
+                                                                   Visibility="{Binding Text, ElementName=NewItemMemoBox, Converter={StaticResource EmptyVis}}" />
+                                                    </Grid>
+                                                </Border>
                                             </StackPanel>
-                                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                                <Button Content="Save" Style="{StaticResource ActionButton}" Margin="0,0,8,0"
-                                                        Click="OnNewSave"
-                                                        Background="{StaticResource Accent}" Foreground="#121212" BorderThickness="0" />
-                                                <Button Content="Cancel" Style="{StaticResource ActionButton}"
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
+                                                <Button Content="Cancel" Style="{StaticResource ActionButton}" Margin="0,0,8,0"
                                                         Click="OnNewCancel"
-                                                        Background="#0DFFFFFF" Foreground="{StaticResource SubText}" />
+                                                        Background="Transparent" Foreground="{StaticResource TextSecondary}" />
+                                                <Button Content="Save" Style="{StaticResource ActionButton}"
+                                                        Click="OnNewSave"
+                                                        Background="{StaticResource Accent}" Foreground="{StaticResource PanelBg}" BorderThickness="0" />
                                             </StackPanel>
                                         </StackPanel>
                                     </Grid>
@@ -430,10 +465,10 @@
                                         </Grid.ColumnDefinitions>
 
                                         <!-- Accent bar -->
-                                        <Border Grid.Column="0" Width="4" CornerRadius="2" Margin="0,0,12,0">
+                                        <Border Grid.Column="0" Width="3" CornerRadius="1.5" Margin="0,0,12,0">
                                             <Border.Style>
                                                 <Style TargetType="Border">
-                                                    <Setter Property="Background" Value="{StaticResource SubText40}" />
+                                                    <Setter Property="Background" Value="{StaticResource NeutralBorder}" />
                                                     <Setter Property="Height" Value="16" />
                                                     <Setter Property="VerticalAlignment" Value="Top" />
                                                     <Style.Triggers>
@@ -456,13 +491,18 @@
                                                     <ColumnDefinition Width="Auto" />
                                                 </Grid.ColumnDefinitions>
                                                 <TextBlock Grid.Column="0" Text="{Binding Memo}" FontSize="13" FontWeight="Medium"
-                                                           Foreground="{StaticResource Memo}" TextTrimming="CharacterEllipsis"
+                                                           Foreground="{StaticResource TextPrimary}" TextTrimming="CharacterEllipsis"
                                                            Visibility="{Binding HasMemo, Converter={StaticResource BoolVis}}" />
-                                                <Border Grid.Column="1" Background="{StaticResource White08}" CornerRadius="4"
-                                                        Padding="6,1" VerticalAlignment="Center"
+                                                <Border Grid.Column="1" Background="{StaticResource Surface}" CornerRadius="4"
+                                                        Padding="7,2" VerticalAlignment="Center"
+                                                        BorderBrush="{StaticResource NeutralBorder}" BorderThickness="1"
                                                         Visibility="{Binding ShowFolderLabel, Converter={StaticResource BoolVis}}">
-                                                    <TextBlock Text="{Binding FolderLabel}" FontSize="10"
-                                                               Foreground="#66FFFFFF" />
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <Ellipse Width="5" Height="5" Fill="{StaticResource TextSecondary}"
+                                                                 VerticalAlignment="Center" Margin="0,0,4,0" />
+                                                        <TextBlock Text="{Binding FolderLabel}" FontSize="10"
+                                                                   Foreground="{StaticResource TextSecondary}" VerticalAlignment="Center" />
+                                                    </StackPanel>
                                                 </Border>
                                             </Grid>
 
@@ -470,12 +510,12 @@
                                             <TextBlock Text="{Binding ContentOneLine}" FontSize="14" Margin="0,2,0,0">
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">
-                                                        <Setter Property="Foreground" Value="{StaticResource Content70}" />
+                                                        <Setter Property="Foreground" Value="{StaticResource TextSecondary}" />
                                                         <Setter Property="TextTrimming" Value="CharacterEllipsis" />
                                                         <Setter Property="TextWrapping" Value="NoWrap" />
                                                         <Style.Triggers>
                                                             <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
-                                                                <Setter Property="Foreground" Value="White" />
+                                                                <Setter Property="Foreground" Value="{StaticResource TextPrimary}" />
                                                                 <Setter Property="TextTrimming" Value="None" />
                                                                 <Setter Property="TextWrapping" Value="Wrap" />
                                                                 <Setter Property="MaxHeight" Value="300" />
@@ -488,22 +528,46 @@
 
                                             <!-- Date + actions (selected only) -->
                                             <StackPanel Visibility="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}, Converter={StaticResource BoolVis}}">
-                                                <TextBlock Text="{Binding DateDisplay}" FontFamily="Consolas" FontSize="11"
-                                                           Foreground="#9968748D" Margin="0,8,0,0" />
-                                                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                                    <Button Content="Paste" Style="{StaticResource ActionButton}" Margin="0,0,8,0"
+                                                <TextBlock Text="{Binding DateDisplay}" FontSize="11"
+                                                           Foreground="{StaticResource TextTertiary}" Margin="0,8,0,0" />
+                                                <Grid Margin="0,8,0,0">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <Button Grid.Column="0" Content="Paste" Style="{StaticResource ActionButton}" Margin="0,0,8,0"
                                                             Click="OnRowPaste"
                                                             Background="{Binding DataContext.ButtonFocusIndex, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BtnBg}, ConverterParameter=0}"
                                                             Foreground="{Binding DataContext.ButtonFocusIndex, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BtnFg}, ConverterParameter=0}" />
-                                                    <Button Content="Edit" Style="{StaticResource ActionButton}" Margin="0,0,8,0"
+                                                    <Button Grid.Column="1" Content="Edit" Style="{StaticResource ActionButton}"
                                                             Click="OnRowEdit"
                                                             Background="{Binding DataContext.ButtonFocusIndex, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BtnBg}, ConverterParameter=1}"
                                                             Foreground="{Binding DataContext.ButtonFocusIndex, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BtnFg}, ConverterParameter=1}" />
-                                                    <Button Content="Delete" Style="{StaticResource ActionButton}"
-                                                            Click="OnRowDelete"
+                                                    <!-- Quiet trash button (right-aligned). Idle = danger-tinted glyph, no
+                                                         fill; fills red on keyboard focus (ButtonFocusIndex==2) or hover. -->
+                                                    <Button Grid.Column="3" Click="OnRowDelete" Cursor="Hand"
+                                                            FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="13"
+                                                            Content="&#xE74D;"
                                                             Background="{Binding DataContext.ButtonFocusIndex, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BtnBg}, ConverterParameter=2:danger}"
-                                                            Foreground="{Binding DataContext.ButtonFocusIndex, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BtnFg}, ConverterParameter=2:danger}" />
-                                                </StackPanel>
+                                                            Foreground="{Binding DataContext.ButtonFocusIndex, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BtnFg}, ConverterParameter=2:danger}">
+                                                        <Button.Template>
+                                                            <ControlTemplate TargetType="Button">
+                                                                <Border x:Name="tb" Background="{TemplateBinding Background}"
+                                                                        CornerRadius="8" Padding="9,6">
+                                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                                </Border>
+                                                                <ControlTemplate.Triggers>
+                                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                                        <Setter TargetName="tb" Property="Background" Value="{StaticResource Danger}" />
+                                                                        <Setter Property="Foreground" Value="{StaticResource TextPrimary}" />
+                                                                    </Trigger>
+                                                                </ControlTemplate.Triggers>
+                                                            </ControlTemplate>
+                                                        </Button.Template>
+                                                    </Button>
+                                                </Grid>
                                             </StackPanel>
                                         </StackPanel>
 
@@ -522,12 +586,19 @@
                                                 </Style>
                                             </ContentControl.Style>
                                         </ContentControl>
+
+                                        <!-- Thin divider below unselected item rows (W-05). -->
+                                        <Border Grid.Column="0" Grid.ColumnSpan="2" Height="1" Margin="8,11,8,-13"
+                                                VerticalAlignment="Bottom" Background="{StaticResource Divider}"
+                                                Visibility="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}, Converter={StaticResource BoolVisInvert}}" />
                                     </Grid>
                                 </Grid>
                             </Border>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
+                    </Grid>
+                </DockPanel>
 
                 <!-- Bottom resize handle (vertical drag) -->
                 <Thumb Grid.Row="2" Height="16" Cursor="SizeNS"
@@ -560,10 +631,11 @@
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0" Text="Toggle Window" FontSize="14" FontWeight="Medium"
-                                           Foreground="White" VerticalAlignment="Center" />
-                                <Border Grid.Column="1" Background="#14FFFFFF" CornerRadius="8" Padding="14,6">
+                                           Foreground="{StaticResource TextPrimary}" VerticalAlignment="Center" />
+                                <Border Grid.Column="1" Background="#14FFFFFF" CornerRadius="8" Padding="14,6"
+                                        BorderBrush="{StaticResource NeutralBorder}" BorderThickness="1">
                                     <TextBlock Text="{Binding ShortcutDisplay}" FontSize="13" FontWeight="SemiBold"
-                                               Foreground="White" />
+                                               FontFamily="Consolas" Foreground="{StaticResource TextPrimary}" />
                                 </Border>
                             </Grid>
                         </Border>
@@ -578,7 +650,7 @@
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0">
-                                    <TextBlock Text="Launch at Login" FontSize="15" FontWeight="Medium" Foreground="White" />
+                                    <TextBlock Text="Launch at Login" FontSize="15" FontWeight="Medium" Foreground="{StaticResource TextPrimary}" />
                                     <TextBlock Text="Automatically start PasteSheet when you log in." FontSize="12"
                                                Foreground="{StaticResource SubText}" Margin="0,4,0,0" TextWrapping="Wrap" />
                                 </StackPanel>
@@ -594,7 +666,7 @@
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0">
-                                    <TextBlock Text="Mouse Edge Detection" FontSize="15" FontWeight="Medium" Foreground="White" />
+                                    <TextBlock Text="Mouse Edge Detection" FontSize="15" FontWeight="Medium" Foreground="{StaticResource TextPrimary}" />
                                     <TextBlock Text="Slide into the screen when the mouse hits the right edge." FontSize="12"
                                                Foreground="{StaticResource SubText}" Margin="0,4,0,0" TextWrapping="Wrap" />
                                 </StackPanel>
@@ -611,7 +683,7 @@
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
                                     <StackPanel Grid.Column="0">
-                                        <TextBlock Text="Auto-hide" FontSize="15" FontWeight="Medium" Foreground="White" />
+                                        <TextBlock Text="Auto-hide" FontSize="15" FontWeight="Medium" Foreground="{StaticResource TextPrimary}" />
                                         <TextBlock Text="Automatically hide the window after a period of inactivity." FontSize="12"
                                                    Foreground="{StaticResource SubText}" Margin="0,4,0,0" TextWrapping="Wrap" />
                                     </StackPanel>
@@ -659,7 +731,7 @@
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0">
-                                    <TextBlock Text="Automatic Updates" FontSize="15" FontWeight="Medium" Foreground="White" />
+                                    <TextBlock Text="Automatic Updates" FontSize="15" FontWeight="Medium" Foreground="{StaticResource TextPrimary}" />
                                     <TextBlock Text="Automatically check for updates in the background." FontSize="12"
                                                Foreground="{StaticResource SubText}" Margin="0,4,0,0" TextWrapping="Wrap" />
                                 </StackPanel>
@@ -674,9 +746,9 @@
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0" Text="Check for Updates" FontSize="14" FontWeight="Medium"
-                                           Foreground="White" VerticalAlignment="Center" />
+                                           Foreground="{StaticResource TextPrimary}" VerticalAlignment="Center" />
                                 <Button Grid.Column="1" Content="Check Now" Click="OnCheckUpdatesClick"
-                                        Background="#14FFFFFF" Foreground="White" BorderThickness="0"
+                                        Background="#14FFFFFF" Foreground="{StaticResource TextPrimary}" BorderThickness="0"
                                         FontSize="13" FontWeight="SemiBold" Padding="14,6" Cursor="Hand" />
                             </Grid>
                         </Border>
@@ -693,7 +765,7 @@
                                     <TextBlock Grid.Column="0" Text="Version" FontSize="14"
                                                Foreground="{StaticResource SubText}" />
                                     <TextBlock Grid.Column="1" Text="{Binding AppVersion}" FontSize="14" FontWeight="Medium"
-                                               Foreground="White" />
+                                               Foreground="{StaticResource TextPrimary}" />
                                 </Grid>
                                 <Grid Margin="0,10,0,0">
                                     <Grid.ColumnDefinitions>
@@ -703,7 +775,7 @@
                                     <TextBlock Grid.Column="0" Text="Developer" FontSize="14"
                                                Foreground="{StaticResource SubText}" />
                                     <TextBlock Grid.Column="1" Text="{Binding DeveloperName}" FontSize="14" FontWeight="Medium"
-                                               Foreground="White" />
+                                               Foreground="{StaticResource TextPrimary}" />
                                 </Grid>
                             </StackPanel>
                         </Border>
@@ -713,70 +785,100 @@
             </Grid>
 
             <!-- Detail overlay -->
-            <Border Background="#99000000" CornerRadius="16"
+            <Border Background="#8C000000" CornerRadius="16"
                     Visibility="{Binding HasDetail, Converter={StaticResource BoolVis}}"
                     MouseDown="OnDetailBackdrop">
-                <Border Background="#1E1E1E" CornerRadius="12" Margin="19,40"
-                        BorderBrush="#1AFFFFFF" BorderThickness="1" ClipToBounds="True">
+                <Border Background="{StaticResource Surface}" CornerRadius="12" Margin="19,40"
+                        BorderBrush="{StaticResource NeutralBorder}" BorderThickness="1" ClipToBounds="True">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
                         <!-- Header -->
-                        <Border Grid.Row="0" Background="#0DFFFFFF" Padding="16">
+                        <Border Grid.Row="0" Background="{StaticResource Surface}" Padding="16">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Text="Detail View" FontSize="16" FontWeight="Bold"
-                                           Foreground="White" VerticalAlignment="Center" />
-                                <Button Grid.Column="1" Content="Copy" Click="OnDetailCopy" Margin="0,0,8,0"
-                                        Background="{StaticResource Accent}" Foreground="#121212" FontWeight="Bold"
-                                        BorderThickness="0" Padding="12,6" Cursor="Hand" />
-                                <Button Grid.Column="2" Content="Close" Click="OnDetailClose"
-                                        Background="#1AFFFFFF" Foreground="White"
-                                        BorderThickness="0" Padding="12,6" Cursor="Hand" />
+                                <TextBlock Grid.Column="0" Text="Detail" FontSize="15" FontWeight="Medium"
+                                           Foreground="{StaticResource TextPrimary}" VerticalAlignment="Center" />
+                                <Button Grid.Column="1" Click="OnDetailCopy" Margin="0,0,8,0"
+                                        Background="{StaticResource Accent}" Foreground="{StaticResource PanelBg}" FontWeight="SemiBold"
+                                        BorderThickness="0" Padding="12,6" Cursor="Hand">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="&#xE8C8;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets"
+                                                   FontSize="11" VerticalAlignment="Center" Margin="0,0,4,0" />
+                                        <TextBlock Text="Copy" FontSize="11" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Button>
+                                <Button Grid.Column="2" Content="&#xE711;" Click="OnDetailClose"
+                                        FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="12"
+                                        Style="{StaticResource IconButton}" Foreground="{StaticResource TextSecondary}" />
                             </Grid>
                         </Border>
                         <!-- Body -->
-                        <ScrollViewer Grid.Row="1" Background="#1A1A1A" VerticalScrollBarVisibility="Auto">
+                        <ScrollViewer Grid.Row="1" Background="{StaticResource PanelBg}" VerticalScrollBarVisibility="Auto">
                             <TextBox Text="{Binding DetailItem.Content, Mode=OneWay}" IsReadOnly="True"
-                                     Background="Transparent" BorderThickness="0" Foreground="#CCFFFFFF"
+                                     Background="Transparent" BorderThickness="0" Foreground="#FFCFCFC8"
                                      FontFamily="Consolas" FontSize="14" Padding="24"
                                      TextWrapping="Wrap" IsTabStop="False" />
                         </ScrollViewer>
+                        <!-- Meta footer: date · N chars -->
+                        <StackPanel Grid.Row="2" Background="{StaticResource Surface}">
+                            <Border Height="1" Background="{StaticResource Divider}" />
+                            <TextBlock Text="{Binding DetailMeta}" FontSize="11"
+                                       Foreground="{StaticResource TextTertiary}" Margin="16,10" />
+                        </StackPanel>
                     </Grid>
                 </Border>
             </Border>
 
             <!-- Modal overlay -->
-            <Border Background="#99000000" CornerRadius="16"
+            <Border Background="#8C000000" CornerRadius="16"
                     Visibility="{Binding HasModal, Converter={StaticResource BoolVis}}"
                     MouseDown="OnModalBackdrop">
-                <Border Background="#FA121212" CornerRadius="16" Padding="24" MaxWidth="340"
+                <Border Background="{StaticResource PanelBg}" CornerRadius="12" Padding="20" MaxWidth="320"
                         Margin="20" VerticalAlignment="Center" HorizontalAlignment="Center"
-                        BorderBrush="#1AFFFFFF" BorderThickness="1">
+                        BorderBrush="{StaticResource NeutralBorder}" BorderThickness="1">
+                    <Border.Effect>
+                        <DropShadowEffect Color="#000000" Opacity="0.45" BlurRadius="24" ShadowDepth="12" Direction="270" />
+                    </Border.Effect>
                     <StackPanel>
-                        <TextBlock Text="{Binding Modal.Title}" Foreground="{StaticResource Accent}"
-                                   FontWeight="Bold" FontSize="18" />
-                        <TextBlock Text="{Binding Modal.Message}" Foreground="#E6FFFFFF"
-                                   FontSize="14" TextWrapping="Wrap" LineHeight="20" Margin="0,16,0,0" />
-                        <Border x:Name="ModalInputBorder" Background="#4D000000" CornerRadius="8" Padding="8"
-                                Margin="0,16,0,0" BorderBrush="#1AFFFFFF" BorderThickness="1"
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE74D;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="13"
+                                       Foreground="{StaticResource DangerText}" VerticalAlignment="Center" Margin="0,0,6,0"
+                                       Visibility="{Binding Modal.IsDanger, Converter={StaticResource BoolVis}}" />
+                            <TextBlock Text="{Binding Modal.Title}" Foreground="{StaticResource TextPrimary}"
+                                       FontWeight="SemiBold" FontSize="17" />
+                        </StackPanel>
+                        <TextBlock Text="{Binding Modal.Message}" Foreground="{StaticResource TextSecondary}"
+                                   FontSize="13" TextWrapping="Wrap" LineHeight="18" Margin="0,12,0,0" />
+                        <!-- Delete target preview block -->
+                        <Border CornerRadius="8" Padding="12,10" Margin="0,12,0,0"
+                                Background="{StaticResource Surface}" BorderBrush="{StaticResource Divider}" BorderThickness="1"
+                                Visibility="{Binding Modal.Preview, Converter={StaticResource NotEmptyVis}}">
+                            <TextBlock Text="{Binding Modal.Preview}" Foreground="{StaticResource TextSecondary}"
+                                       FontFamily="Consolas" FontSize="13" TextTrimming="CharacterEllipsis"
+                                       TextWrapping="Wrap" MaxHeight="36" />
+                        </Border>
+                        <Border x:Name="ModalInputBorder" Background="{StaticResource Surface}" CornerRadius="8" Padding="8"
+                                Margin="0,12,0,0" BorderBrush="{StaticResource NeutralBorder}" BorderThickness="1"
                                 Visibility="{Binding Modal.ShowInput, Converter={StaticResource BoolVis}}">
                             <TextBox x:Name="ModalInput" Background="Transparent" BorderThickness="0"
-                                     Foreground="White" CaretBrush="White" FontSize="14"
+                                     Foreground="{StaticResource TextPrimary}" CaretBrush="{StaticResource Accent}" FontSize="14"
                                      Text="{Binding Modal.InputValue, UpdateSourceTrigger=PropertyChanged}" />
                         </Border>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
                             <Button Content="{Binding Modal.CancelText}" Padding="16,8" Margin="0,0,8,0" Click="OnModalCancel"
-                                    Background="#0DFFFFFF" Foreground="White" BorderThickness="0"
+                                    Background="{StaticResource Surface}" Foreground="{StaticResource TextPrimary}"
+                                    BorderBrush="{StaticResource NeutralBorder}" BorderThickness="1"
                                     FontSize="14" Cursor="Hand" />
                             <Button x:Name="ModalConfirm" Content="{Binding Modal.ConfirmText}" Padding="16,8"
-                                    Click="OnModalConfirm" FontSize="14" FontWeight="Bold" BorderThickness="0" Cursor="Hand"
+                                    Click="OnModalConfirm" FontSize="14" FontWeight="SemiBold" BorderThickness="0" Cursor="Hand"
                                     Background="{Binding Modal.IsDanger, Converter={StaticResource ConfirmBg}}"
                                     Foreground="{Binding Modal.IsDanger, Converter={StaticResource ConfirmFg}}" />
                         </StackPanel>

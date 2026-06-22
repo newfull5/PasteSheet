@@ -18,7 +18,6 @@ public partial class MainWindow : Window, IWindowHost
 {
     private readonly AppViewModel _vm;
     private readonly WindowPositionService _positionService = new();
-    private readonly DispatcherTimer _cursorTimer = new() { Interval = TimeSpan.FromMilliseconds(500) };
 
     public double DpiScale { get; private set; } = 1.0;
 
@@ -40,9 +39,6 @@ public partial class MainWindow : Window, IWindowHost
             ApplyNonTaskbarStyle();
             ApplyRoundedCorners();
         };
-
-        _cursorTimer.Tick += (_, _) => CursorBlink.Opacity = CursorBlink.Opacity > 0 ? 0 : 1;
-        _cursorTimer.Start();
     }
 
     // MARK: - IWindowHost
