@@ -154,7 +154,7 @@ public partial class AppEntry : Application
         _mouseEdgeService.StartMonitoring(
             widthPhysical,
             () => _vm.Host?.IsVisible ?? false,
-            () => _vm.ShowWindowFromEdge(),
+            () => { _window.SaveForegroundBeforeShow(); _vm.ShowWindowFromEdge(); },
             () => _vm.HideWindowFromEdge());
     }
 

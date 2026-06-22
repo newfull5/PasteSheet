@@ -177,6 +177,13 @@ public sealed class AppViewModel : INotifyPropertyChanged
         OnChanged(nameof(SelectedIndex));
     }
 
+    /// Last row index that points at real content (excludes the trailing
+    /// "New folder/item" row). Keeps selection on content after a delete.
+    private int LastContentIndex =>
+        string.IsNullOrEmpty(SearchQuery)
+            ? Math.Max(0, Rows.Count - 2)   // last row is the "New …" affordance
+            : Math.Max(0, Rows.Count - 1);  // search results have no New row
+
     // MARK: - View Navigation
 
     public void ShowDirectoryView()
@@ -275,6 +282,7 @@ public sealed class AppViewModel : INotifyPropertyChanged
     public void SaveEdit()
     {
         if (EditingItemId is not long id) return;
+        if (string.IsNullOrWhiteSpace(EditContent)) return; // keep the form open on empty content
         try
         {
             _manageItems.UpdateItem(id, EditContent, CurrentDirectory, string.IsNullOrEmpty(EditMemo) ? null : EditMemo);
@@ -314,6 +322,7 @@ public sealed class AppViewModel : INotifyPropertyChanged
                 {
                     _manageItems.DeleteItem(id);
                     LoadHistory(); LoadDirectories(); RebuildRows();
+                    if (SelectedIndex > LastContentIndex) SelectedIndex = LastContentIndex;
                 }
                 catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"Delete item: {ex}"); }
             }
@@ -356,7 +365,11 @@ public sealed class AppViewModel : INotifyPropertyChanged
             IsDanger = true,
             OnConfirm = _ =>
             {
-                try { _manageDirectories.DeleteDirectory(name); LoadDirectories(); RebuildRows(); }
+                try
+                {
+                    _manageDirectories.DeleteDirectory(name); LoadDirectories(); RebuildRows();
+                    if (SelectedIndex > LastContentIndex) SelectedIndex = LastContentIndex;
+                }
                 catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"Delete dir: {ex}"); }
             }
         };
@@ -587,7 +600,13 @@ public sealed class AppViewModel : INotifyPropertyChanged
         if (!_autoHideEnabled || Host is null || !Host.IsVisible) return;
         ClearAutoHideTimer();
         _autoHideTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(_autoHideTimeout) };
-        _autoHideTimer.Tick += (_, _) => ToggleWindow();
+        _autoHideTimer.Tick += (_, _) =>
+        {
+            // Don't auto-hide mid-action: a modal, the detail overlay, inline edit,
+            // or a create form is open. Mirrors macOS resetAutoHideTimer guard.
+            if (HasModal || HasDetail || IsEditing || IsCreatingNew) return;
+            ToggleWindow();
+        };
         _autoHideTimer.Start();
     }
 
@@ -644,6 +663,12 @@ public sealed class AppViewModel : INotifyPropertyChanged
         // While editing or creating with a focused text box, let it own all other
         // keys (caret movement, typing) instead of hijacking them for list nav.
         if (isInput && (EditingItemId is not null || IsCreatingNew)) return false;
+        // Ctrl+N: new item (in a folder) or new folder (at root). Mirrors macOS Cmd+N.
+        if (key == Key.N && hasCmd && !isInput && string.IsNullOrEmpty(SearchQuery))
+        {
+            if (CurrentView == ViewType.Items) { StartNewItem(); return true; }
+            if (CurrentView == ViewType.Directories) { StartNewFolder(); return true; }
+        }
         // Ctrl+E starts edit
         if (key == Key.E && hasCmd && CurrentView == ViewType.Items)
         {
